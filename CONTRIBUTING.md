@@ -1,71 +1,79 @@
-# Guide de contribution
+# Contribuer à Mon Miam Miam
 
-Bienvenue dans le projet. Ces conventions s'appliquent à tous les contributeurs, y compris le responsable du dépôt.
+Ce guide s'applique au **frontend**, au **backend**, à l'**API**, aux **maquettes** et à la **documentation** du restaurant ZeDuc@Space.
 
-## 1. Organisation du travail
+## Organisation des 6 contributeurs
 
-- Chaque fonctionnalité ou correction commence par une **Issue**, décrivant le résultat attendu et les critères d'acceptation.
-- Une tâche a un responsable identifiable. Les décisions importantes sont conservées dans l'Issue ou la Pull Request.
-- Le travail doit rester découpé en changements simples, vérifiables et indépendants.
+Le cahier des charges prévoit une équipe de **6 personnes**, avec des responsabilités explicites. Les affectations réelles sont encore à décider et à consigner dans **Jira** (pas d'identités inventées ici). Les tâches peuvent être réparties par domaines : expérience étudiant, opérations employés, supervision gérant/admin, API & données, qualité & déploiement, coordination & design. Ces domaines sont des **propositions de répartition**, pas des rôles officiellement attribués.
 
-## 2. Règles Git et branches
+### Jira et GitHub
 
-La branche **`main`** représente la version de référence du projet. **Ne poussez pas directement sur `main`** : ouvrez une Pull Request (PR).
+1. Créer / affecter une **story, tâche ou bug dans Jira** (source principale du backlog).
+2. Décrire les critères d'acceptation et la dépendance aux autres modules.
+3. Créer une branche GitHub ciblée, idéalement avec l'identifiant Jira quand il est connu, p. ex. `feature/MMM-12-student-cart`.
+4. Ouvrir une **Pull Request (PR)** en indiquant le ticket Jira et, le cas échéant, une Issue GitHub.
+5. Faire relire et exécuter les tests avant fusion.
+6. Mettre le ticket Jira et la documentation à jour après livraison.
 
-À partir de `main`, nommez les branches :
+Si aucun projet Jira n'est encore connecté, utiliser temporairement les Issues GitHub comme espace de préparation ; ne pas prétendre que Jira est synchronisé.
 
-- `feature/description-courte` : nouvelle fonctionnalité.
-- `fix/description-courte` : correction.
-- `docs/description-courte` : documentation.
-- `test/description-courte` : tests.
-- `refactor/description-courte` : restructuration sans changement métier.
-- `chore/description-courte` : maintenance.
-- `hotfix/description-courte` : correction urgente.
-- `ci/description-courte` : automatisation CI.
+## Branches et commits
 
-Exemple :
+La branche `main` désigne la version de référence. **Pas de push direct sur `main` par convention d'équipe.**
+
+Préfixes acceptés : `feature/`, `fix/`, `docs/`, `test/`, `refactor/`, `chore/`, `hotfix/`, `ci/`.
+
+Exemples métier :
+- `feature/student-cart`
+- `feature/employee-orders`
+- `feature/manager-dashboard`
+- `feature/admin-menu`
+- `feature/loyalty-points`
+- `feature/referral-codes`
+- `feature/complaints`
+- `docs/api-contracts`
 
 ```bash
 git switch main
 git pull origin main
-git switch -c feature/recherche-cer
-# Après avoir modifié les fichiers :
+git switch -c feature/student-cart
+# Modifier le code, exécuter les tests, puis :
 git add .
-git commit -m "feat: ajouter la recherche de CER"
-git push -u origin feature/recherche-cer
+git commit -m "feat: ajouter la gestion du panier étudiant"
+git push -u origin feature/student-cart
 ```
 
-## 3. Messages de commit
+Utiliser des commits structurés `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`, `ci:`. La PR respecte elle aussi ce préfixe.
 
-Utiliser : `type: résumé à l'infinitif`.
+## Règles de revue
 
-Types conseillés : `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`, `build`, `perf`.
+- Une **PR = un périmètre métier** ; documenter le problème résolu et les étapes de test.
+- Demander **au moins une revue d'un autre membre** avant fusion.
+- Vérifier les contrôles GitHub Actions ; le statut vert n'est pas une validation métier.
+- Pour les interfaces : joindre captures Figma / écran, vérifier mobile et les couleurs `#CFBD97` / `#000000`.
+- Pour les API : fournir requêtes/réponses, validations, droits des rôles et tests.
+- Pour le paiement (optionnel) : ne jamais intégrer de vraies clés dans le dépôt ; privilégier un sandbox de l'agrégateur choisi.
+- Une correction de bug doit inclure un scénario de reproduction et idéalement un test de non-régression.
+- Les PR sensibles (authentification, portefeuille fidélité, parrainage, comptes employés, paiements) exigent une revue renforcée et des tests négatifs.
 
-Exemples : `feat: ajouter une barre de recherche` ou `fix: corriger la validation du formulaire`.
+## Définition de « terminé »
 
-## 4. Pull Requests
+Une fonctionnalité est terminée seulement si :
+- [ ] Ses critères d'acceptation sont couverts.
+- [ ] Les règles de permissions **étudiant / employé / gérant / admin** sont testées.
+- [ ] Les états d'erreur, délais et données invalides sont gérés.
+- [ ] Les tests pertinents passent et la recette manuelle est décrite.
+- [ ] L'interface est responsive et utilisable sur les navigateurs ciblés.
+- [ ] Aucune donnée réelle, aucun secret et aucun mot de passe n'est commité.
+- [ ] Le README / guide utilisateur / contrat API est mis à jour si nécessaire.
+- [ ] La PR a reçu une revue et le ticket Jira est mis à jour.
 
-Avant de demander une fusion :
+Pour les domaines fidélité/parrainage, tester expressément : soldes insuffisants, double attribution, première commande réussie, annulation et non-réutilisation frauduleuse.
 
-1. Lier l'Issue ou expliquer la motivation du changement.
-2. Résumer précisément les fichiers et comportements modifiés.
-3. Vérifier manuellement le comportement concerné ; lancer les tests disponibles.
-4. Fournir des captures pour les modifications visuelles.
-5. Corriger les conflits et s'assurer que les vérifications GitHub Actions passent.
-6. Demander **au moins une revue d'un autre développeur**.
-7. Ne fusionner qu'après résolution des commentaires bloquants.
+## Sécurité et données
 
-**Convention d'équipe :** privilégier le squash merge et des PR de taille raisonnable. Ne jamais fusionner son propre travail sans relecture, sauf urgence documentée.
+Voir [SECURITY.md](SECURITY.md). Les validations et les permissions doivent être imposées **côté serveur**, pas seulement par React/Vue/Angular. Ne pas introduire de données réelles dans la démo Vercel.
 
-## 5. Qualité et sécurité
+## Limite actuelle
 
-- N'ajoutez jamais de secrets, de clés privées, de jetons ni de données personnelles réelles au dépôt.
-- N'ajoutez pas de `.env` ; fournissez, au besoin, un `.env.example` sans valeur sensible.
-- Respectez la cohérence de nommage, la sémantique HTML et l'accessibilité.
-- Évitez les duplications de code et documentez toute nouvelle dépendance.
-- Ajoutez des tests à chaque fonctionnalité lorsque la stack le permet.
-- Préservez la compatibilité mobile et desktop.
-
-## 6. Limitations actuelles
-
-Les règles de protection de branche ne sont **pas techniquement imposées** sur le dépôt privé dans sa configuration actuelle. Jusqu'à leur activation, l'équipe doit respecter manuellement les règles ci-dessus. Les contrôles automatiques vérifient certains aspects (présence des documents et conventions de PR), mais ne remplacent pas la revue humaine.
+Les protections de branche de GitHub ne sont pas disponibles sur ce dépôt privé avec sa configuration actuelle : l'obligation de PR et la revue humaine sont à faire respecter par l'équipe. **Aucun contributeur ne doit supposer qu'un ruleset bloque un push direct.**
