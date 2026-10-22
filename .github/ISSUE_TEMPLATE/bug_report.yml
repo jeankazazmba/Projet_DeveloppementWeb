@@ -1,20 +1,39 @@
-name: "Signaler un bug"
-description: "Décrire un dysfonctionnement reproductible"
+name: "Mon Miam Miam — Signaler un bug"
+description: "Remonter une anomalie de menu, commande, fidélité, rôles ou interface"
 title: "fix: "
 body:
-  - type: textarea
-    id: description
+  - type: dropdown
+    id: module
     attributes:
-      label: "Problème observé"
-      description: "Que se passe-t-il ?"
-      placeholder: "Décrivez le problème."
+      label: "Module affecté"
+      options:
+        - "Étudiant / Panier / Commande"
+        - "Employé / Opérations"
+        - "Gérant / Statistiques"
+        - "Administrateur / Menu"
+        - "Fidélité / Parrainage"
+        - "Réclamations"
+        - "Authentification / Permissions"
+        - "Maquette / Autre"
+    validations:
+      required: true
+  - type: input
+    id: jira
+    attributes:
+      label: "Ticket Jira (si disponible)"
+      placeholder: "Ex. MMM-12"
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Résultat observé"
+      description: "Ne pas inclure de mot de passe ou de données clients réelles."
     validations:
       required: true
   - type: textarea
     id: reproduction
     attributes:
       label: "Étapes de reproduction"
-      placeholder: "1. Ouvrir...\n2. Cliquer...\n3. Observer..."
+      placeholder: "1. Se connecter comme...\n2. Ajouter...\n3. Constater..."
     validations:
       required: true
   - type: textarea
@@ -23,8 +42,8 @@ body:
       label: "Résultat attendu"
     validations:
       required: true
-  - type: textarea
+  - type: input
     id: environment
     attributes:
       label: "Environnement"
-      placeholder: "Navigateur, appareil, version du projet..."
+      placeholder: "Navigateur, appareil, branche/commit, environnement"
