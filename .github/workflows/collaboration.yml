@@ -1,0 +1,47 @@
+name: Vérifications de collaboration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  governance:
+    name: Conventions du dépôt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Vérifier la présence des documents fondamentaux
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in README.md CONTRIBUTING.md SECURITY.md .github/PULL_REQUEST_TEMPLATE.md; do
+            if [[ ! -s "$file" ]]; then
+              echo "Document obligatoire manquant ou vide : $file"
+              exit 1
+            fi
+          done
+
+      - name: Vérifier les conventions de la Pull Request
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          PR_BRANCH: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          case "$PR_BRANCH" in
+            feature/*|fix/*|docs/*|test/*|refactor/*|chore/*|hotfix/*|ci/*) ;;
+            *) echo "Nom de branche invalide : $PR_BRANCH"; exit 1 ;;
+          esac
+          if ! grep -Eq '^(feat|fix|docs|test|refactor|chore|ci|build|perf)(\([a-zA-Z0-9_-]+\))?: .+' <<< "$PR_TITLE"; then
+            echo "Titre de PR invalide. Exemple : feat: ajouter la recherche"
+            exit 1
+          fi
