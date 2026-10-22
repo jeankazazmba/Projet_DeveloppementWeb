@@ -1,0 +1,30 @@
+name: "Signaler un bug"
+description: "Décrire un dysfonctionnement reproductible"
+title: "fix: "
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Problème observé"
+      description: "Que se passe-t-il ?"
+      placeholder: "Décrivez le problème."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "Étapes de reproduction"
+      placeholder: "1. Ouvrir...\n2. Cliquer...\n3. Observer..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Résultat attendu"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environnement"
+      placeholder: "Navigateur, appareil, version du projet..."
