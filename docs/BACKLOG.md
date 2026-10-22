@@ -6,21 +6,21 @@
 
 | Issue | Livrable | Priorité suggérée | Pourquoi |
 | --- | --- | --- | --- |
-| [#1](../issues/1) | MVP, parcours métier et règles à valider | P0 | Éviter les spécifications contradictoires |
-| [#2](../issues/2) | Choix de stack, base de données, architecture et démarrage local | P0 | Débloquer le développement |
-| [#4](../issues/4) | Backlog et responsabilités dans Jira | P0 | Organiser les **6 membres prévus** |
-| [#5](../issues/5) | Figma et prototype Vercel des quatre espaces | P0 | Valider les interfaces et les parcours |
+| [#1](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/1) | MVP, parcours métier et règles à valider | P0 | Éviter les spécifications contradictoires |
+| [#2](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/2) | Choix de stack, base de données, architecture et démarrage local | P0 | Débloquer le développement |
+| [#4](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/4) | Backlog et responsabilités dans Jira | P0 | Organiser les **6 membres prévus** |
+| [#5](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/5) | Figma et prototype Vercel des quatre espaces | P0 | Valider les interfaces et les parcours |
 
 ## 2. Parcours commande et exploitation — cœur fonctionnel
 
 | Issue | Périmètre | Priorité suggérée |
 | --- | --- | --- |
-| [#6](../issues/6) | Authentification et autorisations **étudiant, employé, gérant, admin** | P0 |
-| [#7](../issues/7) | Catalogue, menu du jour, disponibilité, promotions | P0 |
-| [#8](../issues/8) | Panier, commande sur place/livraison, suivi étudiant | P0 |
-| [#18](../issues/18) | File de traitement, préparation, validation par employé | P0 |
-| [#10](../issues/10) | Réclamations et réponses, arbitrage gérant | P1 |
-| [#11](../issues/11) | Supervision gérant, admin et statistiques actualisées | P1 |
+| [#6](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/6) | Authentification et autorisations **étudiant, employé, gérant, admin** | P0 |
+| [#7](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/7) | Catalogue, menu du jour, disponibilité, promotions | P0 |
+| [#8](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/8) | Panier, commande sur place/livraison, suivi étudiant | P0 |
+| [#18](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/18) | File de traitement, préparation, validation par employé | P0 |
+| [#10](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/10) | Réclamations et réponses, arbitrage gérant | P1 |
+| [#11](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/11) | Supervision gérant, admin et statistiques actualisées | P1 |
 
 Les statuts exacts de commande, les modalités de livraison et les droits détaillés devront être **validés dans #1**. Une maquette n'est pas une livraison fonctionnelle.
 
@@ -28,12 +28,12 @@ Les statuts exacts de commande, les modalités de livraison et les droits détai
 
 | Issue | Périmètre | Priorité suggérée |
 | --- | --- | --- |
-| [#9](../issues/9) | **Epic** de coordination fidélité et parrainage | P1 |
-| [#19](../issues/19) | Portefeuille, conversion, crédit/débit de points | P1 |
-| [#20](../issues/20) | Codes uniques et récompense après première commande réussie | P1 |
-| [#12](../issues/12) | Événements, mini-jeux et classement top 10 | P2 |
-| [#21](../issues/21) | Consentement cookies, données personnelles et mentions légales | P1, exigence de sortie avant production |
-| [#22](../issues/22) | **Bonus** : évaluation et intégration d'un agrégateur de paiement | P3, facultatif |
+| [#9](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/9) | **Epic** de coordination fidélité et parrainage | P1 |
+| [#19](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/19) | Portefeuille, conversion, crédit/débit de points | P1 |
+| [#20](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/20) | Codes uniques et récompense après première commande réussie | P1 |
+| [#12](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/12) | Événements, mini-jeux et classement top 10 | P2 |
+| [#21](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/21) | Consentement cookies, données personnelles et mentions légales | P1, exigence de sortie avant production |
+| [#22](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/22) | **Bonus** : évaluation et intégration d'un agrégateur de paiement | P3, facultatif |
 
 **Important :** le paiement agrégateur est présenté comme une fonctionnalité à envisager, puis explicitement comme **bonus non obligatoire dans les livrables**. Ne pas ralentir le cycle de commande obligatoire pour attendre cette fonctionnalité. Les taux de fidélité (1000 F/point et 15 points/1000 F) sont des **exemples** et ne doivent pas devenir des constantes de production sans validation.
 
@@ -41,7 +41,7 @@ Les statuts exacts de commande, les modalités de livraison et les droits détai
 
 | Issue | Périmètre | Priorité suggérée |
 | --- | --- | --- |
-| [#13](../issues/13) | Tests unitaires/API/E2E, CI applicative, recette navigateur/mobile, bêta Vercel et documentation | P0 (transverse) |
+| [#13](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/13) | Tests unitaires/API/E2E, CI applicative, recette navigateur/mobile, bêta Vercel et documentation | P0 (transverse) |
 
 Le workflow GitHub Actions actuel valide la **gouvernance documentaire** et les **conventions de PR**. Il **ne lance pas de tests de l'application** : ceux-ci doivent être ajoutés dès que la stack est décidée dans #2.
 
