@@ -1,25 +1,41 @@
-name: "Tâche technique"
-description: "Organiser une tâche de développement ou de documentation"
+name: "Mon Miam Miam — Tâche"
+description: "Découper un travail technique, Figma, test ou documentation"
 title: "chore: "
 body:
+  - type: dropdown
+    id: discipline
+    attributes:
+      label: "Domaine"
+      options:
+        - "Frontend / UI"
+        - "Backend / API"
+        - "Base de données"
+        - "Qualité / Tests"
+        - "Déploiement / CI"
+        - "Documentation / Gestion"
+    validations:
+      required: true
+  - type: input
+    id: jira
+    attributes:
+      label: "Ticket Jira"
+      placeholder: "Ajouter lorsque Jira sera configuré"
   - type: textarea
     id: objective
     attributes:
-      label: "Objectif"
-      description: "Quel résultat concret est attendu ?"
+      label: "Objectif et résultat attendu"
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: "Travail à réaliser"
+      label: "Étapes"
       placeholder: "- [ ] Étape 1\n- [ ] Étape 2"
     validations:
       required: true
   - type: textarea
     id: acceptance
     attributes:
-      label: "Critères d'acceptation"
-      description: "Quelles vérifications permettent de considérer cette tâche comme terminée ?"
+      label: "Critères d'acceptation et tests"
     validations:
       required: true
