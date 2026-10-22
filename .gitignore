@@ -1,0 +1,37 @@
+# Configuration sensible
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Dépendances
+node_modules/
+vendor/
+
+# Builds et caches
+dist/
+build/
+coverage/
+.cache/
+.next/
+.nuxt/
+.vite/
+.phpunit.cache/
+.phpunit.result.cache
+*.log
+
+# IDE et système
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# Fichiers temporaires
+*.tmp
+*.swp
+*.bak
