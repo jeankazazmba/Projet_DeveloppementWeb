@@ -1,0 +1,25 @@
+name: "Tâche technique"
+description: "Organiser une tâche de développement ou de documentation"
+title: "chore: "
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: "Objectif"
+      description: "Quel résultat concret est attendu ?"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Travail à réaliser"
+      placeholder: "- [ ] Étape 1\n- [ ] Étape 2"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Critères d'acceptation"
+      description: "Quelles vérifications permettent de considérer cette tâche comme terminée ?"
+    validations:
+      required: true
