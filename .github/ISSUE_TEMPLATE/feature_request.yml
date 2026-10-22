@@ -1,25 +1,51 @@
-name: "Demander une fonctionnalité"
-description: "Proposer un besoin ou une amélioration"
+name: "Mon Miam Miam — User story"
+description: "Proposer une fonctionnalité métier traçable dans Jira"
 title: "feat: "
 body:
-  - type: textarea
-    id: goal
+  - type: dropdown
+    id: actor
     attributes:
-      label: "Besoin utilisateur"
-      description: "À quel problème répond cette fonctionnalité ?"
+      label: "Acteur principal"
+      options:
+        - "Étudiant"
+        - "Employé"
+        - "Gérant"
+        - "Administrateur"
+        - "Transverse / Infrastructure"
+    validations:
+      required: true
+  - type: input
+    id: jira
+    attributes:
+      label: "Référence Jira (si disponible)"
+      placeholder: "Ex. MMM-12"
+  - type: textarea
+    id: need
+    attributes:
+      label: "User story / besoin"
+      placeholder: "En tant que ..., je veux ..., afin de ..."
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: "Solution envisagée"
+      label: "Parcours envisagé"
     validations:
       required: true
   - type: textarea
-    id: acceptance
+    id: criteria
     attributes:
       label: "Critères d'acceptation"
-      description: "Comment saurons-nous que la tâche est terminée ?"
       placeholder: "- [ ] Critère 1\n- [ ] Critère 2"
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: "Périmètre"
+      options:
+        - "MVP à confirmer"
+        - "Évolution ultérieure"
+        - "Bonus (paiement ou mobile)"
     validations:
       required: true

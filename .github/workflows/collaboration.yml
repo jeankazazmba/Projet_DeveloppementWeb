@@ -1,4 +1,4 @@
-name: Vérifications de collaboration
+name: Qualité & conventions — Mon Miam Miam
 
 on:
   push:
@@ -12,22 +12,34 @@ permissions:
 
 jobs:
   governance:
-    name: Conventions du dépôt
+    name: Vérifier les conventions du projet
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
 
-      - name: Vérifier la présence des documents fondamentaux
+      - name: Vérifier la documentation Mon Miam Miam
         shell: bash
         run: |
           set -euo pipefail
-          for file in README.md CONTRIBUTING.md SECURITY.md .github/PULL_REQUEST_TEMPLATE.md; do
+          for file in README.md CONTRIBUTING.md SECURITY.md             docs/CAHIER_DES_CHARGES.md docs/ARCHITECTURE.md             docs/DESIGN_SYSTEM.md docs/PLAN_DE_LIVRAISON.md             docs/PLAN_DE_TESTS.md docs/DECISIONS.md docs/RISQUES.md             .github/PULL_REQUEST_TEMPLATE.md; do
             if [[ ! -s "$file" ]]; then
-              echo "Document obligatoire manquant ou vide : $file"
+              echo "::error::Document absent ou vide : $file"
               exit 1
             fi
           done
+          grep -Fq "Mon Miam Miam" README.md || { echo "::error::README non personnalisé"; exit 1; }
+          grep -Fq "#CFBD97" docs/DESIGN_SYSTEM.md || { echo "::error::Couleur primaire absente"; exit 1; }
+          grep -Fq "#000000" docs/DESIGN_SYSTEM.md || { echo "::error::Couleur secondaire absente"; exit 1; }
+
+      - name: Interdire les fichiers de configuration sensibles suivis par Git
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '(^|/)\.env($|\.)' | grep -Ev '(^|/)\.env\.example$'; then
+            echo "::error::Un fichier .env ou .env.* sensible est suivi par Git."
+            exit 1
+          fi
 
       - name: Vérifier les conventions de la Pull Request
         if: github.event_name == 'pull_request'
@@ -39,9 +51,16 @@ jobs:
           set -euo pipefail
           case "$PR_BRANCH" in
             feature/*|fix/*|docs/*|test/*|refactor/*|chore/*|hotfix/*|ci/*) ;;
-            *) echo "Nom de branche invalide : $PR_BRANCH"; exit 1 ;;
+            *) echo "::error::Nom de branche invalide : $PR_BRANCH"; exit 1 ;;
           esac
           if ! grep -Eq '^(feat|fix|docs|test|refactor|chore|ci|build|perf)(\([a-zA-Z0-9_-]+\))?: .+' <<< "$PR_TITLE"; then
-            echo "Titre de PR invalide. Exemple : feat: ajouter la recherche"
+            echo "::error::Titre de PR invalide. Exemple : feat: ajouter le panier étudiant"
             exit 1
           fi
+
+      - name: État des tests applicatifs
+        shell: bash
+        run: |
+          echo "Le dépôt ne contient pas encore de stack applicative."
+          echo "Cette action teste la documentation et les conventions, PAS l'application."
+          echo "Ajouter les tâches de tests unitaires/API/E2E lorsque la stack est installée."

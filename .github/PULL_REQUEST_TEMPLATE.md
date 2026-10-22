@@ -1,28 +1,43 @@
-## Résumé des modifications
+## 📌 Objectif de la Pull Request
 
-Décrivez ce qui a été ajouté, corrigé ou amélioré.
+Décrire brièvement la modification apportée à **Mon Miam Miam / ZeDuc@Space**.
 
-## Issue associée
+### Traçabilité
+- Ticket Jira : `MMM-...` (si existant)
+- Issue GitHub : #
+- Module : Étudiant / Employé / Gérant / Admin / API / Données / UI / CI / Docs
 
-Closes #
+## Modifications
 
-## Type de changement
+- 
 
-- [ ] Fonctionnalité
-- [ ] Correction
-- [ ] Documentation
-- [ ] Refactorisation / maintenance
-- [ ] Tests / CI
+## Critères d'acceptation vérifiés
 
-## Validation
+- [ ] Le scénario métier demandé fonctionne.
+- [ ] Les validations serveur et les droits d'accès par rôle ont été contrôlés (si applicable).
+- [ ] Les erreurs et cas limites ont été vérifiés.
+- [ ] Les tests unitaires/fonctionnels adaptés ont été ajoutés ou actualisés (si du code est modifié).
+- [ ] La PR ne contient aucun secret ou donnée privée.
+- [ ] La documentation et le ticket Jira ont été mis à jour si nécessaire.
+- [ ] J'ai sollicité une revue d'un autre contributeur.
 
-- [ ] J'ai vérifié le fonctionnement de mes changements.
-- [ ] J'ai ajouté ou adapté les tests pertinents, lorsqu'ils existent.
-- [ ] Le dépôt ne contient aucun secret ni donnée privée.
-- [ ] Les changements d'interface ont été vérifiés sur mobile et desktop, si applicables.
-- [ ] J'ai mis à jour la documentation si nécessaire.
-- [ ] J'ai demandé une revue à un autre membre de l'équipe.
+## Test et recette
 
-## Captures ou informations de vérification
+**Commandes exécutées / étapes de reproduction :**
 
-Ajoutez des captures d'écran pour toute modification visuelle ou expliquez comment reproduire le résultat.
+**Résultat observé :**
+
+**Captures Figma / mobile / desktop :** (si interface)
+
+## Impacts à surveiller
+
+- [ ] Authentification ou autorisations
+- [ ] Cycle commande / livraison
+- [ ] Fidélité / parrainage et cohérence des points
+- [ ] Base de données / migration
+- [ ] Paiements (bonus)
+- [ ] Aucun impact notable
+
+## Notes pour les relecteurs
+
+Indiquer les décisions ouvertes ou les limites connues.
