@@ -74,6 +74,7 @@ Le document source mentionne une équipe de **6 personnes** et une durée de **4
 | [Architecture](docs/ARCHITECTURE.md) | Modules, rôles, données, API |
 | [Design system](docs/DESIGN_SYSTEM.md) | Identité, écrans et accessibilité |
 | [Plan de livraison](docs/PLAN_DE_LIVRAISON.md) | Phases, équipe, Jira, livrables |
+| [Backlog du projet](docs/BACKLOG.md) | Issues liées, priorités proposées et dépendances |
 | [Plan de tests](docs/PLAN_DE_TESTS.md) | Scénarios de recette, contrôles |
 | [Décisions ouvertes](docs/DECISIONS.md) | Arbitrages non tranchés |
 | [Risques](docs/RISQUES.md) | Risques et stratégies de mitigation |
