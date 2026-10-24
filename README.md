@@ -2,7 +2,7 @@
 
 **Application web de commande et de gestion du restaurant ZeDuc@Space — UCAC-ICAM, Yansoki.**
 
-> Projet d'équipe de développement web • Dépôt privé • Phase actuelle : **cadrage et documentation** (aucune fonctionnalité applicative encore livrée).
+> Projet d'équipe de développement web • Dépôt privé • Phase actuelle : **conception et préparation jusqu'à la revue du dimanche 25 octobre 2026** (aucune fonctionnalité applicative encore livrée).
 
 ## 🎯 Pourquoi Mon Miam Miam ?
 
@@ -17,6 +17,19 @@ Le restaurant ZeDuc@Space reçoit des commandes par messages et appels. Avec l'a
 - Stimuler la fidélité et le parrainage ; proposer promotions, événements et mini-jeux.
 
 **Référence métier :** *Cahier de charge projet : Mon Miam Miam*, propriétaire « ZeDuc@Space - x - DNx », version **V1.0.2**, datée du **16/09/2024**. Cette date est celle du document source, **pas** une date de livraison actuelle.
+
+## 👥 Organisation actuelle de la conception (jusqu'au 25/10/2026)
+
+- **Jean d'Arc Kazamba** : versioning Git/GitHub et organisation du dépôt.
+- **Roseline BOLONGOSHA** : gestion Jira.
+- **Christian** : maquettes Figma.
+- **Caleb** : conception de la base de données.
+- **Yviline, Aksa et Wivine** : conception des API.
+- **Membres ajoutés** : missions à préciser collectivement.
+
+Cette répartition est **temporaire et concerne la conception** ; les rôles d'implémentation seront redistribués après la revue du dimanche. Voir [la matrice et les livrables](docs/REPARTITION_PHASE_CONCEPTION.md) ainsi que [le protocole de transition](docs/PASSAGE_CONCEPTION_IMPLEMENTATION.md).
+
+Le projet Jira [PMEE](https://2030-team-lz0shg5m.atlassian.net/browse/PMEE) existe ; **la liaison Jira–GitHub reste à vérifier**.
 
 ## 👥 Les quatre espaces
 
@@ -59,12 +72,12 @@ Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) et [docs/CAHIER_DES_CHARGES.md
 
 - Maquettes **Figma** et démonstration web sur **Vercel**.
 - Dépôt GitHub, branches par fonctionnalité, revue via **Pull Request** et vérifications **GitHub Actions**.
-- **Jira** est l'outil de suivi demandé pour le backlog, les sprints, les bugs et les responsables. GitHub Issues peut accueillir les discussions techniques ; relier les tickets Jira lorsque le projet est créé.
+- **Jira** est l'outil de suivi demandé pour le backlog, les sprints, les bugs et les responsables. Le projet Jira PMEE existe ; GitHub Issues accueille les éléments préparatoires, en attendant une synchronisation Jira–GitHub vérifiée.
 - Tests unitaires, fonctionnels et **E2E** couvrant notamment le cycle de commande.
 - Documentation des API, de l'architecture, des installations et de l'utilisation par rôle, schémas BD, risques, budget et livraison de préproduction.
 - Application mobile ultérieure : **extension possible**, hors livrable web initial.
 
-Le document source mentionne une équipe de **6 personnes** et une durée de **4 semaines (30 septembre–21 octobre)**. Ces dates proviennent du document de **2024** et **ne constituent pas un calendrier confirmé pour 2026**. Voir [docs/PLAN_DE_LIVRAISON.md](docs/PLAN_DE_LIVRAISON.md).
+Le document source mentionne initialement une équipe de **6 personnes**, mais l'équipe actuelle s'est agrandie et une durée de **4 semaines (30 septembre–21 octobre)**. Ces dates proviennent du document de **2024** et **ne constituent pas un calendrier confirmé pour 2026**. Voir [docs/PLAN_DE_LIVRAISON.md](docs/PLAN_DE_LIVRAISON.md).
 
 ## 📁 Dossiers documentaires
 
@@ -74,6 +87,8 @@ Le document source mentionne une équipe de **6 personnes** et une durée de **4
 | [Architecture](docs/ARCHITECTURE.md) | Modules, rôles, données, API |
 | [Design system](docs/DESIGN_SYSTEM.md) | Identité, écrans et accessibilité |
 | [Plan de livraison](docs/PLAN_DE_LIVRAISON.md) | Phases, équipe, Jira, livrables |
+| [Répartition de conception](docs/REPARTITION_PHASE_CONCEPTION.md) | Responsables et livrables préliminaires jusqu'au 25/10/2026 |
+| [Transition vers l'implémentation](docs/PASSAGE_CONCEPTION_IMPLEMENTATION.md) | Checklist et futurs rôles à réattribuer |
 | [Backlog du projet](docs/BACKLOG.md) | Issues liées, priorités proposées et dépendances |
 | [Plan de tests](docs/PLAN_DE_TESTS.md) | Scénarios de recette, contrôles |
 | [Décisions ouvertes](docs/DECISIONS.md) | Arbitrages non tranchés |
@@ -100,7 +115,10 @@ Les conventions de branches, de revues et de qualité sont définies. **La branc
 - [x] Dépôt GitHub initialisé.
 - [x] Cadrage écrit sur la base du cahier des charges Mon Miam Miam.
 - [x] Modèles Issues/PR et contrôles de gouvernance.
-- [ ] Valider équipe, stack, dates, backlog Jira et MVP.
+- [x] Documenter la répartition de la phase de conception.
+- [x] Identifier le projet Jira PMEE et le ticket versioning PMEE-5.
+- [ ] Vérifier accès et liaison Jira–GitHub, recueillir les livrables de conception.
+- [ ] Valider la nouvelle répartition d'implémentation, stack, dates, backlog Jira et MVP.
 - [ ] Concevoir les maquettes Figma et prototype Vercel.
 - [ ] Développer les quatre espaces et l'API.
 - [ ] Tester, livrer la bêta et documenter la mise en production.
