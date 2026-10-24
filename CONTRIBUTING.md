@@ -2,20 +2,22 @@
 
 Ce guide s'applique au **frontend**, au **backend**, à l'**API**, aux **maquettes** et à la **documentation** du restaurant ZeDuc@Space.
 
-## Organisation des 6 contributeurs
+## Organisation actuelle — phase de conception
 
-Le cahier des charges prévoit une équipe de **6 personnes**, avec des responsabilités explicites. Les affectations réelles sont encore à décider et à consigner dans **Jira** (pas d'identités inventées ici). Les tâches peuvent être réparties par domaines : expérience étudiant, opérations employés, supervision gérant/admin, API & données, qualité & déploiement, coordination & design. Ces domaines sont des **propositions de répartition**, pas des rôles officiellement attribués.
+**Jusqu'au point de revue du dimanche 25 octobre 2026 :** Jean d'Arc Kazamba (Git/versioning), Roseline BOLONGOSHA (Jira), Christian (Figma), Caleb (conception BDD), Yviline/Aksa/Wivine (conception API). Des membres supplémentaires ont été intégrés ; leurs missions sont à confirmer.
+
+Voir [la répartition actuelle](docs/REPARTITION_PHASE_CONCEPTION.md) et [la préparation du passage à l'implémentation](docs/PASSAGE_CONCEPTION_IMPLEMENTATION.md). **Ces responsabilités ne valent pas attribution des modules d'implémentation.** Les nouveaux rôles seront décidés après la revue et enregistrés dans Jira.
 
 ### Jira et GitHub
 
 1. Créer / affecter une **story, tâche ou bug dans Jira** (source principale du backlog).
 2. Décrire les critères d'acceptation et la dépendance aux autres modules.
-3. Créer une branche GitHub ciblée, idéalement avec l'identifiant Jira quand il est connu, p. ex. `feature/MMM-12-student-cart`.
+3. Créer une branche GitHub ciblée, idéalement avec l'identifiant Jira quand il est connu, p. ex. `chore/PMEE-5-versioning` (ticket réel).
 4. Ouvrir une **Pull Request (PR)** en indiquant le ticket Jira et, le cas échéant, une Issue GitHub.
 5. Faire relire et exécuter les tests avant fusion.
 6. Mettre le ticket Jira et la documentation à jour après livraison.
 
-Si aucun projet Jira n'est encore connecté, utiliser temporairement les Issues GitHub comme espace de préparation ; ne pas prétendre que Jira est synchronisé.
+Le projet Jira [PMEE](https://2030-team-lz0shg5m.atlassian.net/browse/PMEE) existe, mais sa liaison au dépôt reste **non vérifiée**. Les GitHub Issues sont un appui technique ; Jira demeure la source de vérité des tâches.
 
 ## Branches et commits
 
@@ -32,15 +34,16 @@ Exemples métier :
 - `feature/referral-codes`
 - `feature/complaints`
 - `docs/api-contracts`
+- `chore/PMEE-5-versioning`
 
 ```bash
 git switch main
 git pull origin main
-git switch -c feature/student-cart
+git switch -c chore/PMEE-5-versioning
 # Modifier le code, exécuter les tests, puis :
 git add .
-git commit -m "feat: ajouter la gestion du panier étudiant"
-git push -u origin feature/student-cart
+git commit -m "chore: PMEE-5 documenter les conventions Git"
+git push -u origin chore/PMEE-5-versioning
 ```
 
 Utiliser des commits structurés `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`, `ci:`. La PR respecte elle aussi ce préfixe.
