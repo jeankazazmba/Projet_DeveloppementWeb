@@ -1,14 +1,36 @@
 # Backlog initial — Mon Miam Miam
 
-**Statut :** backlog de préparation **GitHub** construit à partir du cahier des charges *Mon Miam Miam V1.0.2 (16/09/2024)*. Le cahier demande un suivi officiel dans **Jira** ; à ce stade, **aucun projet Jira n'est encore lié** à ce dépôt. Les priorités ci-dessous sont **proposées** pour faciliter l'atelier de cadrage : ce ne sont pas des décisions déjà validées.
+**Statut :** backlog de préparation **GitHub** construit à partir du cahier des charges *Mon Miam Miam V1.0.2 (16/09/2024)*. Le cahier demande un suivi officiel dans **Jira** ; le projet **[Jira PMEE](https://2030-team-lz0shg5m.atlassian.net/browse/PMEE)** a été créé et le ticket **PMEE-5** est connu ; **la synchronisation du dépôt GitHub avec Jira n'est pas encore confirmée**. Les priorités ci-dessous sont **proposées** pour faciliter l'atelier de cadrage : ce ne sont pas des décisions déjà validées.
+
+## 0. Phase active : conception et organisation — jusqu'au point du 25/10/2026
+
+La répartition actuelle **ne concerne que la phase de conception** : Jean d'Arc Kazamba (Git/versioning, ticket Jira PMEE-5), Roseline BOLONGOSHA (Jira), Christian (Figma), Caleb (conception base de données), Yviline/Aksa/Wivine (conception API). Des membres supplémentaires ont été intégrés ; les nouvelles responsabilités de développement ne sont **pas encore définies**.
+
+**Référence nominative :** [REPARTITION_PHASE_CONCEPTION.md](REPARTITION_PHASE_CONCEPTION.md). **Conditions de passage à l'implémentation :** [PASSAGE_CONCEPTION_IMPLEMENTATION.md](PASSAGE_CONCEPTION_IMPLEMENTATION.md).
+
+**À suivre prioritairement pendant cette phase :** structure Git/Jira et accès, liens Figma, schéma BDD, contrats API, arbitrage MVP/stack, rendez-vous de revue. Les Issues de fonctionnalités **#6 à #22** sont un backlog de réalisation future, **pas une attribution actuelle de développement**.
+
+### Tickets GitHub liés aux responsabilités actuelles
+
+Ces tickets servent à référencer les livrables dans le dépôt ; **Jira PMEE reste le suivi officiel**. Ils ne constituent ni un sprint de développement ni une nouvelle affectation de rôles.
+
+| Issue GitHub | Mission de conception | Responsable déclaré | Phase |
+| --- | --- | --- | --- |
+| [#24](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/24) | Versioning Git et contrôle liaison PMEE-5 | Jean d'Arc Kazamba (@jeankazazmba) | Jusqu'à la revue du 25/10 |
+| [#4](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/4) | Backlog et organisation Jira | Roseline BOLONGOSHA | Jusqu'à la revue du 25/10 |
+| [#5](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/5) | Maquettes et parcours Figma | Christian | Jusqu'à la revue du 25/10 |
+| [#25](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/25) | Modèle et schéma de données | Caleb | Jusqu'à la revue du 25/10 |
+| [#26](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/26) | Contrats et organisation des API | Yviline, Aksa, Wivine | Jusqu'à la revue du 25/10 |
+
+Les tickets **#1** (MVP commun) et **#2** (stack / amorçage ensuite) sont ouverts **sans attribution individuelle définitive**. Il faut éviter de les interpréter comme des tâches Git confiées à Jean d'Arc.
 
 ## 1. Préparation du projet — priorité initiale
 
 | Issue | Livrable | Priorité suggérée | Pourquoi |
 | --- | --- | --- | --- |
 | [#1](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/1) | MVP, parcours métier et règles à valider | P0 | Éviter les spécifications contradictoires |
-| [#2](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/2) | Choix de stack, base de données, architecture et démarrage local | P0 | Débloquer le développement |
-| [#4](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/4) | Backlog et responsabilités dans Jira | P0 | Organiser les **6 membres prévus** |
+| [#2](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/2) | Choix de stack/architecture et amorçage **après revue** | P0 au passage de phase | Débloquer le développement sans démarrer avant arbitrage |
+| [#4](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/4) | Backlog et responsabilités dans Jira | P0 | Organiser les membres effectivement présents |
 | [#5](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/5) | Figma et prototype Vercel des quatre espaces | P0 | Valider les interfaces et les parcours |
 
 ## 2. Parcours commande et exploitation — cœur fonctionnel
@@ -67,24 +89,24 @@ Le workflow GitHub Actions actuel valide la **gouvernance documentaire** et les 
 #22 Paiement agrégateur : bonus facultatif
 ```
 
-## 6. Répartition indicative — **6 membres à nommer**
+## 6. Répartition nominative effective — uniquement pour la conception
 
-**Ce sont des domaines, pas des attributions réelles** :
+| Responsable(s) | Tâche actuelle | État des preuves accessibles |
+| --- | --- | --- |
+| **Jean d'Arc Kazamba** | Git/versioning et préparation du dépôt | Documentation et contrôles de gouvernance présents ; PMEE-5 et lien Jira à vérifier |
+| **Roseline BOLONGOSHA** | Jira et organisation du backlog | Projet PMEE créé ; qualité des affectations et intégration GitHub à confirmer |
+| **Christian** | Maquettes Figma | Lien du livrable/validation à collecter |
+| **Caleb** | Conception BDD | Schéma de données validé à collecter |
+| **Yviline, Aksa, Wivine** | Conception des API | Contrats API et partage interne des sous-modules à collecter |
+| **Autres membres intégrés** | À préciser | Identités et missions à valider |
 
-1. Pilotage/Scrum, backlog Jira, documentation et intégration.
-2. UX/UI, Figma, intégration web de l'espace étudiant.
-3. Backend, authentification, API et base de données.
-4. Commandes, exploitation employé et supervision gérant/admin.
-5. Fidélité, parrainage, réclamations et règles métier.
-6. Tests, sécurité, CI/CD et déploiement, en soutien transversal.
-
-Chaque tâche possède **un responsable explicite dans Jira**, avec relecture croisée de la Pull Request. Un membre peut travailler sur plusieurs sujets selon les compétences disponibles.
+**Aucune de ces missions ne préjuge de la répartition de l'implémentation après la revue du dimanche 25 octobre 2026.** Pour les livrables, validations et dépendances, lire [REPARTITION_PHASE_CONCEPTION.md](REPARTITION_PHASE_CONCEPTION.md).
 
 ## 7. Workflow Jira / GitHub
 
-- **Jira** = source de vérité du backlog, des affectations et des dates, une fois créé.
-- **GitHub Issues** = préparation et détail des tâches techniques tant que Jira n'est pas relié ; ajouter les clés Jira dès leur création.
-- Branche : `feature/MMM-123-student-cart` si un ticket Jira existe, sinon `feature/student-cart`.
+- **Jira PMEE** = source de vérité du backlog, des affectations et des dates ; projet créé, accès et synchronisation à confirmer.
+- **GitHub Issues** = préparation et détail des tâches techniques, sans recopier en double les statuts Jira ; ajouter les clés Jira dès leur création.
+- Branche : `chore/PMEE-5-versioning` pour le ticket existant ; pour les autres travaux, utiliser leur **véritable clé Jira** dès qu'elle est connue, sinon un nom de branche descriptif sans clé inventée.
 - Pull Request : résumer le résultat, indiquer ticket, scénario de recette et captures selon le module.
 - Relecture humaine, vérifications vertes, puis fusion ; suivre [CONTRIBUTING.md](../CONTRIBUTING.md).
 
@@ -92,7 +114,7 @@ Les GitHub Issues **#14 à #17** ont été fermées comme doublons du backlog ex
 
 ## 8. Jalons relatifs, non datés
 
-Le document de 2024 indique **6 personnes**, **4 semaines** et « 30 septembre – 21 octobre » ; les échéances doivent être **replanifiées pour l'équipe actuelle**.
+Le document de 2024 indique **6 personnes initialement**, **4 semaines** et « 30 septembre – 21 octobre » ; l'équipe s'est agrandie ; les échéances et responsabilités de développement doivent être **replanifiées après le point du 25/10/2026**.
 
 - **S1 :** validation MVP, Jira, choix technique, base des maquettes, architecture.
 - **S2 :** auth, menu et structures de données, intégration de l'interface.
