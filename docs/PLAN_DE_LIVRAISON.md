@@ -2,7 +2,7 @@
 
 ## Source et temporalité
 
-Le cahier des charges (V1.0.2 du 16/09/2024) prévoit **6 membres**, un fonctionnement agile / Scrum, un **projet Jira** et une réalisation annoncée sur **4 semaines**, avec les dates imprimées **30 septembre–21 octobre**. **Ces dates de l'ancien cahier des charges ne sont pas un calendrier validé aujourd'hui.** Le tableau ci-dessous propose des semaines relatives **S1 à S4**, à dater par le responsable de projet.
+Le cahier des charges (V1.0.2 du 16/09/2024) prévoit initialement **6 membres**, un fonctionnement agile / Scrum, un **projet Jira** et une réalisation annoncée sur **4 semaines**, avec les dates imprimées **30 septembre–21 octobre**. **Ces dates de l'ancien cahier des charges ne sont pas un calendrier validé aujourd'hui.** Le tableau ci-dessous propose des semaines relatives **S1 à S4**, à dater par le responsable de projet.
 
 ## Outils et responsabilités
 
@@ -13,9 +13,13 @@ Le cahier des charges (V1.0.2 du 16/09/2024) prévoit **6 membres**, un fonction
 - **Cloud backend + base de données** : solution à choisir après définition de la stack.
 - **Documentation** : réunions, risques, décisions, budgets et guides.
 
-**Répartition de travail proposée (pas d'affectations nominatives)** : (1) coordination et QA, (2) UI/UX & frontend public/étudiant, (3) frontend opérationnel employé, (4) manager/admin et stats, (5) backend commandes/catalogue/authentification, (6) données/fidélité/parrainage/intégration. Les compétences, dépendances et disponibilités de l'équipe pourront imposer une autre distribution.
+**Répartition réelle pour la phase de conception (jusqu'au point du dimanche 25/10/2026) :** Jean d'Arc Kazamba — versioning Git/GitHub ; Roseline BOLONGOSHA — Jira ; Christian — Figma ; Caleb — conception BDD ; Yviline, Aksa et Wivine — conception API. Des membres supplémentaires ont rejoint l'équipe ; leurs missions seront précisées après confirmation. Voir [la matrice et les livrables actuels](REPARTITION_PHASE_CONCEPTION.md).
+
+**À la revue de dimanche, ces responsabilités devront être réévaluées pour l'implémentation :** aucune attribution de module de développement n'est présumée. Voir [le protocole de transition](PASSAGE_CONCEPTION_IMPLEMENTATION.md).
 
 ## Phases de réalisation (proposition)
+
+La phase **actuelle** est la **conception/préparation jusqu'au point du 25/10/2026**. Le tableau S1–S4 est une projection **relative, non datée et non validée pour la période suivante**. Les affectations de développement seront décidées à l'issue de la revue, et le démarrage ne doit pas être annoncé avant validation.
 
 | Semaine relative | Résultats attendus | Vérification |
 | --- | --- | --- |
@@ -27,6 +31,8 @@ Le cahier des charges (V1.0.2 du 16/09/2024) prévoit **6 membres**, un fonction
 La faisabilité sur quatre semaines dépend du périmètre MVP et des personnes disponibles. **Paiement externe et extension mobile ne doivent pas être présentés comme obligatoires.**
 
 ## Structure recommandée du backlog Jira
+
+Le projet Jira réel **[PMEE](https://2030-team-lz0shg5m.atlassian.net/browse/PMEE)** existe ; l'attribution de **PMEE-5** au versioning Git a été notifiée. Les Epics réels, autres tickets et la synchronisation GitHub restent à vérifier.
 
 Épopées **proposées** :
 - **EPIC-01** — Cadrage, architecture, données et droits d'accès.
