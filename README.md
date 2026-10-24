@@ -77,7 +77,7 @@ Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) et [docs/CAHIER_DES_CHARGES.md
 - Documentation des API, de l'architecture, des installations et de l'utilisation par rôle, schémas BD, risques, budget et livraison de préproduction.
 - Application mobile ultérieure : **extension possible**, hors livrable web initial.
 
-Le document source mentionne initialement une équipe de **6 personnes**, mais l'équipe actuelle s'est agrandie et une durée de **4 semaines (30 septembre–21 octobre)**. Ces dates proviennent du document de **2024** et **ne constituent pas un calendrier confirmé pour 2026**. Voir [docs/PLAN_DE_LIVRAISON.md](docs/PLAN_DE_LIVRAISON.md).
+Le document source mentionne une équipe initiale de **6 personnes** et un délai de **4 semaines (30 septembre–21 octobre)**. **L'équipe actuelle s'est agrandie** et une nouvelle répartition de développement sera décidée après la revue du 25/10/2026. Ces dates proviennent du document de **2024** et **ne constituent pas un calendrier confirmé pour 2026**. Voir [docs/PLAN_DE_LIVRAISON.md](docs/PLAN_DE_LIVRAISON.md).
 
 ## 📁 Dossiers documentaires
 
