@@ -10,6 +10,20 @@ La répartition actuelle **ne concerne que la phase de conception** : Jean d'Arc
 
 **À suivre prioritairement pendant cette phase :** structure Git/Jira et accès, liens Figma, schéma BDD, contrats API, arbitrage MVP/stack, rendez-vous de revue. Les Issues de fonctionnalités **#6 à #22** sont un backlog de réalisation future, **pas une attribution actuelle de développement**.
 
+### Tickets GitHub liés aux responsabilités actuelles
+
+Ces tickets servent à référencer les livrables dans le dépôt ; **Jira PMEE reste le suivi officiel**. Ils ne constituent ni un sprint de développement ni une nouvelle affectation de rôles.
+
+| Issue GitHub | Mission de conception | Responsable déclaré | Phase |
+| --- | --- | --- | --- |
+| [#24](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/24) | Versioning Git et contrôle liaison PMEE-5 | Jean d'Arc Kazamba (@jeankazazmba) | Jusqu'à la revue du 25/10 |
+| [#4](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/4) | Backlog et organisation Jira | Roseline BOLONGOSHA | Jusqu'à la revue du 25/10 |
+| [#5](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/5) | Maquettes et parcours Figma | Christian | Jusqu'à la revue du 25/10 |
+| [#25](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/25) | Modèle et schéma de données | Caleb | Jusqu'à la revue du 25/10 |
+| [#26](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/26) | Contrats et organisation des API | Yviline, Aksa, Wivine | Jusqu'à la revue du 25/10 |
+
+Les tickets **#1** (MVP commun) et **#2** (stack / amorçage ensuite) sont ouverts **sans attribution individuelle définitive**. Il faut éviter de les interpréter comme des tâches Git confiées à Jean d'Arc.
+
 ## 1. Préparation du projet — priorité initiale
 
 | Issue | Livrable | Priorité suggérée | Pourquoi |
