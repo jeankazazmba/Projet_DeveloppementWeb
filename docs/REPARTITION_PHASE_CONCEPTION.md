@@ -26,6 +26,16 @@ Ne pas interpréter les lignes « non communiqué / non présent dans le dépôt
 - Toute modification de la répartition avant la revue de dimanche est consignée avec sa date, son auteur et sa validation.
 - Un livrable est considéré comme **reçu** uniquement lorsque son lien/fichier est partagé ; **validé** seulement après revue par les personnes concernées.
 
+## Tickets GitHub correspondants (suivi technique, statuts officiels dans Jira)
+
+- **Versioning Git / Jean d'Arc :** [#24](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/24), relié au ticket Jira [PMEE-5](https://2030-team-lz0shg5m.atlassian.net/browse/PMEE-5).
+- **Organisation Jira / Roseline :** [#4](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/4).
+- **Maquettes Figma / Christian :** [#5](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/5).
+- **Modèle de données / Caleb :** [#25](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/25).
+- **Conception API / Yviline, Aksa et Wivine :** [#26](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/26).
+
+Les personnes sans identifiant GitHub confirmé figurent **dans les descriptions**, sans attribution arbitraire à un compte.
+
 ## 2. Livrables attendus au point de revue du dimanche 25/10
 
 | Domaine | Preuve attendue | Critère de revue |
