@@ -20,6 +20,9 @@ Les éléments ci-dessous restent **ouverts** jusqu'à validation explicite par 
 | DEC-14 | **Gestion de projet** | Jira exigé | Projet Jira, backlog, responsable des sprints et liens GitHub |
 | DEC-15 | **Déploiement** | Démo Vercel et backend cloud | URL Figma, Vercel, cloud API, base de données, secrets |
 | DEC-16 | **Multi-restaurant** | Évolutivité future souhaitée | Modéliser tenant dès maintenant ou préserver une extension simple ? |
+| DEC-17 | **Répartition de conception** | Répartition communiquée par l'équipe le 23/10/2026 ; confirmée active jusqu'au dimanche 25/10/2026 | **Documentée pour la phase actuelle** dans [REPARTITION_PHASE_CONCEPTION.md](REPARTITION_PHASE_CONCEPTION.md). Validation des livrables et des membres ajoutés encore attendue |
+| DEC-18 | **Répartition d'implémentation** | Les responsabilités doivent évoluer après les travaux préparatoires | **Non attribuée** : décider la nouvelle matrice lors de la revue du 25/10 et la reporter dans Jira et GitHub |
+| DEC-19 | **Liaison GitHub–Jira** | Projet Jira réel PMEE et ticket PMEE-5 notifié | **À vérifier** : connexion du dépôt privé et apparition de branches/PR dans les tickets |
 
 ## Convention d'arbitrage
 
