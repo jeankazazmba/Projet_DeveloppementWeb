@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="parrainage" name="Cycle de vie du parrainage">
+    <mxGraphModel dx="1209" dy="705" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" value="Début" vertex="1">
+          <mxGeometry height="50" width="120" x="420" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="generate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" value="Le parrain génère son code de parrainage" vertex="1">
+          <mxGeometry height="60" width="260" x="350" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="share" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" value="Le parrain partage son code avec un autre étudiant" vertex="1">
+          <mxGeometry height="70" width="300" x="330" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="signup" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" value="Le filleul s&#39;inscrit et saisit le code de parrainage" vertex="1">
+          <mxGeometry height="70" width="300" x="330" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="valid" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" value="Le code est-il valide ?" vertex="1">
+          <mxGeometry height="100" width="200" x="380" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="invalid" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;" value="Afficher un message d&#39;erreur et demander un code valide" vertex="1">
+          <mxGeometry height="70" width="250" x="680" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="associate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" value="Associer le filleul au parrain dans le système" vertex="1">
+          <mxGeometry height="60" width="280" x="340" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="firstorder" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" value="Le filleul effectue sa première commande" vertex="1">
+          <mxGeometry height="60" width="260" x="350" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="success" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" value="La première commande est-elle réussie ?" vertex="1">
+          <mxGeometry height="100" width="200" x="380" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="wait" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;" value="Attendre une première commande réussie avant d&#39;attribuer la récompense" vertex="1">
+          <mxGeometry height="80" width="250" x="680" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="reward" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" value="Attribuer les points de récompense au parrain" vertex="1">
+          <mxGeometry height="60" width="280" x="340" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="status" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;" value="Mettre à jour le statut : récompense attribuée" vertex="1">
+          <mxGeometry height="60" width="280" x="340" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" value="Fin" vertex="1">
+          <mxGeometry height="50" width="120" x="420" y="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="generate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="generate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="share">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="share" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="signup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="signup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="valid">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="valid" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="invalid" value="Non">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="valid" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="associate" value="Oui">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="invalid" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="signup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="associate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="firstorder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="firstorder" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="success">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="success" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="wait" value="Non">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="success" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="reward" value="Oui">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="reward" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="status">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="status" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
