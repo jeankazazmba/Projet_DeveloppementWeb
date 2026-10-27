@@ -1,6 +1,6 @@
 # Sprint 1 — Conception : dépôt des livrables
 
-**Période :** conception, revue prévue le 25 octobre 2026. **Statut :** en attente des dépôts et validations individuels.
+**Période historique :** conception, revue prévue le 25 octobre 2026. **État au 27/10/2026 :** lien Figma, archive BDD, document API et diagrammes déposés ; livrables Git/versioning intégrés par la PR #48. Les validations de conception et la liaison Jira restent à documenter. Voir [le suivi du Sprint 2](../sprint-2/README.md) et [l'index API](04-contrats-api/SPECIFICATIONS_API.md).
 
 ## Où déposer ?
 
