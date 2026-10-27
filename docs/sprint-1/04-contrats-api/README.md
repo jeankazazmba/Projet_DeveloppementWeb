@@ -15,6 +15,10 @@ Dossier de conception de l'équipe API : Yveline, Aksa et Wivine. Les documents 
 
 Les diagrammes sont au format XML diagrams.net et peuvent être ouverts dans diagrams.net. Le contrat OpenAPI est une proposition de conception, pas une description d'une API déjà disponible.
 
+## Vérification du contrat OpenAPI
+
+Le `27/10/2026`, `openapi.yaml` a été validé avec `openapi-spec-validator 0.9.0` : OpenAPI `3.1.0`, 29 chemins et 12 tags. Cette validation confirme la structure du contrat; elle ne remplace pas la revue des règles métier et des permissions par l'équipe.
+
 ## Contributions
 
 Les fichiers reçus ne précisent pas la contribution individuelle de chaque membre. Yveline, Aksa et Wivine doivent indiquer leur répartition respective dans le commentaire de l'Issue #26 lors de la demande de validation.
