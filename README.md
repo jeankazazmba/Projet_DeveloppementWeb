@@ -2,7 +2,7 @@
 
 **Application web de commande et de gestion du restaurant ZeDuc@Space — UCAC-ICAM, Yansoki.**
 
-> Projet d'équipe de développement web • Dépôt privé • **État au 27 octobre 2026 : préparation de l'implémentation du Sprint 2**, dont les tâches sont ouvertes avec une échéance au **28 octobre 2026**. Les livrables de conception sont partiellement déposés ; aucune fonctionnalité applicative n'est encore livrée dans `main`.
+> Projet d'équipe de développement web • Dépôt privé • Phase actuelle : **conception et préparation jusqu'à la revue du dimanche 25 octobre 2026** (aucune fonctionnalité applicative encore livrée).
 
 ## 🎯 Pourquoi Mon Miam Miam ?
 
@@ -18,9 +18,7 @@ Le restaurant ZeDuc@Space reçoit des commandes par messages et appels. Avec l'a
 
 **Référence métier :** *Cahier de charge projet : Mon Miam Miam*, propriétaire « ZeDuc@Space - x - DNx », version **V1.0.2**, datée du **16/09/2024**. Cette date est celle du document source, **pas** une date de livraison actuelle.
 
-## 👥 Organisation et passage au Sprint 2
-
-La répartition ci-dessous rappelle les responsabilités de **conception du Sprint 1**, dont la revue était prévue le 25/10/2026 :
+## 👥 Organisation actuelle de la conception (jusqu'au 25/10/2026)
 
 - **Jean d'Arc Kazamba** : versioning Git/GitHub et organisation du dépôt.
 - **Roseline BOLONGOSHA** : gestion Jira.
@@ -29,9 +27,7 @@ La répartition ci-dessous rappelle les responsabilités de **conception du Spri
 - **Yviline, Aksa et Wivine** : conception des API.
 - **Membres ajoutés** : missions à préciser collectivement.
 
-Les responsabilités d'implémentation sont désormais décrites dans les **Issues #28 à #46**. Voir [le suivi du Sprint 2 et les tâches de Jean d'Arc](docs/sprint-2/README.md). Les documents de [répartition de conception](docs/REPARTITION_PHASE_CONCEPTION.md) et de [transition](docs/PASSAGE_CONCEPTION_IMPLEMENTATION.md) conservent le contexte de préparation ; la tenue de la revue et ses décisions ne sont pas attestées par un compte rendu complété dans le dépôt.
-
-**Priorités de Jean d'Arc au Sprint 2 :** responsable de [#28 — initialiser frontend, backend et conventions](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/28), avec Christian (@Ono206), et binôme de Roseline sur [#33 — Jira, branches et contrôles CI](https://github.com/jeankazazmba/Projet_DeveloppementWeb/issues/33).
+Cette répartition est **temporaire et concerne la conception** ; les rôles d'implémentation seront redistribués après la revue du dimanche. Voir [la matrice et les livrables](docs/REPARTITION_PHASE_CONCEPTION.md) ainsi que [le protocole de transition](docs/PASSAGE_CONCEPTION_IMPLEMENTATION.md).
 
 Le projet Jira [PMEE](https://2030-team-lz0shg5m.atlassian.net/browse/PMEE) existe ; **la liaison Jira–GitHub reste à vérifier**.
 
@@ -68,7 +64,7 @@ Le logo original ZeDuc@Space figure dans le cahier des charges. **Ne pas recrée
 
 Exigences de conception : **architecture MVC ou équivalente**, découpage frontend/backend, données persistées, API et interface responsive, compatibilité Chrome/Firefox/Safari, évolutivité vers plusieurs restaurants.
 
-Le cahier des charges **laisse le choix de la stack**. Les livrables récents mentionnent **React** pour le web (Issue #53) et **Laravel / Sanctum** dans la proposition API back-office. Ces orientations doivent être consolidées avec les versions, le SGBD et les conventions dans #28 ; aucune stack applicative n'est encore installée dans `main`. Voir [l'index des spécifications API](docs/sprint-1/04-contrats-api/SPECIFICATIONS_API.md).
+Le cahier des charges **laisse le choix de la stack** (exemples : React/Vue/Angular, PHP/Laravel) : aucune technologie de production n'est encore arrêtée ni installée. Les modèles `users`, `orders`, `referrals`, les points de fidélité et les statistiques doivent être affinés lors de la conception.
 
 Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) et [docs/CAHIER_DES_CHARGES.md](docs/CAHIER_DES_CHARGES.md).
 
@@ -81,7 +77,7 @@ Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) et [docs/CAHIER_DES_CHARGES.md
 - Documentation des API, de l'architecture, des installations et de l'utilisation par rôle, schémas BD, risques, budget et livraison de préproduction.
 - Application mobile ultérieure : **extension possible**, hors livrable web initial.
 
-Le document source mentionne une équipe initiale de **6 personnes** et un délai de **4 semaines (30 septembre–21 octobre)**, issus du cahier de **2024**. Les Issues d'implémentation indiquent maintenant des échéances en **2026 : Sprint 2 le 28/10, Sprint 3 le 30/10, Sprint 4 le 31/10**. Ce sont des objectifs de suivi, pas des preuves de livraison ; leur correspondance avec Jira reste à vérifier. Voir [le relevé actuel](docs/sprint-2/README.md) et [le plan de livraison initial](docs/PLAN_DE_LIVRAISON.md).
+Le document source mentionne une équipe initiale de **6 personnes** et un délai de **4 semaines (30 septembre–21 octobre)**. **L'équipe actuelle s'est agrandie** et une nouvelle répartition de développement sera décidée après la revue du 25/10/2026. Ces dates proviennent du document de **2024** et **ne constituent pas un calendrier confirmé pour 2026**. Voir [docs/PLAN_DE_LIVRAISON.md](docs/PLAN_DE_LIVRAISON.md).
 
 ## 📁 Dossiers documentaires
 
@@ -94,7 +90,6 @@ Le document source mentionne une équipe initiale de **6 personnes** et un déla
 | [Répartition de conception](docs/REPARTITION_PHASE_CONCEPTION.md) | Responsables et livrables préliminaires jusqu'au 25/10/2026 |
 | [Transition vers l'implémentation](docs/PASSAGE_CONCEPTION_IMPLEMENTATION.md) | Checklist et futurs rôles à réattribuer |
 | [Backlog du projet](docs/BACKLOG.md) | Issues liées, priorités proposées et dépendances |
-| [Sprint 2 et tâches de Jean d'Arc](docs/sprint-2/README.md) | Issues, responsabilités, échéances et critères vérifiés au 27/10/2026 |
 | [Plan de tests](docs/PLAN_DE_TESTS.md) | Scénarios de recette, contrôles |
 | [Décisions ouvertes](docs/DECISIONS.md) | Arbitrages non tranchés |
 | [Risques](docs/RISQUES.md) | Risques et stratégies de mitigation |
@@ -122,12 +117,9 @@ Les conventions de branches, de revues et de qualité sont définies. **La branc
 - [x] Modèles Issues/PR et contrôles de gouvernance.
 - [x] Documenter la répartition de la phase de conception.
 - [x] Identifier le projet Jira PMEE et le ticket versioning PMEE-5.
-- [x] Intégrer les six livrables Git/versioning PMEE-5 dans `main` : PR #48, commit `7fa11e8` du 27/10/2026.
-- [x] Référencer le lien Figma, l'archive BDD et les livrables API déposés au Sprint 1 (validation globale encore à établir).
-- [x] Référencer les tâches d'implémentation des Sprints 2 à 4 dans GitHub Issues.
-- [ ] Vérifier la liaison Jira–GitHub et reporter les décisions et affectations dans Jira.
-- [ ] Consolider la stack, le MVP et les validations de conception ; initialiser l'application (#28).
-- [ ] Valider les maquettes et livrer le prototype Vercel.
+- [ ] Vérifier accès et liaison Jira–GitHub, recueillir les livrables de conception.
+- [ ] Valider la nouvelle répartition d'implémentation, stack, dates, backlog Jira et MVP.
+- [ ] Concevoir les maquettes Figma et prototype Vercel.
 - [ ] Développer les quatre espaces et l'API.
 - [ ] Tester, livrer la bêta et documenter la mise en production.
 
