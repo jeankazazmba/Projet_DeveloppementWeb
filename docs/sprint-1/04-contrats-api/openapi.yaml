@@ -1,0 +1,863 @@
+openapi: 3.1.0
+info:
+  title: API Mon Miam Miam
+  version: 0.1.0
+  summary: Proposition de contrat REST pour ZeDuc@Space
+  description: |
+    Contrat de conception à valider par l'équipe; l'API n'est pas encore implémentée.
+    Les chemins français suivent le livrable de conception et devront être harmonisés
+    avec le backend avant développement. Les règles de fidélité, les statuts définitifs,
+    les droits détaillés et le mécanisme d'authentification restent à confirmer.
+    Le paiement en ligne est un bonus facultatif du MVP. Le serveur recalcule les prix,
+    remises et points; les montants fournis par le client ne font pas autorité.
+
+    Sécurité et rôles proposés:
+    - Public: inscription, connexion, réinitialisation, menu, plats, promotions,
+      classement et consultation des paramètres publics (horaires).
+    - Étudiant: profil personnel, panier, commandes personnelles, points,
+      parrainage, réclamations et commentaires sur ses commandes terminées.
+    - Employé: file de commandes, mise à jour de leur traitement, disponibilité
+      temporaire des plats, réponses aux réclamations et statistiques hebdomadaires.
+    - Gérant: supervision, création d'employés, arbitrage des réclamations et
+      statistiques générales, sous réserve de la matrice finale.
+    - Administrateur: gestion du menu, promotions, employés, paramètres et
+      statistiques globales.
+  contact:
+    name: Équipe API Mon Miam Miam
+servers:
+  - url: /api/v1
+    description: Préfixe proposé; hôte à configurer au déploiement.
+tags:
+  - name: Authentification
+  - name: Utilisateurs
+  - name: Menu
+  - name: Panier
+  - name: Commandes
+  - name: Paiements
+    description: Bonus facultatif; à exclure du MVP sauf décision contraire.
+  - name: Fidélité
+  - name: Parrainage
+  - name: Réclamations
+  - name: Promotions
+  - name: Statistiques
+  - name: Employés
+security:
+  - bearerAuth: []
+x-role-permissions:
+  public:
+    - inscription et connexion
+    - lecture du menu, des plats, des promotions, du classement et des horaires
+  etudiant:
+    - profil personnel, panier, commandes personnelles, fidélité, parrainage et réclamations
+    - commentaire sur une commande servie ou livrée
+  employe:
+    - consultation et traitement des commandes
+    - disponibilité temporaire des plats, réponses aux réclamations et statistiques hebdomadaires
+  gerant:
+    - supervision des commandes, création des comptes employés et arbitrage des réclamations
+    - statistiques générales et statistiques de fidélité
+  administrateur:
+    - gestion du menu, promotions, employés, paramètres et statistiques globales
+description: |
+  Matrice indicative uniquement. Les contrôles d'accès doivent être appliqués côté serveur
+  et la matrice finale doit être validée par l'équipe avant implémentation.
+paths:
+  /auth/inscription:
+    post:
+      tags: [Authentification]
+      operationId: inscrireEtudiant
+      summary: Créer un compte étudiant
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Inscription'}
+      responses:
+        '201': {$ref: '#/components/responses/Created'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+  /auth/connexion:
+    post:
+      tags: [Authentification]
+      operationId: connecterUtilisateur
+      summary: Authentifier un utilisateur
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Connexion'}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+  /auth/mot-de-passe/oublie:
+    post:
+      tags: [Authentification]
+      operationId: demanderReinitialisation
+      summary: Demander une réinitialisation du mot de passe
+      description: Réponse neutre qui ne révèle pas si le courriel existe.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: {type: string, format: email}
+      responses:
+        '202': {$ref: '#/components/responses/Success'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+  /utilisateurs/{id}:
+    parameters:
+      - {$ref: '#/components/parameters/Id'}
+    get:
+      tags: [Utilisateurs]
+      operationId: obtenirUtilisateur
+      summary: Consulter un profil
+      description: L'étudiant accède à son profil; exceptions RBAC à valider.
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Utilisateurs]
+      operationId: modifierUtilisateur
+      summary: Modifier son profil ou sa localisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProfilModifiable'}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /menu:
+    get:
+      tags: [Menu]
+      operationId: obtenirMenu
+      summary: Afficher le menu du jour et les promotions actives
+      security: []
+      parameters:
+        - name: date
+          in: query
+          schema: {type: string, format: date}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+  /plats:
+    get:
+      tags: [Menu]
+      operationId: listerPlats
+      summary: Lister les plats disponibles
+      security: []
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Limit'}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+    post:
+      tags: [Menu]
+      operationId: creerPlat
+      summary: Ajouter un plat
+      x-required-roles: [administrateur]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Plat'}
+      responses:
+        '201': {$ref: '#/components/responses/Created'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /plats/{id}:
+    parameters:
+      - {$ref: '#/components/parameters/Id'}
+    get:
+      tags: [Menu]
+      operationId: obtenirPlat
+      summary: Consulter un plat
+      security: []
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Menu]
+      operationId: modifierPlat
+      summary: Modifier un plat
+      x-required-roles: [administrateur]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Plat'}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+    delete:
+      tags: [Menu]
+      operationId: supprimerPlat
+      summary: Supprimer un plat
+      x-required-roles: [administrateur]
+      responses:
+        '204': {description: Plat supprimé}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /plats/{id}/disponibilite:
+    patch:
+      tags: [Menu]
+      operationId: modifierDisponibilite
+      summary: Modifier temporairement la disponibilité d'un plat
+      description: Permission employé à confirmer avec la matrice RBAC.
+      x-required-roles: [employe, administrateur]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [disponible]
+              properties:
+                disponible: {type: boolean}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /panier:
+    get:
+      tags: [Panier]
+      operationId: obtenirPanier
+      summary: Consulter son panier
+      x-required-roles: [etudiant]
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /panier/articles:
+    post:
+      tags: [Panier]
+      operationId: ajouterArticlePanier
+      summary: Ajouter un plat au panier
+      x-required-roles: [etudiant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ArticleCommande'}
+      responses:
+        '201': {$ref: '#/components/responses/Created'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /panier/articles/{id}:
+    delete:
+      tags: [Panier]
+      operationId: retirerArticlePanier
+      summary: Retirer un article de son panier
+      x-required-roles: [etudiant]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '204': {description: Article retiré}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /commandes:
+    get:
+      tags: [Commandes]
+      operationId: listerCommandes
+      summary: Lister les commandes accessibles à l'utilisateur
+      description: L'étudiant ne voit que ses commandes; la file du personnel dépend du rôle.
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Limit'}
+        - name: statut
+          in: query
+          schema: {$ref: '#/components/schemas/StatutCommande'}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+    post:
+      tags: [Commandes]
+      operationId: creerCommande
+      summary: Créer une commande
+      description: Le serveur relit les prix et disponibilités, puis recalcule total et remise. Le paiement externe éventuel est séparé.
+      x-required-roles: [etudiant]
+      parameters:
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CommandeRequest'}
+            examples:
+              commandeLivraison:
+                summary: Exemple fictif à confirmer
+                value:
+                  mode_service: livraison
+                  adresse_livraison: Campus, bâtiment A
+                  heure_arrivee: '2026-10-27T18:30:00Z'
+                  points_utilises: 15
+                  articles:
+                    - {plat_id: 4, quantite: 2}
+                    - {plat_id: 9, quantite: 1}
+      responses:
+        '201':
+          description: Commande créée; paiement externe non déclenché par défaut
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SuccessEnvelope'}
+              examples:
+                commandeCreee:
+                  summary: Exemple illustratif; devise et règles de points à valider
+                  value:
+                    success: true
+                    message: Commande créée
+                    data:
+                      id: 231
+                      statut: en_attente
+                      mode_service: livraison
+                      montant_total: 25000
+                      reduction_points: 1000
+                      montant_a_payer: 24000
+                      points_gagnes: 24
+                      devise: CDF
+                      date_commande: '2026-10-27T15:47:00Z'
+                    error: null
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /commandes/{id}:
+    parameters:
+      - {$ref: '#/components/parameters/Id'}
+    get:
+      tags: [Commandes]
+      operationId: obtenirCommande
+      summary: Consulter le détail d'une commande
+      description: Contrôle de propriété pour l'étudiant; personnel soumis à la matrice RBAC.
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /commandes/{id}/statut:
+    patch:
+      tags: [Commandes]
+      operationId: modifierStatutCommande
+      summary: Mettre à jour le traitement d'une commande
+      description: Transitions permises et statuts définitifs à valider avec le restaurant.
+      x-required-roles: [employe, gerant, administrateur]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [statut]
+              properties:
+                statut: {$ref: '#/components/schemas/StatutCommande'}
+                commentaire: {type: string, maxLength: 500}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /commandes/{id}/points:
+    post:
+      tags: [Fidélité]
+      operationId: appliquerPointsCommande
+      summary: Appliquer des points à une commande non finalisée
+      description: Le serveur vérifie le solde et calcule la réduction. Taux à valider; débit atomique et idempotent à prévoir.
+      x-required-roles: [etudiant]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [points_utilises]
+              properties:
+                points_utilises: {type: integer, minimum: 1}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /paiements:
+    post:
+      tags: [Paiements]
+      operationId: initierPaiement
+      summary: Initier un paiement externe (bonus facultatif)
+      description: À exposer uniquement si l'équipe retient le paiement. Aucun secret d'agrégateur ne doit être retourné.
+      x-required-roles: [etudiant]
+      parameters:
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [commande_id, methode]
+              properties:
+                commande_id: {type: integer, minimum: 1}
+                methode: {type: string, enum: [mobile_money, carte]}
+                fournisseur:
+                  type: string
+                  description: Prestataire à choisir; aucune intégration n'est sélectionnée.
+      responses:
+        '201': {$ref: '#/components/responses/Created'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /paiements/webhook:
+    post:
+      tags: [Paiements]
+      operationId: recevoirWebhookPaiement
+      summary: Recevoir une notification du prestataire
+      description: Route optionnelle; vérifier la signature et l'état distant, et traiter chaque notification de façon idempotente.
+      security: []
+      parameters:
+        - name: X-Webhook-Signature
+          in: header
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200': {description: Notification authentifiée et traitée ou déjà reçue}
+        '400': {description: Signature invalide ou corps incorrect}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /utilisateurs/{id}/points:
+    get:
+      tags: [Fidélité]
+      operationId: obtenirSoldePoints
+      summary: Consulter le solde de points
+      description: Un étudiant consulte son solde; les accès des autres rôles sont à valider.
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /utilisateurs/{id}/points/historique:
+    get:
+      tags: [Fidélité]
+      operationId: obtenirHistoriquePoints
+      summary: Consulter l'historique des mouvements de points
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Limit'}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /parrainage/generer:
+    post:
+      tags: [Parrainage]
+      operationId: genererCodeParrainage
+      summary: Générer ou récupérer son code de parrainage
+      x-required-roles: [etudiant]
+      responses:
+        '201': {$ref: '#/components/responses/Created'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /parrainage/utiliser:
+    post:
+      tags: [Parrainage]
+      operationId: utiliserCodeParrainage
+      summary: Associer un code à un compte étudiant
+      x-required-roles: [etudiant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: {type: string, minLength: 4, maxLength: 32}
+      responses:
+        '201': {$ref: '#/components/responses/Created'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /parrainage:
+    get:
+      tags: [Parrainage]
+      operationId: listerParrainages
+      summary: Consulter ses parrainages et leurs états
+      x-required-roles: [etudiant]
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Limit'}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /reclamations:
+    get:
+      tags: [Réclamations]
+      operationId: listerReclamations
+      summary: Lister les réclamations accessibles selon le rôle
+      parameters:
+        - {$ref: '#/components/parameters/Page'}
+        - {$ref: '#/components/parameters/Limit'}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+    post:
+      tags: [Réclamations]
+      operationId: creerReclamation
+      summary: Ouvrir une réclamation
+      x-required-roles: [etudiant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [commande_id, sujet, description]
+              properties:
+                commande_id: {type: integer, minimum: 1}
+                sujet: {type: string, minLength: 3, maxLength: 120}
+                description: {type: string, minLength: 5, maxLength: 5000}
+      responses:
+        '201': {$ref: '#/components/responses/Created'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /reclamations/{id}:
+    patch:
+      tags: [Réclamations]
+      operationId: traiterReclamation
+      summary: Répondre ou arbitrer une réclamation
+      description: L'employé prépare la réponse; gérant ou administrateur l'approuve ou la rejette selon les droits à valider.
+      x-required-roles: [employe, gerant, administrateur]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reponse: {type: string, maxLength: 5000}
+                decision: {type: string, enum: [en_attente_validation, approuvee, rejetee, resolue]}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /promotions:
+    get:
+      tags: [Promotions]
+      operationId: listerPromotions
+      summary: Consulter les promotions et événements actifs
+      security: []
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+    post:
+      tags: [Promotions]
+      operationId: creerPromotion
+      summary: Créer une promotion
+      x-required-roles: [administrateur]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [titre, date_debut, date_fin]
+              properties:
+                titre: {type: string, maxLength: 160}
+                description: {type: string, maxLength: 2000}
+                date_debut: {type: string, format: date-time}
+                date_fin: {type: string, format: date-time}
+                active: {type: boolean}
+      responses:
+        '201': {$ref: '#/components/responses/Created'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /statistiques/ventes:
+    get:
+      tags: [Statistiques]
+      operationId: obtenirStatistiquesVentes
+      summary: Consulter les statistiques de ventes et commandes
+      description: L'employé est limité à la vue hebdomadaire; vues générales pour gérant et administrateur.
+      x-required-roles: [employe, gerant, administrateur]
+      parameters:
+        - name: periode
+          in: query
+          schema: {type: string, enum: [semaine, mois, globale], default: semaine}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /classement:
+    get:
+      tags: [Statistiques]
+      operationId: obtenirClassementClients
+      summary: Afficher les dix meilleurs clients
+      description: Nom affiché, pseudonyme et consentement restent à valider.
+      security: []
+      parameters:
+        - name: periode
+          in: query
+          schema: {type: string, enum: [jour, semaine, mois], default: semaine}
+      responses:
+        '200': {$ref: '#/components/responses/Success'}
+  /employes:
+    post:
+      tags: [Employés]
+      operationId: creerEmploye
+      summary: Créer un compte employé
+      x-required-roles: [gerant, administrateur]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Employe'}
+      responses:
+        '201': {$ref: '#/components/responses/Created'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/ValidationError'}
+  /employes/{id}:
+    delete:
+      tags: [Employés]
+      operationId: desactiverEmploye
+      summary: Désactiver ou supprimer un compte employé
+      description: La désactivation auditée est préférable à l'effacement physique; décision à valider.
+      x-required-roles: [administrateur]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+      responses:
+        '204': {description: Compte désactivé ou supprimé selon la politique retenue}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Format illustratif; mécanisme et cycle de session à choisir.
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: {type: integer, minimum: 1}
+    Page:
+      name: page
+      in: query
+      schema: {type: integer, minimum: 1, default: 1}
+    Limit:
+      name: limit
+      in: query
+      schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Recommandée pour éviter le double traitement d'une opération rejouée.
+      schema: {type: string, maxLength: 128}
+  responses:
+    Success:
+      description: Opération réussie
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/SuccessEnvelope'}
+    Created:
+      description: Ressource créée
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/SuccessEnvelope'}
+    Unauthorized:
+      description: Authentification absente ou invalide
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErrorEnvelope'}
+    Forbidden:
+      description: Droits insuffisants
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErrorEnvelope'}
+    NotFound:
+      description: Ressource introuvable ou inaccessible
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErrorEnvelope'}
+    Conflict:
+      description: Opération incompatible avec l'état actuel ou déjà effectuée
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErrorEnvelope'}
+    ValidationError:
+      description: Données invalides ou refusées par une règle métier
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErrorEnvelope'}
+    TooManyRequests:
+      description: Limite de requêtes atteinte
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErrorEnvelope'}
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required: [success, message, data, error]
+      properties:
+        success: {const: true}
+        message: {type: string}
+        data:
+          description: Résultat propre à l'opération.
+          anyOf:
+            - {type: object, additionalProperties: true}
+            - {type: array, items: {}}
+            - {type: 'null'}
+        error: {type: 'null'}
+    ErrorEnvelope:
+      type: object
+      required: [success, message, data, error]
+      properties:
+        success: {const: false}
+        message: {type: string}
+        data: {type: 'null'}
+        error:
+          type: object
+          required: [code]
+          properties:
+            code: {type: string, description: Identifiant d'erreur stable}
+            details:
+              description: Détails de validation sans information sensible.
+              anyOf:
+                - {type: object, additionalProperties: true}
+                - {type: array, items: {}}
+                - {type: 'null'}
+    Inscription:
+      type: object
+      required: [nom, email, mot_de_passe]
+      properties:
+        nom: {type: string, minLength: 2, maxLength: 120}
+        email: {type: string, format: email}
+        telephone: {type: string, maxLength: 32}
+        mot_de_passe: {type: string, format: password, minLength: 12}
+        localisation_livraison: {type: string, maxLength: 500}
+        code_parrainage: {type: string, description: Facultatif; soumis aux règles d'éligibilité}
+    Connexion:
+      type: object
+      required: [email, mot_de_passe]
+      properties:
+        email: {type: string, format: email}
+        mot_de_passe: {type: string, format: password}
+    ProfilModifiable:
+      type: object
+      minProperties: 1
+      properties:
+        nom: {type: string, minLength: 2, maxLength: 120}
+        telephone: {type: string, maxLength: 32}
+        localisation_livraison: {type: string, maxLength: 500}
+    Plat:
+      type: object
+      required: [nom, prix, disponible]
+      properties:
+        nom: {type: string, maxLength: 160}
+        description: {type: string, maxLength: 2000}
+        prix:
+          type: integer
+          minimum: 0
+          description: Montant en CDF à confirmer avec le restaurant.
+        disponible: {type: boolean}
+        categorie: {type: string, maxLength: 100}
+    ArticleCommande:
+      type: object
+      required: [plat_id, quantite]
+      properties:
+        plat_id: {type: integer, minimum: 1}
+        quantite: {type: integer, minimum: 1, maximum: 50}
+    CommandeRequest:
+      type: object
+      required: [mode_service, articles]
+      properties:
+        mode_service: {type: string, enum: [sur_place, livraison]}
+        heure_arrivee:
+          type: string
+          format: date-time
+          description: Nécessité selon le mode à préciser.
+        adresse_livraison:
+          type: string
+          maxLength: 500
+          description: Requise pour livraison; employer des données fictives dans les exemples.
+        articles:
+          type: array
+          minItems: 1
+          items: {$ref: '#/components/schemas/ArticleCommande'}
+        points_utilises:
+          type: integer
+          minimum: 0
+          description: Facultatif; taux non figé et solde vérifié par le serveur.
+    StatutCommande:
+      type: string
+      enum: [en_attente, acceptee, en_preparation, prete, servie, livree, refusee, annulee]
+      description: Proposition; statuts et transitions à valider.
+    Employe:
+      type: object
+      required: [nom, email, mot_de_passe]
+      properties:
+        nom: {type: string, maxLength: 120}
+        email: {type: string, format: email}
+        telephone: {type: string, maxLength: 32}
+        mot_de_passe: {type: string, format: password, minLength: 12}
+        role:
+          type: string
+          const: employe
+          description: Cette route ne permet pas d'auto-attribuer un rôle privilégié.
