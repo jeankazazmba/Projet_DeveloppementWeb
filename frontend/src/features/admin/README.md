@@ -1,7 +1,7 @@
 # admin
 
-Module fonctionnel React du Sprint 3.
+Le back-office de `app_backoffice` est intégré à l'application React commune sous `/admin`.
 
-Placer ici les composants, pages, hooks et services propres à cette fonctionnalité, selon les besoins. Réutiliser les composants et utilitaires partagés au lieu de les dupliquer.
+`AdminApp.jsx` charge ses styles uniquement pendant l'affichage du back-office. Les six écrans, leurs composants et les ressources Figma proviennent du prototype local. Les actions restent celles du prototype : elles manipulent des données de démonstration en mémoire et ne sont pas encore reliées au backend Laravel.
 
-Le code Laravel reste dans backend/ ; la documentation de suivi dans docs/sprint-3/.
+Ne pas dupliquer cet espace dans `student/`, `employee/` ou `manager/`, qui appartiennent aux autres membres de l'équipe.

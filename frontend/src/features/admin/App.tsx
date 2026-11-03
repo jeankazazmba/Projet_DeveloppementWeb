@@ -1,0 +1,88 @@
+import { useEffect, useState } from 'react'
+import { assets } from './design-assets'
+import { initialClaims, initialDishes, initialEmployees, initialPromotions, initialSettings } from './data'
+import type { Page } from './data'
+import { Icon, Modal, SearchInput } from './components/ui'
+import Dashboard from './pages/Dashboard'
+import Employees from './pages/Employees'
+import Menu from './pages/Menu'
+import Promotions from './pages/Promotions'
+import Claims from './pages/Claims'
+import Settings from './pages/Settings'
+
+const nav: { page: Page; label: string; icon: string }[] = [
+  { page: 'dashboard', label: 'Tableau de bord', icon: assets.dashboard.imgIcon },
+  { page: 'menu', label: 'Menu & Stocks', icon: assets.dashboard.imgIcon3 },
+  { page: 'employees', label: 'Équipe & Shifts', icon: assets.dashboard.imgIcon5 },
+  { page: 'promotions', label: 'Promotions & Événements', icon: assets.promotions.imgContainer2 },
+  { page: 'claims', label: 'Réclamations', icon: assets.dashboard.imgIcon6 },
+  { page: 'settings', label: 'Paramètres', icon: assets.dashboard.imgContainer },
+]
+type Theme = 'dark' | 'light'
+function readPage(): Page {
+  const key = window.location.hash.replace('#/', '').split('?')[0]
+  return nav.find(item => item.page === key)?.page ?? 'dashboard'
+}
+export default function App() {
+  const [page, setPage] = useState<Page>(readPage)
+  const [theme, setTheme] = useState<Theme>(() => {
+    try {
+      return localStorage.getItem('mon-miam-miam-theme') === 'light' ? 'light' : 'dark'
+    } catch {
+      return 'dark'
+    }
+  })
+  const [employees, setEmployees] = useState(initialEmployees)
+  const [dishes, setDishes] = useState(initialDishes)
+  const [promotions, setPromotions] = useState(initialPromotions)
+  const [claims, setClaims] = useState(initialClaims)
+  const [settings, setSettings] = useState(initialSettings)
+  const [sidebar, setSidebar] = useState(false)
+  const [query, setQuery] = useState('')
+  const [notice, setNotice] = useState('')
+  const [info, setInfo] = useState('')
+  useEffect(() => {
+    const sync = () => { setPage(readPage()); setSidebar(false); window.scrollTo(0, 0) }
+    window.addEventListener('hashchange', sync)
+    return () => window.removeEventListener('hashchange', sync)
+  }, [])
+  useEffect(() => { document.title = `${nav.find(n => n.page === page)?.label} · Mon Miam Miam` }, [page])
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem('mon-miam-miam-theme', theme) } catch { /* Le thème reste appliqué pour cette session. */ }
+    return () => { delete document.documentElement.dataset.theme }
+  }, [theme])
+  useEffect(() => { if (!notice) return; const timer = window.setTimeout(() => setNotice(''), 5000); return () => window.clearTimeout(timer) }, [notice])
+  useEffect(() => { if (!sidebar) return; const close = (e: KeyboardEvent) => { if (e.key === 'Escape') setSidebar(false) }; window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close) }, [sidebar])
+  const navigate = (next: Page) => { window.location.hash = `/${next}`; setSidebar(false) }
+  const openClaims = claims.filter(c => ['En attente', 'En examen'].includes(c.status)).length
+  return <div className="app-shell">
+    <a className="skip-link" href="#main">Aller au contenu</a>
+    {sidebar && <button className="sidebar-shade" aria-label="Fermer la navigation" onClick={() => setSidebar(false)} />}
+    <aside id="navigation" className={`sidebar ${sidebar ? 'is-open' : ''}`}>
+      <a href="#/dashboard" className="brand" aria-label="Mon Miam Miam — Tableau de bord"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="Mon Miam Miam ZeDuc-Sp@ce" /><span>YANSOKI • DOUALA</span></a>
+      <div className="role-line"><span className="badge">ADMIN</span><span className="live-label"><img src={assets.dashboard.imgEllipse} alt="" />En direct</span></div>
+      <nav aria-label="Navigation administrateur">
+        {nav.map((item, index) => <div key={item.page}>
+          <a href={`#/${item.page}`} onClick={() => setSidebar(false)} className={`nav-link ${page === item.page ? 'active' : ''}`} aria-current={page === item.page ? 'page' : undefined}><Icon src={item.icon} /><span>{item.label}</span>{item.page === 'claims' && openClaims > 0 && <span className="nav-count">{openClaims}</span>}</a>
+          {index === 0 && <><button className="nav-link unavailable" disabled title="Écran Commandes non fourni dans app1"><Icon src={assets.dashboard.imgIcon1} />Commandes<span className="nav-count">2</span></button><button className="nav-link unavailable" disabled title="Écran Tables & Salle non fourni dans app1"><Icon src={assets.dashboard.imgIcon2} />Tables & Salle</button></>}
+          {item.page === 'menu' && <a className="nav-link" href="#/dashboard" onClick={() => { navigate('dashboard'); window.setTimeout(() => document.getElementById('sales')?.scrollIntoView({ behavior: 'smooth' }), 50) }}><Icon src={assets.dashboard.imgIcon4} />Rapports & Ventes</a>}
+        </div>)}
+      </nav>
+      <div className="sidebar-bottom"><div className="user-card"><span className="avatar">AD</span><div><strong>Admin</strong><small>Admini.ZeDuc-Sp@ce</small></div></div><div className="support-links"><button onClick={() => setInfo('Les coordonnées du support technique seront configurées avec le backend.')}><Icon src={assets.dashboard.imgContainer1} />Support<br />Technique</button><button disabled title="Authentification à connecter au backend"><Icon src={assets.dashboard.imgContainer2} />Déconnexion</button></div></div>
+    </aside>
+    <div className="workspace"><header className="topbar"><button type="button" className="icon-button mobile-menu" aria-label="Ouvrir la navigation" aria-expanded={sidebar} aria-controls="navigation" onClick={() => setSidebar(!sidebar)}>☰</button><form onSubmit={e => { e.preventDefault(); navigate('menu') }}><SearchInput value={query} onChange={setQuery} placeholder="Rechercher un plat..." /></form><div className="topbar-right"><span className="demo-label" title="Données locales issues des maquettes, réinitialisées au rechargement">Démo</span><span className="service-chip"><img src={assets.dashboard.imgEllipse} alt="" />Service en cours</span><button type="button" className="theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button className="notification-button" aria-label={`Voir les ${openClaims} réclamations ouvertes`} onClick={() => navigate('claims')}><Icon src={assets.dashboard.imgIconBell} /></button><button className="profile-button" onClick={() => navigate('settings')}><span className="avatar">AD</span><span>Admin</span></button></div></header>
+      <main id="main" tabIndex={-1} className={`main-content page-${page}`}>
+        {page === 'dashboard' && <Dashboard navigate={navigate} openClaims={openClaims} />}
+        {page === 'employees' && <Employees employees={employees} setEmployees={setEmployees} notify={setNotice} />}
+        {page === 'menu' && <Menu dishes={dishes} setDishes={setDishes} query={query} setQuery={setQuery} notify={setNotice} />}
+        {page === 'promotions' && <Promotions promotions={promotions} setPromotions={setPromotions} notify={setNotice} />}
+        {page === 'claims' && <Claims claims={claims} setClaims={setClaims} notify={setNotice} />}
+        {page === 'settings' && <Settings settings={settings} setSettings={setSettings} notify={setNotice} />}
+      </main>
+      <footer className="footer"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="" /><p>© 2024 Mon Miam Miam • ZeDuc-Sp@ce, Résidence La Terrasse, Yansoki • Douala</p><button onClick={() => setInfo('Les mentions légales et conditions de vente doivent être fournies par le restaurant.')}>Mentions<br />Légales & CGV</button><button onClick={() => setInfo('La politique de confidentialité sera ajoutée avant la mise en production.')}>Politique RGPD<br />Campus</button><button onClick={() => setInfo('Le numéro WhatsApp complet du restaurant reste à renseigner.')}>WhatsApp<br />Assistance (+237)</button></footer>
+    </div>
+    {notice && <div className="toast" role="status">{notice}<button aria-label="Fermer la notification" onClick={() => setNotice('')}>×</button></div>}
+    {info && <Modal title="Information" onClose={() => setInfo('')}><p className="muted">{info}</p><div className="dialog-actions"><button className="button primary" onClick={() => setInfo('')}>Fermer</button></div></Modal>}
+  </div>
+}
