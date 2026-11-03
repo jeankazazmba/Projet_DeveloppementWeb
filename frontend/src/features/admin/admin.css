@@ -31,11 +31,8 @@
 .admin-workspace { min-width: 0; flex: 1; }
 .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 5rem; padding: 1rem 2rem; border-bottom: 1px solid var(--admin-line); }
 .admin-header strong { font-size: 1.15rem; }
-.admin-header-actions, .font-size-control { display: flex; align-items: center; gap: .5rem; }
-.font-size-control { padding: .3rem; border: 1px solid var(--admin-line); border-radius: .75rem; background: var(--admin-surface); }
-.font-size-control button, .admin-theme-button { min-height: 2.25rem; border: 0; border-radius: .5rem; padding: .35rem .65rem; background: var(--admin-raised); color: var(--admin-text); cursor: pointer; }
-.font-size-control button:disabled { cursor: not-allowed; opacity: .45; }
-.font-size-control span { min-width: 4.75rem; color: var(--admin-muted); font-size: .8rem; text-align: center; }
+.admin-header-actions { display: flex; align-items: center; gap: .5rem; }
+.admin-theme-button { min-height: 2.25rem; border: 0; border-radius: .5rem; padding: .35rem .65rem; background: var(--admin-raised); color: var(--admin-text); cursor: pointer; }
 .admin-theme-button { border: 1px solid var(--admin-line); }
 .admin-content { width: min(100%, 100rem); margin: 0 auto; padding: 2.5rem 2rem; }
 .admin-welcome h1 { margin: .5rem 0 1rem; font-size: clamp(2rem, 4vw, 3.25rem); }
@@ -68,7 +65,7 @@
   .admin-sidebar nav { display: flex; overflow-x: auto; margin-top: .75rem; }
   .admin-sidebar nav button { flex: 0 0 auto; }
   .admin-header { align-items: flex-start; flex-direction: column; padding: 1rem; }
-  .admin-header-actions { width: 100%; justify-content: space-between; }
+  .admin-header-actions { width: 100%; justify-content: flex-start; }
   .admin-content { padding: 1.5rem 1rem; }
   .admin-metric-grid, .admin-two-columns, .admin-card-grid, .admin-complaint-layout { grid-template-columns: 1fr; }
   .admin-table { min-width: 43rem; }

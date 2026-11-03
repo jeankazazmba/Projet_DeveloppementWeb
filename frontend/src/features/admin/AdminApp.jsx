@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import FontSizeControl from '../../components/ui/FontSizeControl.jsx'
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx'
 import AdminEmployeesPage from './pages/AdminEmployeesPage.jsx'
 import AdminMenuPage from './pages/AdminMenuPage.jsx'
@@ -50,10 +49,7 @@ export default function AdminApp() {
       <div className="admin-workspace">
         <header className="admin-header">
           <div><p className="admin-kicker">ESPACE ADMINISTRATEUR · ZEDUC-SP@CE</p><strong>{sections.find(([id]) => id === activeSection)?.[1]}</strong></div>
-          <div className="admin-header-actions">
-            <FontSizeControl />
-            <button type="button" className="admin-theme-button" onClick={() => setLightTheme((current) => !current)} aria-pressed={lightTheme}>{lightTheme ? 'Thème sombre' : 'Thème clair'}</button>
-          </div>
+          <div className="admin-header-actions"><button type="button" className="admin-theme-button" onClick={() => setLightTheme((current) => !current)} aria-pressed={lightTheme}>{lightTheme ? 'Thème sombre' : 'Thème clair'}</button></div>
         </header>
         <main className="admin-content" id="admin-dashboard">
           {screen}
