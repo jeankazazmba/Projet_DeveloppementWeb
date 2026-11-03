@@ -32,6 +32,7 @@ import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
 import FloatingCart from "./FloatingCart";
 import AppTopBar from "./AppTopBar";
+import PaymentMethods, { cashPaymentLabel } from "./PaymentMethods";
 import {
   Button,
   colors,
@@ -166,7 +167,7 @@ function AppProvider({ children }) {
     (sum, item) => sum + item.dish.price * item.quantity,
     0,
   );
-  const placeOrder = ({ mode, address, arrival, payment, usePoints }) => {
+  const placeOrder = ({ mode, address, arrival, usePoints }) => {
     if (!cartItems.length) return;
     const discount = usePoints
       ? Math.min(Math.floor(data.points / 10) * 100, subtotal)
@@ -186,16 +187,15 @@ function AppProvider({ children }) {
       mode,
       address,
       arrival,
-      payment,
+      payment: cashPaymentLabel(mode),
+      paymentStatus: "À régler",
       status: "En préparation · démo",
     };
     setData((current) => ({
       ...current,
       cart: {},
       orders: [order, ...current.orders],
-      points:
-        Math.max(0, current.points - discount / 100) +
-        Math.floor(order.total / 1000) * 10,
+      points: Math.max(0, current.points - discount / 100),
     }));
     setStack([{ name: "confirmation", params: { orderId: order.id } }]);
   };
@@ -1100,32 +1100,7 @@ function Checkout() {
         )}
       </Glass>
       <SectionTitle title="Paiement" />
-      <Glass style={{ padding: 17 }}>
-        <View style={{ flexDirection: "row", gap: 12 }}>
-          <Icon name="cash-outline" />
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.text, fontWeight: "800" }}>
-              Paiement sur place
-            </Text>
-            <Text style={{ color: colors.muted, marginTop: 3, lineHeight: 19 }}>
-              Commande locale de démonstration. Aucun débit n'est effectué.
-            </Text>
-          </View>
-          <Icon name="checkmark-circle" color={colors.green} />
-        </View>
-        <View
-          style={{
-            borderTopColor: "#38342B",
-            borderTopWidth: 1,
-            marginTop: 16,
-            paddingTop: 13,
-          }}
-        >
-          <Text style={{ color: colors.muted }}>
-            Mobile Money et carte : connexion à l'agrégateur requise.
-          </Text>
-        </View>
-      </Glass>
+      <PaymentMethods mode={mode} />
       <SectionTitle title="Vos points" />
       <Glass style={{ padding: 16 }} onPress={() => setUsePoints(!usePoints)}>
         <View style={styles.rowBetween}>
@@ -1159,7 +1134,7 @@ function Checkout() {
         />
       </Glass>
       <Button
-        title="Confirmer la commande démo"
+        title="Confirmer · payer à la réception"
         onPress={() => {
           if (!arrival.trim() || (mode === "Livraison" && !address.trim()))
             return Alert.alert(
@@ -1170,7 +1145,6 @@ function Checkout() {
             mode,
             arrival: arrival.trim(),
             address: address.trim(),
-            payment: "Sur place · démo",
             usePoints,
           });
         }}
@@ -1184,7 +1158,7 @@ function Checkout() {
           marginTop: 12,
         }}
       >
-        Une commande réelle nécessitera la connexion à l'API.
+        Aucun paiement n'est débité. Une commande réelle nécessitera la connexion à l'API.
       </Text>
     </Page>
   );
@@ -1253,6 +1227,11 @@ function Confirmation({ params }) {
         <Glass style={{ padding: 18, marginTop: 15 }}>
           <Summary label="Réception" value={order.mode} />
           <Summary label="Heure souhaitée" value={order.arrival} />
+          <Summary label="Paiement" value={order.payment} />
+          <Summary
+            label="État du paiement"
+            value={order.paymentStatus || "Non renseigné"}
+          />
           <Summary label="Total" value={money(order.total)} strong />
         </Glass>
       )}
@@ -1400,6 +1379,10 @@ function OrderDetail({ params }) {
           <Summary label="Adresse" value={order.address} />
         ) : null}
         <Summary label="Paiement" value={order.payment} />
+        <Summary
+          label="État du paiement"
+          value={order.paymentStatus || "Non renseigné"}
+        />
         <Summary label="Réduction" value={money(order.discount)} />
         <Summary label="Total" value={money(order.total)} strong />
       </Glass>
