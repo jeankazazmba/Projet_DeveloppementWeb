@@ -32,6 +32,7 @@ import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
 import FloatingCart from "./FloatingCart";
 import AppTopBar from "./AppTopBar";
+import Discover from "./Discover";
 import PaymentMethods, { cashPaymentLabel } from "./PaymentMethods";
 import {
   Button,
@@ -343,6 +344,7 @@ function Router() {
     complaints: Complaints,
     report: Report,
     games: Games,
+    discover: DiscoverScreen,
     wheel: Wheel,
     leaderboard: Leaderboard,
     profile: Profile,
@@ -773,6 +775,15 @@ function Home() {
         ))}
       </ScrollView>
       <SectionTitle title="À découvrir" />
+      <Glass style={{ padding: 17, marginBottom: 10 }} onPress={() => go("discover", { tab: "promotions" })}>
+        <View style={styles.rowBetween}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>Promotions & événements</Text>
+            <Text style={{ color: colors.muted, marginTop: 4 }}>Découvrez les offres et l’agenda du rooftop.</Text>
+          </View>
+          <Icon name="pricetags-outline" size={27} />
+        </View>
+      </Glass>
       <Glass
         style={{ padding: 17, marginBottom: 10 }}
         onPress={() => go("games")}
@@ -808,6 +819,11 @@ function Home() {
       </Glass>
     </Page>
   );
+}
+
+function DiscoverScreen({ params }) {
+  const { back, go } = useApp();
+  return <Discover back={back} go={go} initialTab={params?.tab} />;
 }
 
 function Menu({ params = {} }) {
@@ -2108,6 +2124,11 @@ function Profile() {
           icon="chatbubbles-outline"
           label="Réclamations"
           onPress={() => go("complaints")}
+        />
+        <ProfileLink
+          icon="pricetags-outline"
+          label="Promotions & événements"
+          onPress={() => go("discover")}
         />
         <ProfileLink
           icon="game-controller-outline"

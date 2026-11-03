@@ -12,4 +12,6 @@ Pour l'installation et le lancement par le propriétaire du projet : utiliser No
 
 Les images de plats proviennent des SVG locaux de la maquette. `scripts/extract_assets.py` permet de les extraire de nouveau avec Pillow si les exports changent.
 
+La rubrique « À découvrir » présente les promotions, événements et jeux du site public dans le thème mobile. Les sept visuels des offres proviennent de l'export local `20-promotions-evenements--Public`. Le contenu est informatif : les dates et disponibilités sont à confirmer, et le quiz attend une publication réelle. La roue reste une simulation locale.
+
 Dans Expo Go, le splash natif peut différer de celui d'une application installée. La transition de marque intégrée à l'application reste visible pour prévisualiser ce parcours ; vérifier le splash natif dans une version installable lorsque la compilation sera réalisée.
