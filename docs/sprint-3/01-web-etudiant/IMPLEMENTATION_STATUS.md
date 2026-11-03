@@ -5,6 +5,7 @@ Le code est intégré à l’application React existante dans `frontend/src/`. L
 ## Écrans ajoutés
 
 - Site public : accueil, menu, fiche plat, promotions et événements.
+- Bandeau cookies : choix accepter/refuser conservé localement ; aucun traceur publicitaire n’est chargé.
 - Authentification : connexion, inscription, récupération de mot de passe, profil de démonstration.
 - Parcours commande : panier, choix sur place ou livraison, récapitulatif, confirmation locale, liste et détail des commandes.
 - Compléments : réclamations, fidélité, parrainage et interface préparatoire de paiement.
