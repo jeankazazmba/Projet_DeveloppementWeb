@@ -166,7 +166,9 @@ export function Page({
           contentContainerStyle={[
             styles.page,
             {
-              paddingTop: noHeader ? Math.max(insets.top + 16, 28) : 16,
+              paddingTop: noHeader
+                ? Math.max(insets.top + 16, 28)
+                : insets.top + 92,
               paddingBottom: 120 + insets.bottom,
             },
           ]}

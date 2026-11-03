@@ -9,33 +9,55 @@ export default function AppTopBar({
   onHome,
   onSearch,
   onNotifications,
+  blurTarget,
 }) {
   const insets = useSafeAreaInsets();
   return (
     <View
+      pointerEvents="box-none"
       style={{
-        paddingTop: insets.top + 8,
-        paddingBottom: 8,
-        paddingHorizontal: 16,
-        backgroundColor: colors.bg,
+        position: "absolute",
+        top: insets.top + 10,
+        left: 16,
+        right: 16,
+        zIndex: 20,
+        borderRadius: 24,
+        shadowColor: "#000000",
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        shadowOffset: { width: 0, height: 10 },
+        elevation: 12,
       }}
     >
       <BlurView
-        intensity={65}
+        intensity={82}
         tint="dark"
+        blurMethod="dimezisBlurViewSdk31Plus"
+        blurTarget={blurTarget}
         style={{
           height: 62,
-          borderRadius: 22,
+          borderRadius: 24,
           overflow: "hidden",
           borderWidth: 1,
-          borderColor: "rgba(220,199,156,0.25)",
-          backgroundColor: "rgba(37,36,32,0.82)",
+          borderColor: "rgba(240,219,174,0.38)",
+          backgroundColor: "rgba(26,27,26,0.42)",
           flexDirection: "row",
           alignItems: "center",
           paddingHorizontal: 9,
           gap: 9,
         }}
       >
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            top: 1,
+            left: 20,
+            right: 20,
+            height: 1,
+            backgroundColor: "rgba(255,255,255,0.24)",
+          }}
+        />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Accueil Mon Miam Miam"
@@ -63,8 +85,8 @@ export default function AppTopBar({
             height: 39,
             borderRadius: 14,
             borderWidth: 1,
-            borderColor: "rgba(220,199,156,0.20)",
-            backgroundColor: "rgba(255,255,255,0.055)",
+            borderColor: "rgba(240,219,174,0.24)",
+            backgroundColor: "rgba(255,255,255,0.09)",
             flexDirection: "row",
             alignItems: "center",
             gap: 8,

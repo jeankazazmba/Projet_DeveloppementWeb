@@ -3,6 +3,7 @@
 - `App.js` : navigation, persistance locale et 18 parcours étudiants.
 - `SplashIntro.js` : transition de marque visible dans Expo Go.
 - `Onboarding.js` : quatre écrans de présentation à chaque lancement, avant la connexion ou l’accueil selon la session, avec reprise possible.
+- `AppTopBar.js` : barre supérieure flottante et translucide ; la navigation basse partage le même flou et la même vue cible Android.
 - `FloatingCart.js` : accès au panier par bouton flottant déplaçable.
 - `AppTopBar.js` : logo, recherche du menu et notifications locales.
 - `catalog.js` : plats et prix de démonstration, avec photos des exports Figma.

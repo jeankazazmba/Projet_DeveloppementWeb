@@ -16,7 +16,7 @@ import {
   View,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BlurView } from "expo-blur";
+import { BlurTargetView, BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
@@ -242,38 +242,63 @@ function AppProvider({ children }) {
   );
 }
 
-function BottomTabs() {
+function BottomTabs({ blurTarget }) {
   const { screen, tab } = useApp();
   const insets = useSafeAreaInsets();
   if (!tabNames.includes(screen.name) && screen.name !== "cart") return null;
   return (
     <BlurView
-      intensity={65}
+      intensity={82}
       tint="dark"
+      blurMethod="dimezisBlurViewSdk31Plus"
+      blurTarget={blurTarget}
       style={{
         position: "absolute",
         bottom: insets.bottom + 12,
         left: 16,
         right: 16,
         borderWidth: 1,
-        borderColor: "rgba(220,199,156,0.34)",
-        borderRadius: 26,
+        borderColor: "rgba(240,219,174,0.4)",
+        borderRadius: 28,
         overflow: "hidden",
-        backgroundColor: "rgba(26,25,23,0.90)",
+        backgroundColor: "rgba(26,27,26,0.42)",
         paddingVertical: 8,
         paddingHorizontal: 5,
         flexDirection: "row",
         shadowColor: "#000000",
-        shadowOpacity: 0.35,
-        shadowRadius: 16,
-        elevation: 10,
+        shadowOpacity: 0.32,
+        shadowRadius: 20,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: 12,
+        zIndex: 20,
       }}
     >
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: 1,
+          left: 18,
+          right: 18,
+          height: 1,
+          backgroundColor: "rgba(255,255,255,0.22)",
+        }}
+      />
       {tabs.map(([name, label, icon]) => (
         <Pressable
           key={name}
           onPress={() => tab(name)}
-          style={{ flex: 1, alignItems: "center", gap: 4, paddingVertical: 5 }}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: screen.name === name }}
+          style={{
+            flex: 1,
+            alignItems: "center",
+            gap: 4,
+            paddingVertical: 5,
+            borderRadius: 20,
+            backgroundColor:
+              screen.name === name ? "rgba(220,199,156,0.15)" : "transparent",
+          }}
         >
           <Icon
             name={icon}
@@ -297,6 +322,7 @@ function BottomTabs() {
 
 function Router() {
   const { screen, finishOnboarding, cartItems, data, go, tab } = useApp();
+  const blurTarget = useRef(null);
   if (screen.name === "onboarding")
     return (
       <View
@@ -348,6 +374,7 @@ function Router() {
       <StatusBar style="light" />
       {showTopBar && (
         <AppTopBar
+          blurTarget={blurTarget}
           unreadCount={unreadCount}
           onHome={() => tab("home")}
           onSearch={() => go("menu", { autoFocus: true, searchAt: Date.now() })}
@@ -356,11 +383,13 @@ function Router() {
           }}
         />
       )}
-      <Component
-        key={`${screen.name}-${screen.params?.id || ""}-${screen.params?.searchAt || ""}`}
-        params={screen.params}
-      />
-      <BottomTabs />
+      <BlurTargetView ref={blurTarget} collapsable={false} style={{ flex: 1 }}>
+        <Component
+          key={`${screen.name}-${screen.params?.id || ""}-${screen.params?.searchAt || ""}`}
+          params={screen.params}
+        />
+      </BlurTargetView>
+      <BottomTabs blurTarget={blurTarget} />
       <FloatingCart
         count={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
         hasTabs={tabNames.includes(screen.name)}

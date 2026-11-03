@@ -6,7 +6,7 @@ Les interactions sont fonctionnelles en **mode démonstration local** et conserv
 
 Le bouton flottant du panier peut être touché pour ouvrir le panier ou déplacé par glissement dans la zone visible de l'écran. Il affiche le nombre d'articles et reste au-dessus de la barre de navigation.
 
-La barre haute fixe donne accès à l'accueil par le logo, à la recherche des plats et aux notifications locales des commandes et signalements. La navigation principale est une barre flottante aux coins arrondis.
+La barre haute flottante en verre donne accès à l'accueil par le logo, à la recherche des plats et aux notifications locales des commandes et signalements. La navigation principale flotte au-dessus du contenu avec le même effet glassmorphism. Sur Android compatible, les deux barres floutent la vue derrière elles ; ailleurs, leur fond translucide préserve la lecture.
 
 Pour l'installation et le lancement par le propriétaire du projet : utiliser Node.js 22.13+ ou 24.3+, puis depuis `mobile/`, exécuter `npm ci` et `npx expo start`.
 
