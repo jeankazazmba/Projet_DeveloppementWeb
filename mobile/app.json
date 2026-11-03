@@ -8,7 +8,29 @@
     "userInterfaceStyle": "dark",
     "ios": { "supportsTablet": true },
     "android": { "adaptiveIcon": { "backgroundColor": "#100F0D" } },
-    "plugins": [["expo-image-picker", { "photosPermission": "Autoriser la sélection d'une photo pour illustrer une réclamation.", "cameraPermission": "Autoriser une photo pour illustrer une réclamation.", "microphonePermission": false }]],
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Autoriser la sélection d'une photo pour illustrer une réclamation.",
+          "cameraPermission": "Autoriser une photo pour illustrer une réclamation.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#000000",
+          "image": "./assets/splash-logo.png",
+          "imageWidth": 120,
+          "resizeMode": "contain",
+          "dark": {
+            "image": "./assets/splash-logo.png",
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
+    ],
     "extra": { "appMode": "student-demo" }
   }
 }

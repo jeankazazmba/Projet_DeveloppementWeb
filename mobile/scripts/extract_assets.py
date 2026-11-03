@@ -24,6 +24,8 @@ def main(export_root: Path, output_root: Path) -> None:
             for index, match in enumerate(re.finditer(r"data:image/(png|jpeg|webp);base64,([^\"']+)", source)):
                 data = base64.b64decode(match.group(2))
                 image = Image.open(io.BytesIO(data))
+                if svg.stem == "layer-00007" and index == 0 and match.group(1) == "png":
+                    (output_root.parent / "splash-logo.png").write_bytes(data)
                 if image.width < 120 or image.height < 90:
                     continue
                 name = f"{folder.name.split('--')[0]}-{svg.stem}-{index}.jpg"

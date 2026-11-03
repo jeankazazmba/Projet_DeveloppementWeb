@@ -21,12 +21,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system/legacy";
+import * as SplashScreen from "expo-splash-screen";
 import Svg, { Circle, Path, Text as SvgText } from "react-native-svg";
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { categories, dishes, findDish, money } from "./catalog";
+import Onboarding from "./Onboarding";
+import SplashIntro from "./SplashIntro";
 import {
   Button,
   colors,
@@ -40,10 +43,14 @@ import {
   styles,
 } from "./ui";
 
+SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.setOptions({ duration: 450, fade: true });
+
 const KEY = "mon-miam-miam-student-v1";
 const Context = createContext(null);
 const useApp = () => useContext(Context);
 const initialData = {
+  onboardingDone: false,
   user: null,
   cart: {},
   orders: [],
@@ -64,7 +71,12 @@ const tabs = [
 function AppProvider({ children }) {
   const [data, setData] = useState(initialData);
   const [ready, setReady] = useState(false);
-  const [stack, setStack] = useState([{ name: "login", params: {} }]);
+  const [introDone, setIntroDone] = useState(false);
+  const [stack, setStack] = useState([{ name: "onboarding", params: {} }]);
+  useEffect(() => {
+    const timer = setTimeout(() => setIntroDone(true), 950);
+    return () => clearTimeout(timer);
+  }, []);
   useEffect(() => {
     AsyncStorage.getItem(KEY)
       .then((raw) => {
@@ -72,6 +84,8 @@ function AppProvider({ children }) {
           const saved = JSON.parse(raw);
           setData({ ...initialData, ...saved });
           if (saved.user) setStack([{ name: "home", params: {} }]);
+          else if (saved.onboardingDone)
+            setStack([{ name: "login", params: {} }]);
         }
       })
       .catch(() => {})
@@ -97,6 +111,15 @@ function AppProvider({ children }) {
   const logout = () => {
     setData((current) => ({ ...current, user: null }));
     setStack([{ name: "login", params: {} }]);
+  };
+  const finishOnboarding = () => {
+    setData((current) => ({ ...current, onboardingDone: true }));
+    setStack((current) => {
+      const top = current[current.length - 1];
+      return top.params?.replay && current.length > 1
+        ? current.slice(0, -1)
+        : [{ name: "login", params: {} }];
+    });
   };
   const addToCart = (id, quantity = 1) => {
     setData((current) => ({
@@ -177,6 +200,7 @@ function AppProvider({ children }) {
     back,
     login,
     logout,
+    finishOnboarding,
     addToCart,
     setQuantity,
     cartItems,
@@ -186,10 +210,12 @@ function AppProvider({ children }) {
   };
   return (
     <Context.Provider value={value}>
-      {ready ? (
+      {ready && introDone ? (
         children
       ) : (
-        <View style={{ flex: 1, backgroundColor: colors.bg }} />
+        <SplashIntro
+          onLayout={() => SplashScreen.hideAsync().catch(() => {})}
+        />
       )}
     </Context.Provider>
   );
@@ -264,7 +290,17 @@ function BottomTabs() {
 }
 
 function Router() {
-  const { screen, data } = useApp();
+  const { screen, finishOnboarding } = useApp();
+  if (screen.name === "onboarding")
+    return (
+      <View
+        style={{ flex: 1, backgroundColor: colors.bg }}
+        onLayout={() => SplashScreen.hideAsync().catch(() => {})}
+      >
+        <StatusBar style="light" />
+        <Onboarding onComplete={finishOnboarding} />
+      </View>
+    );
   const pages = {
     login: Login,
     register: Register,
@@ -288,7 +324,10 @@ function Router() {
   };
   const Component = pages[screen.name] || Home;
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+    <View
+      style={{ flex: 1, backgroundColor: colors.bg }}
+      onLayout={() => SplashScreen.hideAsync().catch(() => {})}
+    >
       <StatusBar style="light" />
       <Component
         key={`${screen.name}-${screen.params?.id || ""}`}
@@ -416,6 +455,14 @@ function Login() {
         <Text style={{ color: colors.muted, textAlign: "center" }}>
           Nouveau ici ?{" "}
           <Text style={{ color: colors.gold }}>Créer un compte</Text>
+        </Text>
+      </Pressable>
+      <Pressable
+        onPress={() => go("onboarding", { replay: true })}
+        style={{ marginTop: 17 }}
+      >
+        <Text style={{ color: colors.gold, textAlign: "center" }}>
+          Voir la présentation
         </Text>
       </Pressable>
     </AuthShell>
@@ -1971,6 +2018,11 @@ function Profile() {
           icon="trophy-outline"
           label="Classement"
           onPress={() => go("leaderboard")}
+        />
+        <ProfileLink
+          icon="sparkles-outline"
+          label="Revoir la présentation"
+          onPress={() => go("onboarding", { replay: true })}
           last
         />
       </Glass>
