@@ -1,8 +1,10 @@
 # Mon Miam Miam — application étudiante
 
-Application React Native / Expo SDK 58. Elle reprend les parcours des 18 exports `*--Etudiant` de `app1-tous-les-ecran222s/screens`, adaptés à un téléphone : accueil, menu, détail de plat, panier, commande, historique, fidélité, parrainage, réclamations, jeux, classement et profil. Un splash screen au logo de la maquette et trois écrans de présentation précèdent la connexion lors de la première ouverture. La présentation peut être relancée depuis le profil.
+Application React Native / Expo SDK 58. Elle reprend les parcours des 18 exports `*--Etudiant` de `app1-tous-les-ecran222s/screens`, adaptés à un téléphone : accueil, menu, détail de plat, panier, commande, historique, fidélité, parrainage, réclamations, jeux, classement et profil. Un splash screen au logo de la maquette et quatre écrans de présentation précèdent la connexion lors de la première ouverture. La présentation peut être relancée depuis le profil ou la connexion.
 
 Les interactions sont fonctionnelles en **mode démonstration local** et conservées sur l'appareil : compte de démonstration, panier, commandes simulées, points, parrainage et réclamations. Aucun paiement, aucune authentification serveur et aucun envoi de réclamation ne sont effectués. L'intégration de l'API Laravel, de l'agrégateur de paiement et des règles serveur de fidélité reste à réaliser.
+
+Le bouton flottant du panier peut être touché pour ouvrir le panier ou déplacé par glissement dans la zone visible de l'écran. Il affiche le nombre d'articles et reste au-dessus de la barre de navigation.
 
 Pour l'installation et le lancement par le propriétaire du projet : utiliser Node.js 22.13+ ou 24.3+, puis depuis `mobile/`, exécuter `npm ci` et `npx expo start`.
 

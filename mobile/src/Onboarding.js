@@ -28,7 +28,7 @@ const slides = [
     description:
       "Choisissez vos plats, composez votre panier et indiquez l’heure souhaitée pour le retrait ou la livraison.",
     badge: "Sur place ou en livraison",
-    icon: "bag-handle-outline",
+    icon: "cart-outline",
     image: require("../assets/images/05-Menu-layer-00137-0.jpg"),
     action: "Continuer",
   },
@@ -40,6 +40,16 @@ const slides = [
     badge: "Points, parrainage et surprises",
     icon: "gift-outline",
     image: require("../assets/images/05-Menu-layer-00265-0.jpg"),
+    action: "Continuer",
+  },
+  {
+    eyebrow: "TOUT AU MÊME ENDROIT",
+    title: "Restez informé, à chaque étape.",
+    description:
+      "Retrouvez vos commandes, consultez leurs détails et signalez facilement un problème depuis votre espace.",
+    badge: "Commandes et assistance",
+    icon: "receipt-outline",
+    image: require("../assets/images/05-Menu-layer-00248-0.jpg"),
     action: "Entrer dans l’app",
   },
 ];

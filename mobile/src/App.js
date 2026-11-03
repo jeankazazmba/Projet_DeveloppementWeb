@@ -30,6 +30,7 @@ import {
 import { categories, dishes, findDish, money } from "./catalog";
 import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
+import FloatingCart from "./FloatingCart";
 import {
   Button,
   colors,
@@ -222,7 +223,7 @@ function AppProvider({ children }) {
 }
 
 function BottomTabs() {
-  const { screen, tab, cartItems, go } = useApp();
+  const { screen, tab } = useApp();
   const insets = useSafeAreaInsets();
   if (!tabNames.includes(screen.name) && screen.name !== "cart") return null;
   return (
@@ -265,32 +266,12 @@ function BottomTabs() {
           </Text>
         </Pressable>
       ))}
-      {cartItems.length > 0 && (
-        <Pressable
-          onPress={() => go("cart")}
-          style={{
-            position: "absolute",
-            top: -19,
-            right: 8,
-            width: 32,
-            height: 32,
-            borderRadius: 16,
-            backgroundColor: colors.gold,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ color: "#181510", fontWeight: "900" }}>
-            {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-          </Text>
-        </Pressable>
-      )}
     </BlurView>
   );
 }
 
 function Router() {
-  const { screen, finishOnboarding } = useApp();
+  const { screen, finishOnboarding, cartItems, go } = useApp();
   if (screen.name === "onboarding")
     return (
       <View
@@ -334,6 +315,19 @@ function Router() {
         params={screen.params}
       />
       <BottomTabs />
+      <FloatingCart
+        count={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+        hasTabs={tabNames.includes(screen.name)}
+        hidden={[
+          "login",
+          "register",
+          "forgot",
+          "cart",
+          "checkout",
+          "confirmation",
+        ].includes(screen.name)}
+        onOpen={() => go("cart")}
+      />
     </View>
   );
 }
@@ -550,7 +544,7 @@ function Home() {
       subtitle="Qu'est-ce qui vous ferait plaisir aujourd'hui ?"
       right={
         <Pressable onPress={() => go("cart")} style={{ padding: 9 }}>
-          <Icon name="bag-handle-outline" color={colors.text} />
+          <Icon name="cart-outline" color={colors.text} />
           <Text
             style={{ color: colors.gold, textAlign: "center", fontSize: 11 }}
           >
@@ -701,7 +695,7 @@ function Menu() {
       subtitle="Des saveurs pour chaque envie."
       right={
         <Pressable onPress={() => go("cart")}>
-          <Icon name="bag-handle-outline" color={colors.text} />
+          <Icon name="cart-outline" color={colors.text} />
         </Pressable>
       }
     >

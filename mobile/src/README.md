@@ -2,7 +2,8 @@
 
 - `App.js` : navigation, persistance locale et 18 parcours étudiants.
 - `SplashIntro.js` : transition de marque visible dans Expo Go.
-- `Onboarding.js` : trois écrans de présentation avant la connexion, avec reprise possible.
+- `Onboarding.js` : quatre écrans de présentation avant la connexion, avec reprise possible.
+- `FloatingCart.js` : accès au panier par bouton flottant déplaçable.
 - `catalog.js` : plats et prix de démonstration, avec photos des exports Figma.
 - `ui.js` : composants communs et thème sombre glassmorphism.
 
