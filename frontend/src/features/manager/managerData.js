@@ -26,6 +26,19 @@ export const initialOrders = [
   { id: 'MM-1044', customer: 'Sandra O.', service: 'Livraison', location: 'Rés. La Terrasse', employee: 'Aïcha B.', status: 'Prête', createdAt: age(21), amount: 4500 },
 ]
 
+// The keys mirror the admin table resource so this screen can later consume the same API.
+export const initialTables = Array.from({ length: 12 }, (_, index) => {
+  const id = `T${String(index + 1).padStart(2, '0')}`
+  const order = initialOrders.find(item => item.service === 'Sur place' && item.location === `Table ${String(index + 1).padStart(2, '0')}`)
+  return {
+    id,
+    zone: index < 8 ? 'Salle' : 'Terrasse',
+    seats: index % 3 === 0 ? 6 : index % 3 === 1 ? 4 : 2,
+    status: order ? 'Occupée' : index < 8 ? 'Libre' : index < 10 ? 'Réservée' : 'Nettoyage',
+    orderId: order?.id || null,
+  }
+})
+
 export const initialClaims = [
   {
     id: 'RC-0031', student: 'Arsène K.', location: 'Rés. La Terrasse · Douala', elapsed: 'Il y a 25 min', orderId: 'MM-1042', amount: 4400,

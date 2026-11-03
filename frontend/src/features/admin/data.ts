@@ -1,6 +1,6 @@
 import { assets } from './design-assets'
 
-export type Page = 'dashboard' | 'orders' | 'tables' | 'menu' | 'reports' | 'employees' | 'promotions' | 'claims' | 'settings'
+export type Page = 'dashboard' | 'orders' | 'tables' | 'menu' | 'reports' | 'employees' | 'promotions' | 'claims' | 'settings' | 'data'
 export type Employee = { id: string; name: string; email: string; role: 'Employé' | 'Gérant'; active: boolean; lastLogin: string }
 export type Dish = { id: string; name: string; description: string; category: string; price: number; available: boolean; featured: boolean; image: string; ingredients: string[] }
 export type Promotion = { id: string; title: string; subtitle: string; description: string; type: 'Promotion' | 'Événement' | 'Jeu concours'; status: 'Active' | 'Programmée' | 'Expirée' | 'Brouillon'; tag: string; dateLabel: string; start: string; end: string; image: string; footer: string; metric: string }

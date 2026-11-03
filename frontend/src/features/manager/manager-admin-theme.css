@@ -207,3 +207,25 @@
 @media(prefers-reduced-motion:reduce) {
   .manager-app * { transition: none !important; }
 }
+
+/* Modules de service ajoutés en attendant les ressources de l'API. */
+.manager-operations-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; padding: 18px; }
+.manager-operation-card { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; min-width: 0; padding: 17px; border: 1px solid var(--mg-line); border-radius: 13px; background: var(--mg-raised); }
+.manager-operation-card-head { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 8px; }
+.manager-operation-card-head strong { color: var(--mg-text); font-size: 16px; }
+.manager-operation-card p,.manager-operation-card small { margin: 0; color: var(--mg-muted); font-size: 13px; }
+.manager-operation-card .manager-button { margin-top: auto; }
+.manager-operations-empty { padding: 22px; color: var(--mg-muted); }
+.manager-operation-modal form { display: grid; gap: 16px; margin-top: 20px; }
+.manager-operation-modal form label { display: grid; gap: 7px; color: var(--mg-muted); font-size: 13px; }
+.manager-operation-modal form select { min-height: 42px; width: 100%; font-size: 14px; }
+.manager-operation-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.manager-operation-dish { display: flex; align-items: center; gap: 11px; min-width: 220px; }
+.manager-operation-dish img { width: 48px; height: 48px; border-radius: 9px; object-fit: cover; }
+.manager-operation-dish small { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.manager-operation-switch { display: inline-flex; align-items: center; width: 43px; height: 24px; padding: 3px; border: 1px solid var(--mg-line); border-radius: 30px; background: var(--mg-raised); }
+.manager-operation-switch.on { background: var(--mg-gold); border-color: var(--mg-gold); }
+.manager-operation-switch span { width: 16px; height: 16px; border-radius: 50%; background: var(--mg-muted); transition: transform .15s; }
+.manager-operation-switch.on span { background: #211b11; transform: translateX(18px); }
+@media(max-width:1050px) { .manager-operations-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .manager-operations-grid { grid-template-columns: 1fr; } }

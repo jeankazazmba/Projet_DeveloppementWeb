@@ -8,6 +8,8 @@ Les dix dossiers `--Admin` de l'export `app1-tous-les-ecran222s/screens` ont ét
 
 Trois écrans supplémentaires, absents des exports Figma, complètent la navigation administrateur : `/admin#/orders`, `/admin#/tables` et `/admin#/reports`. Ils reprennent les composants et la palette du back-office existant. Les commandes et les tables sont modifiables pendant la session. Les graphiques SVG et les tableaux de données du tableau de bord et des rapports sont calculés à partir des mêmes commandes de démonstration. L'historique 7 et 30 jours est simulé explicitement ; aucune API temps réel n'est branchée.
 
+`/admin#/data` montre les ressources métier à raccorder, les champs utilisés par les écrans et le nombre d'exemples locaux. La vérification réseau porte uniquement sur `/api/health` si `VITE_API_URL` est renseigné ; elle ne certifie pas que la base ou les routes métier existent.
+
 Les onglets auparavant inactifs de `/admin#/settings` sont ouverts : Restaurant, Paiements, Politiques et Sécurité. Les trois premiers enregistrent une configuration locale ; Sécurité décrit les branchements d'authentification et de droits encore nécessaires, sans simuler une protection réelle.
 
 | Export | Interface intégrée |

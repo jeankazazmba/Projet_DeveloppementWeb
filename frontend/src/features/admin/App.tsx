@@ -12,6 +12,7 @@ import Settings from './pages/Settings'
 import Orders from './pages/Orders'
 import Tables from './pages/Tables'
 import Reports from './pages/Reports'
+import DataReadiness from './pages/DataReadiness'
 import { initialOrders, initialTables } from './operations'
 
 const nav: { page: Page; label: string; icon: string }[] = [
@@ -24,6 +25,7 @@ const nav: { page: Page; label: string; icon: string }[] = [
   { page: 'promotions', label: 'Promotions & Événements', icon: assets.promotions.imgContainer2 },
   { page: 'claims', label: 'Réclamations', icon: assets.dashboard.imgIcon6 },
   { page: 'settings', label: 'Paramètres', icon: assets.dashboard.imgContainer },
+  { page: 'data', label: 'Données & intégration', icon: assets.dashboard.imgIcon4 },
 ]
 type Theme = 'dark' | 'light'
 function readPage(): Page {
@@ -89,6 +91,7 @@ export default function App() {
         {page === 'promotions' && <Promotions promotions={promotions} setPromotions={setPromotions} notify={setNotice} />}
         {page === 'claims' && <Claims claims={claims} setClaims={setClaims} notify={setNotice} />}
         {page === 'settings' && <Settings settings={settings} setSettings={setSettings} notify={setNotice} />}
+        {page === 'data' && <DataReadiness employees={employees.length} dishes={dishes.length} promotions={promotions.length} claims={claims.length} orders={orders.length} tables={tables.length} />}
       </main>
       <footer className="footer"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="" /><p>© 2024 Mon Miam Miam • ZeDuc-Sp@ce, Résidence La Terrasse, Yansoki • Douala</p><button onClick={() => setInfo('Les mentions légales et conditions de vente doivent être fournies par le restaurant.')}>Mentions<br />Légales & CGV</button><button onClick={() => setInfo('La politique de confidentialité sera ajoutée avant la mise en production.')}>Politique RGPD<br />Campus</button><button onClick={() => setInfo('Le numéro WhatsApp complet du restaurant reste à renseigner.')}>WhatsApp<br />Assistance (+237)</button></footer>
     </div>
