@@ -107,9 +107,6 @@ function AppProvider({ children }) {
         if (raw) {
           const saved = JSON.parse(raw);
           setData({ ...initialData, ...saved });
-          if (saved.user) setStack([{ name: "home", params: {} }]);
-          else if (saved.onboardingDone)
-            setStack([{ name: "login", params: {} }]);
         }
       })
       .catch(() => {})
@@ -142,7 +139,7 @@ function AppProvider({ children }) {
       const top = current[current.length - 1];
       return top.params?.replay && current.length > 1
         ? current.slice(0, -1)
-        : [{ name: "login", params: {} }];
+        : [{ name: data.user ? "home" : "login", params: {} }];
     });
   };
   const addToCart = (id, quantity = 1) => {
@@ -307,7 +304,10 @@ function Router() {
         onLayout={() => SplashScreen.hideAsync().catch(() => {})}
       >
         <StatusBar style="light" />
-        <Onboarding onComplete={finishOnboarding} />
+        <Onboarding
+          onComplete={finishOnboarding}
+          allowSkip={Boolean(screen.params?.replay)}
+        />
       </View>
     );
   const pages = {

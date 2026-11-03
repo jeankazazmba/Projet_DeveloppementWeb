@@ -54,7 +54,7 @@ const slides = [
   },
 ];
 
-export default function Onboarding({ onComplete }) {
+export default function Onboarding({ onComplete, allowSkip = false }) {
   const [index, setIndex] = useState(0);
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
@@ -103,14 +103,21 @@ export default function Onboarding({ onComplete }) {
               MON MIAM MIAM
             </Text>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Passer la présentation"
-            onPress={onComplete}
-            hitSlop={12}
-          >
-            <Text style={{ color: colors.muted, fontSize: 14 }}>Passer</Text>
-          </Pressable>
+          {allowSkip && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Passer la présentation"
+              onPress={onComplete}
+              hitSlop={12}
+            >
+              <Text style={{ color: colors.muted, fontSize: 14 }}>Passer</Text>
+            </Pressable>
+          )}
+          {!allowSkip && (
+            <Text style={{ color: colors.gold, fontSize: 13, fontWeight: "800" }}>
+              {String(index + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
+            </Text>
+          )}
         </View>
 
         <View
