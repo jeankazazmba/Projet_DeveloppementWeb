@@ -31,6 +31,7 @@ import { categories, dishes, findDish, money } from "./catalog";
 import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
 import FloatingCart from "./FloatingCart";
+import AppTopBar from "./AppTopBar";
 import {
   Button,
   colors,
@@ -56,6 +57,7 @@ const initialData = {
   cart: {},
   orders: [],
   complaints: [],
+  notificationsReadAt: null,
   points: 120,
   referralUsed: false,
   lastSpin: null,
@@ -68,6 +70,27 @@ const tabs = [
   ["loyalty", "Fidélité", "star-outline"],
   ["profile", "Profil", "person-outline"],
 ];
+
+function localNotifications(data) {
+  return [
+    ...(data.orders || []).map((order) => ({
+      id: `order-${order.id}`,
+      date: order.date,
+      title: `Commande ${order.id}`,
+      body: "Commande de démonstration enregistrée sur cet appareil.",
+      screen: "order",
+      params: { id: order.id },
+    })),
+    ...(data.complaints || []).map((complaint) => ({
+      id: `complaint-${complaint.id}`,
+      date: complaint.date,
+      title: "Signalement enregistré",
+      body: `${complaint.subject} · en attente de connexion au serveur.`,
+      screen: "complaints",
+      params: {},
+    })),
+  ].sort((first, second) => second.date.localeCompare(first.date));
+}
 
 function AppProvider({ children }) {
   const [data, setData] = useState(initialData);
@@ -232,16 +255,21 @@ function BottomTabs() {
       tint="dark"
       style={{
         position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        borderTopWidth: 1,
-        borderColor: "#574C39",
-        backgroundColor: "rgba(16,16,15,0.80)",
-        paddingBottom: Math.max(insets.bottom, 14),
-        paddingTop: 9,
-        paddingHorizontal: 6,
+        bottom: insets.bottom + 12,
+        left: 16,
+        right: 16,
+        borderWidth: 1,
+        borderColor: "rgba(220,199,156,0.34)",
+        borderRadius: 26,
+        overflow: "hidden",
+        backgroundColor: "rgba(26,25,23,0.90)",
+        paddingVertical: 8,
+        paddingHorizontal: 5,
         flexDirection: "row",
+        shadowColor: "#000000",
+        shadowOpacity: 0.35,
+        shadowRadius: 16,
+        elevation: 10,
       }}
     >
       {tabs.map(([name, label, icon]) => (
@@ -271,7 +299,7 @@ function BottomTabs() {
 }
 
 function Router() {
-  const { screen, finishOnboarding, cartItems, go } = useApp();
+  const { screen, finishOnboarding, cartItems, data, go, tab } = useApp();
   if (screen.name === "onboarding")
     return (
       <View
@@ -302,16 +330,34 @@ function Router() {
     wheel: Wheel,
     leaderboard: Leaderboard,
     profile: Profile,
+    notifications: Notifications,
   };
   const Component = pages[screen.name] || Home;
+  const showTopBar = !["login", "register", "forgot"].includes(screen.name);
+  const notifications = localNotifications(data);
+  const unreadCount = notifications.filter(
+    (item) =>
+      Date.parse(item.date) >
+      Date.parse(data.notificationsReadAt || "1970-01-01"),
+  ).length;
   return (
     <View
       style={{ flex: 1, backgroundColor: colors.bg }}
       onLayout={() => SplashScreen.hideAsync().catch(() => {})}
     >
       <StatusBar style="light" />
+      {showTopBar && (
+        <AppTopBar
+          unreadCount={unreadCount}
+          onHome={() => tab("home")}
+          onSearch={() => go("menu", { autoFocus: true, searchAt: Date.now() })}
+          onNotifications={() => {
+            if (screen.name !== "notifications") go("notifications");
+          }}
+        />
+      )}
       <Component
-        key={`${screen.name}-${screen.params?.id || ""}`}
+        key={`${screen.name}-${screen.params?.id || ""}-${screen.params?.searchAt || ""}`}
         params={screen.params}
       />
       <BottomTabs />
@@ -329,6 +375,81 @@ function Router() {
         onOpen={() => go("cart")}
       />
     </View>
+  );
+}
+
+function Notifications() {
+  const { data, setData, go, back } = useApp();
+  const items = localNotifications(data);
+  useEffect(() => {
+    setData((current) => ({
+      ...current,
+      notificationsReadAt: new Date().toISOString(),
+    }));
+  }, [setData]);
+  return (
+    <Page
+      title="Notifications"
+      subtitle="Les activités enregistrées sur cet appareil."
+      onBack={back}
+    >
+      {items.length ? (
+        items.map((item) => (
+          <Glass
+            key={item.id}
+            style={{ padding: 17, marginBottom: 11 }}
+            onPress={() => go(item.screen, item.params)}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+            >
+              <Icon name="notifications-outline" size={23} />
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    color: colors.text,
+                    fontSize: 15,
+                    fontWeight: "800",
+                  }}
+                >
+                  {item.title}
+                </Text>
+                <Text
+                  style={{ color: colors.muted, marginTop: 5, lineHeight: 19 }}
+                >
+                  {item.body}
+                </Text>
+                <Text
+                  style={{ color: colors.gold, fontSize: 12, marginTop: 9 }}
+                >
+                  {new Date(item.date).toLocaleString("fr-FR")}
+                </Text>
+              </View>
+              <Icon name="chevron-forward" size={18} color={colors.muted} />
+            </View>
+          </Glass>
+        ))
+      ) : (
+        <Glass style={{ padding: 24, alignItems: "center" }}>
+          <Icon name="notifications-off-outline" size={36} />
+          <Text
+            style={{
+              color: colors.text,
+              fontSize: 18,
+              fontWeight: "800",
+              marginTop: 12,
+            }}
+          >
+            Aucune notification
+          </Text>
+          <Text
+            style={{ color: colors.muted, textAlign: "center", marginTop: 6 }}
+          >
+            Vos commandes et signalements de démonstration apparaîtront ici.
+          </Text>
+        </Glass>
+      )}
+    </Page>
   );
 }
 
@@ -537,21 +658,11 @@ function Forgot() {
 }
 
 function Home() {
-  const { data, go, addToCart, tab, cartItems } = useApp();
+  const { data, go, addToCart, tab } = useApp();
   return (
     <Page
       title={`Bonjour ${data.user?.name?.split(" ")[0] || "étudiant"} 👋`}
       subtitle="Qu'est-ce qui vous ferait plaisir aujourd'hui ?"
-      right={
-        <Pressable onPress={() => go("cart")} style={{ padding: 9 }}>
-          <Icon name="cart-outline" color={colors.text} />
-          <Text
-            style={{ color: colors.gold, textAlign: "center", fontSize: 11 }}
-          >
-            {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-          </Text>
-        </Pressable>
-      }
     >
       <LinearGradient
         colors={["#4D3920", "#26231D", "#171A18"]}
@@ -680,7 +791,7 @@ function Home() {
   );
 }
 
-function Menu() {
+function Menu({ params = {} }) {
   const { go, addToCart } = useApp();
   const [category, setCategory] = useState("Tout");
   const [query, setQuery] = useState("");
@@ -690,19 +801,12 @@ function Menu() {
       dish.name.toLowerCase().includes(query.toLowerCase()),
   );
   return (
-    <Page
-      title="Menu du jour"
-      subtitle="Des saveurs pour chaque envie."
-      right={
-        <Pressable onPress={() => go("cart")}>
-          <Icon name="cart-outline" color={colors.text} />
-        </Pressable>
-      }
-    >
+    <Page title="Menu du jour" subtitle="Des saveurs pour chaque envie.">
       <Field
         value={query}
         onChangeText={setQuery}
         placeholder="Rechercher un plat…"
+        autoFocus={params.autoFocus}
         right={<Icon name="search-outline" color={colors.muted} />}
       />
       <ScrollView

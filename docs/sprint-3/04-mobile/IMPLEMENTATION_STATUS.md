@@ -4,7 +4,7 @@
 
 Les 18 exports `*--Etudiant` ont un parcours mobile correspondant : connexion et mot de passe oublié, accueil, menu, détail du plat, panier, paiement, confirmation, commandes et détail de commande, fidélité, parrainage, réclamations et signalement, jeux et roue de la chance, classement, profil. Un écran de création de compte complète le parcours d'authentification.
 
-Un splash natif Expo reprend le logo doré de la maquette. Une transition de marque visible dans Expo Go et quatre écrans d'onboarding présentent le menu, la commande, les avantages étudiants, puis le suivi des commandes et l'assistance. L'onboarding est affiché à la première ouverture, son état est enregistré localement et il peut être revu depuis le profil ou la connexion. Un bouton flottant avec icône de chariot ouvre le panier ; il est déplaçable par glissement et reste dans la zone visible de l'écran.
+Un splash natif Expo reprend le logo doré de la maquette. Une transition de marque visible dans Expo Go et quatre écrans d'onboarding présentent le menu, la commande, les avantages étudiants, puis le suivi des commandes et l'assistance. L'onboarding est affiché à la première ouverture, son état est enregistré localement et il peut être revu depuis le profil ou la connexion. Un bouton flottant avec icône de chariot ouvre le panier ; il est déplaçable par glissement et reste dans la zone visible de l'écran. Une barre haute fixe présente le logo, la recherche du menu et les notifications locales. La navigation basse est flottante avec des coins arrondis.
 
 Le thème reprend le noir et l'or des maquettes avec des cartes translucides et des bordures lumineuses. Les photos du menu sont extraites des ressources Figma fournies localement.
 

@@ -81,6 +81,7 @@ export function Field({
   secureTextEntry,
   multiline,
   autoCapitalize,
+  autoFocus,
   right,
 }) {
   return (
@@ -100,6 +101,7 @@ export function Field({
           secureTextEntry={secureTextEntry}
           multiline={multiline}
           autoCapitalize={autoCapitalize}
+          autoFocus={autoFocus}
         />
         {right}
       </View>
@@ -164,7 +166,7 @@ export function Page({
           contentContainerStyle={[
             styles.page,
             {
-              paddingTop: Math.max(insets.top + 16, 28),
+              paddingTop: noHeader ? Math.max(insets.top + 16, 28) : 16,
               paddingBottom: 120 + insets.bottom,
             },
           ]}

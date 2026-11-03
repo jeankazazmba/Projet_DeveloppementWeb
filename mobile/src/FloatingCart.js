@@ -23,9 +23,9 @@ export default function FloatingCart({ count, hasTabs, hidden, onOpen }) {
   const bounds = {
     minX: MARGIN,
     maxX: Math.max(MARGIN, width - SIZE - MARGIN),
-    minY: insets.top + MARGIN,
+    minY: insets.top + 82,
     maxY: Math.max(
-      insets.top + MARGIN,
+      insets.top + 82,
       height - insets.bottom - SIZE - (hasTabs ? 92 : 20),
     ),
   };

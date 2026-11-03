@@ -4,6 +4,7 @@
 - `SplashIntro.js` : transition de marque visible dans Expo Go.
 - `Onboarding.js` : quatre écrans de présentation avant la connexion, avec reprise possible.
 - `FloatingCart.js` : accès au panier par bouton flottant déplaçable.
+- `AppTopBar.js` : logo, recherche du menu et notifications locales.
 - `catalog.js` : plats et prix de démonstration, avec photos des exports Figma.
 - `ui.js` : composants communs et thème sombre glassmorphism.
 
