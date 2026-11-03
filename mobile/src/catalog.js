@@ -1,0 +1,95 @@
+export const categories = [
+  "Tout",
+  "Plats",
+  "Grillades",
+  "Boissons",
+  "Desserts",
+];
+
+export const dishes = [
+  {
+    id: "poulet",
+    name: "Poulet braisé maison",
+    category: "Plats",
+    price: 8500,
+    rating: "4,9",
+    minutes: 25,
+    description:
+      "Poulet mariné aux épices, légumes sautés et accompagnement au choix.",
+    image: require("../assets/images/05-Menu-layer-00137-0.jpg"),
+  },
+  {
+    id: "riz",
+    name: "Riz épicé du chef",
+    category: "Plats",
+    price: 7500,
+    rating: "4,8",
+    minutes: 20,
+    description: "Riz parfumé, légumes frais et sauce signature Mon Miam Miam.",
+    image: require("../assets/images/05-Menu-layer-00155-0.jpg"),
+  },
+  {
+    id: "poisson",
+    name: "Poisson grillé",
+    category: "Grillades",
+    price: 11000,
+    rating: "4,9",
+    minutes: 30,
+    description: "Poisson grillé, aromates et légumes de saison.",
+    image: require("../assets/images/05-Menu-layer-00172-0.jpg"),
+  },
+  {
+    id: "brochettes",
+    name: "Brochettes gourmandes",
+    category: "Grillades",
+    price: 6500,
+    rating: "4,7",
+    minutes: 20,
+    description: "Brochettes grillées à la flamme et sauce maison.",
+    image: require("../assets/images/05-Menu-layer-00195-0.jpg"),
+  },
+  {
+    id: "cocktail",
+    name: "Cocktail hibiscus",
+    category: "Boissons",
+    price: 3500,
+    rating: "4,8",
+    minutes: 5,
+    description: "Boisson fraîche à l’hibiscus et aux fruits.",
+    image: require("../assets/images/05-Menu-layer-00214-0.jpg"),
+  },
+  {
+    id: "jus",
+    name: "Jus gingembre miel",
+    category: "Boissons",
+    price: 3000,
+    rating: "4,7",
+    minutes: 5,
+    description: "Gingembre frais, citron et miel.",
+    image: require("../assets/images/05-Menu-layer-00231-0.jpg"),
+  },
+  {
+    id: "mijote",
+    name: "Mijoté du jour",
+    category: "Plats",
+    price: 9500,
+    rating: "4,9",
+    minutes: 25,
+    description: "Plat généreux mijoté à feu doux avec des épices locales.",
+    image: require("../assets/images/05-Menu-layer-00248-0.jpg"),
+  },
+  {
+    id: "dessert",
+    name: "Douceur caramel",
+    category: "Desserts",
+    price: 4500,
+    rating: "4,8",
+    minutes: 10,
+    description: "Dessert fondant au caramel et aux fruits.",
+    image: require("../assets/images/05-Menu-layer-00265-0.jpg"),
+  },
+];
+
+export const findDish = (id) => dishes.find((dish) => dish.id === id);
+export const money = (amount) =>
+  `${Math.round(amount).toLocaleString("fr-FR")} FCFA`;

@@ -1,15 +1,9 @@
-# Application mobile Mon Miam Miam
+# Mon Miam Miam — application étudiante
 
-Ce dossier accueillera l'application **React Native avec Expo** du Sprint 3. Il est séparé de `frontend/` (site et back-office React) et de `backend/` (API Laravel).
+Application React Native / Expo SDK 57. Elle reprend les parcours des 18 exports `*--Etudiant` de `app1-tous-les-ecran222s/screens`, adaptés à un téléphone : accueil, menu, détail de plat, panier, commande, historique, fidélité, parrainage, réclamations, jeux, classement et profil.
 
-## Structure préparée
+Les interactions sont fonctionnelles en **mode démonstration local** et conservées sur l'appareil : compte de démonstration, panier, commandes simulées, points, parrainage et réclamations. Aucun paiement, aucune authentification serveur et aucun envoi de réclamation ne sont effectués. L'intégration de l'API Laravel, de l'agrégateur de paiement et des règles serveur de fidélité reste à réaliser.
 
-```text
-mobile/
-├── assets/       Images, icônes et polices propres à l'application mobile
-└── src/          Écrans, navigation, composants, thème et accès à l'API
-```
+Pour l'installation et le lancement par le propriétaire du projet : depuis `mobile/`, exécuter `npm install` puis `npx expo start`.
 
-La configuration Expo, les dépendances et les écrans seront ajoutés dans `mobile/` au début du développement mobile. Aucun projet Expo n'a encore été initialisé, installé, lancé ou compilé dans ce dossier.
-
-Les livrables et preuves de recette restent dans `docs/sprint-3/04-mobile/` ; le code de l'application reste ici.
+Les images de plats proviennent des SVG locaux de la maquette. `scripts/extract_assets.py` permet de les extraire de nouveau avec Pillow si les exports changent.

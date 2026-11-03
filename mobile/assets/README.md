@@ -1,3 +1,3 @@
 # Ressources mobiles
 
-Placer ici les images, icônes et polices autorisées pour l'application Expo. Les exports Figma du site web et du back-office restent dans `frontend/public/`.
+`images/` contient neuf photos et éléments visuels extraits des SVG du dossier local `05-Menu--Etudiant`, sélectionnés pour le catalogue mobile. Le script `../scripts/extract_assets.py` recrée ces images à partir des exports Figma avec Pillow.

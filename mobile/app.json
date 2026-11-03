@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Mon Miam Miam",
+    "slug": "mon-miam-miam-etudiant",
+    "scheme": "monmiammiam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true },
+    "android": { "edgeToEdgeEnabled": true, "adaptiveIcon": { "backgroundColor": "#100F0D" } },
+    "plugins": [["expo-image-picker", { "photosPermission": "Autoriser la sélection d'une photo pour illustrer une réclamation.", "cameraPermission": "Autoriser une photo pour illustrer une réclamation.", "microphonePermission": false }]],
+    "extra": { "appMode": "student-demo" }
+  }
+}

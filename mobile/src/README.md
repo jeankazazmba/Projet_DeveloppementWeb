@@ -1,3 +1,7 @@
 # Code mobile
 
-Les écrans et modules React Native seront placés ici au moment de l'initialisation Expo. Prévoir des modules séparés pour la navigation, les fonctionnalités métier, les composants communs, le thème et l'accès à l'API Laravel.
+- `App.js` : navigation, persistance locale et 18 parcours étudiants.
+- `catalog.js` : plats et prix de démonstration, avec photos des exports Figma.
+- `ui.js` : composants communs et thème sombre glassmorphism.
+
+La future connexion à l'API Laravel devra remplacer le stockage local de démonstration pour l'authentification, les commandes, les paiements, la fidélité, les jeux, le classement et les réclamations.
