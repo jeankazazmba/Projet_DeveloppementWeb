@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useCart } from './CartContext.jsx'
+import { useCart } from './cartContext.js'
 import { money } from '../menu/catalog.js'
 
 export default function CartPage() {

@@ -1,6 +1,6 @@
-import { createContext, useContext, useState } from 'react'
+import { useState } from 'react'
+import { OrdersContext } from './ordersContext.js'
 
-const OrdersContext = createContext(null)
 export function OrdersProvider({ children }) {
   const [orders, setOrders] = useState([])
   const addOrder = (details) => {
@@ -11,4 +11,3 @@ export function OrdersProvider({ children }) {
   const addComment = (id, comment) => setOrders((current) => current.map((order) => order.id === id ? { ...order, comment } : order))
   return <OrdersContext.Provider value={{ orders, addOrder, addComment }}>{children}</OrdersContext.Provider>
 }
-export const useOrders = () => useContext(OrdersContext)

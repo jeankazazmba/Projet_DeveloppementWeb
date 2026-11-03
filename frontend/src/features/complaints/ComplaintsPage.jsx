@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useOrders } from '../orders/OrdersContext.jsx'
+import { useOrders } from '../orders/ordersContext.js'
 export default function ComplaintsPage() {
   const { orders } = useOrders()
   const [claims, setClaims] = useState([])

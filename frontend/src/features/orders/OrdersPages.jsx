@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useCart } from '../cart/CartContext.jsx'
-import { useDemoSession } from '../auth/DemoSession.jsx'
+import { useCart } from '../cart/cartContext.js'
+import { useDemoSession } from '../auth/sessionContext.js'
 import DeliveryFields from '../delivery/DeliveryFields.jsx'
 import { money } from '../menu/catalog.js'
-import { useOrders } from './OrdersContext.jsx'
+import { useOrders } from './ordersContext.js'
 
 export function CheckoutPage() {
   const { rows, total, clear } = useCart()

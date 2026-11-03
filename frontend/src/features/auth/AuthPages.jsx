@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useDemoSession } from './DemoSession.jsx'
+import { useDemoSession } from './sessionContext.js'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')

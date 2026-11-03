@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useCart } from '../cart/CartContext.jsx'
+import { useCart } from '../cart/cartContext.js'
 import { money, products } from './catalog.js'
 
 export function ProductCard({ product }) {

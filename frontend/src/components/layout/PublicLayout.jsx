@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { useCart } from '../../features/cart/CartContext.jsx'
-import { useDemoSession } from '../../features/auth/DemoSession.jsx'
+import { useCart } from '../../features/cart/cartContext.js'
+import { useDemoSession } from '../../features/auth/sessionContext.js'
 import CookieConsent from './CookieConsent.jsx'
 import '../public.css'
 
