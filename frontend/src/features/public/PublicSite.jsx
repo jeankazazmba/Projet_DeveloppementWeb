@@ -32,7 +32,7 @@ function Footer() {
     <div className="public-container public-footer-grid">
       <div><Link to="/"><img className="public-footer-logo" src={logo} alt="Mon Miam Miam" /></Link><p>Le climat du goût et du chill à Yansoki. Cuisine camerounaise, terrasse panoramique et moments conviviaux.</p></div>
       <div><h3>Liens rapides</h3><Link to="/">Accueil</Link><Link to="/menu">Menu</Link><Link to="/promotions">Promotions</Link><Link to="/promotions#evenements">Événements</Link></div>
-      <div><h3>Assistance</h3><Link to="/acces">Accéder à l’application</Link><Link to="/admin">Espace administration</Link><a href="mailto:contact@monmiammiam.cm">Contacter le restaurant</a></div>
+      <div><h3>Assistance</h3><Link to="/acces">Accéder à l’application</Link><Link to="/admin">Espace administration</Link><Link to="/gerant">Espace gérant</Link><a href="mailto:contact@monmiammiam.cm">Contacter le restaurant</a></div>
       <div><h3>Contact</h3><p>Résidence La Terrasse, Yansoki, Douala, Cameroun</p><p>+237 6 00 00 00 00</p><a href="mailto:contact@monmiammiam.cm">contact@monmiammiam.cm</a></div>
     </div>
     <div className="public-container public-footer-bottom"><span>© 2026 ZeDuc-Sp@ce. Tous droits réservés.</span><span>Mon Miam Miam · Le climat du goût et du chill</span></div>
@@ -122,7 +122,7 @@ function Promotions() {
 }
 
 function Access() {
-  return <main id="public-main" className="public-container public-access"><span className="public-kicker">Mon Miam Miam</span><h1>Accéder à l’application</h1><p>Découvrez le restaurant et son menu sur ce site. L’espace administrateur de démonstration est disponible ci-dessous.</p><div className="public-access-card"><h2>Espace administrateur</h2><p>Tableau de bord, menu, équipe, promotions, réclamations et paramètres.</p><Link className="public-pill" to="/admin">Ouvrir le back-office →</Link></div><div id="inscription" className="public-access-note"><h2>Connexion et inscription client</h2><p>Ces parcours nécessitent l’authentification du projet commun. Ils ne sont pas encore reliés ici ; aucune inscription n’est enregistrée depuis cette page.</p><Link to="/menu">Parcourir le menu →</Link></div></main>
+  return <main id="public-main" className="public-container public-access"><span className="public-kicker">Mon Miam Miam</span><h1>Accéder à l’application</h1><p>Découvrez le restaurant et son menu sur ce site. Les espaces de gestion sont accessibles en démonstration ci-dessous.</p><div className="public-access-card"><h2>Espace administrateur</h2><p>Tableau de bord, menu, équipe, promotions, réclamations et paramètres.</p><Link className="public-pill" to="/admin">Ouvrir le back-office →</Link></div><div className="public-access-card"><h2>Espace gérant</h2><p>Supervision des commandes, équipe, statistiques et validation des réclamations.</p><Link className="public-pill" to="/gerant">Ouvrir l’espace gérant →</Link></div><div id="inscription" className="public-access-note"><h2>Connexion et inscription client</h2><p>Ces parcours nécessitent l’authentification du projet commun. Ils ne sont pas encore reliés ici ; aucune inscription n’est enregistrée depuis cette page.</p><Link to="/menu">Parcourir le menu →</Link></div></main>
 }
 
 export default function PublicSite({ page }) {

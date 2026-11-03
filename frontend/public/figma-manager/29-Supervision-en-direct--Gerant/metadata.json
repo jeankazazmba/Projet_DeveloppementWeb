@@ -1,0 +1,22 @@
+{
+  "id": "146:8683",
+  "page": "Page 1",
+  "pageId": "0:1",
+  "name": "Supervision en direct -Gérant",
+  "width": 1691,
+  "height": 1687,
+  "type": "FRAME",
+  "path": "screens/29-Supervision-en-direct--Gerant",
+  "layerCount": 499,
+  "assetCount": 178,
+  "visualMode": "svg",
+  "notes": [
+    "Calque SVG (146:9097): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9098): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9099): Failed to export node. This node may not have any visible layers.",
+    "Calque icon/logout (146:9206): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9207): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9208): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9209): Failed to export node. This node may not have any visible layers."
+  ]
+}

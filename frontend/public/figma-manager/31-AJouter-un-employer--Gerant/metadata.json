@@ -1,0 +1,19 @@
+{
+  "id": "146:9587",
+  "page": "Page 1",
+  "pageId": "0:1",
+  "name": "AJouter un employer -Gérant",
+  "width": 1280,
+  "height": 1193,
+  "type": "FRAME",
+  "path": "screens/31-AJouter-un-employer--Gerant",
+  "layerCount": 345,
+  "assetCount": 119,
+  "visualMode": "svg",
+  "notes": [
+    "Calque icon/logout (146:9856): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9857): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9858): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9859): Failed to export node. This node may not have any visible layers."
+  ]
+}
