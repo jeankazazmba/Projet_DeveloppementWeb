@@ -207,12 +207,44 @@
 .public-modal h2 { font-size:1.65rem; }
 .public-modal p { margin:20px 0; }
 .public-modal-close { position:absolute;right:15px;top:10px;border:0;background:none;color:#eee;font-size:1.7rem!important; }
-.public-access { min-height:650px;padding-block:90px; }
-.public-access > p { max-width:650px;margin:20px 0 35px; }
-.public-access-card,.public-access-note { max-width:700px;margin:20px 0;padding:30px;border-radius:20px;background:#171717; }
-.public-access-card h2,.public-access-note h2 { font-size:1.4rem; }
-.public-access-card p,.public-access-note p { margin:12px 0 20px; }
-.public-access-note a { color:var(--gold); }
+.public-access-portal { padding:84px 0 110px; background:radial-gradient(ellipse 58% 35% at 50% 8%,#80643527,transparent 75%),#050505; }
+.public-access-intro { text-align:center; }
+.public-access-intro h1 { font-size:clamp(2.7rem,5.2vw,5rem); }
+.public-access-intro > p { max-width:640px;margin:19px auto 0;font-size:1.03rem; }
+.public-access-steps { display:flex;align-items:center;justify-content:center;gap:16px;margin:33px auto 45px;color:#bcb4a6;font-size:.78rem;font-weight:600; }
+.public-access-steps span { display:inline-flex;align-items:center;gap:8px; }
+.public-access-steps b { display:grid;place-items:center;width:23px;height:23px;border:1px solid #b99d69;border-radius:50%;color:var(--gold);font-size:.7rem; }
+.public-access-steps i { width:40px;height:1px;background:#615541; }
+.public-access-profiles { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px; }
+.public-profile-card { min-height:260px;padding:22px;display:flex;flex-direction:column;text-align:left;color:#eee9de;background:linear-gradient(145deg,#1b1b19,#111210);border:1px solid #3d3a32;border-radius:20px;transition:transform .2s,border-color .2s,background .2s,box-shadow .2s; }
+.public-profile-card:hover,.public-profile-card.is-selected { transform:translateY(-4px);border-color:#cbb586;background:linear-gradient(145deg,#2b281f,#161714);box-shadow:0 15px 35px #0008; }
+.public-profile-card-top,.public-profile-card-bottom { display:flex;align-items:center;justify-content:space-between;gap:10px; }
+.public-profile-icon { display:grid;place-items:center;width:53px;height:53px;border-radius:15px;background:#3b3325;color:#e2c994; }
+.public-profile-number { color:#817b70;font-size:.68rem;letter-spacing:.09em;font-weight:700; }
+.public-profile-card > strong { margin-top:24px;font-size:1.3rem;font-weight:700; }
+.public-profile-subtitle { margin-top:6px;color:#a9a397;font-size:.79rem;line-height:1.5; }
+.public-profile-card-bottom { margin-top:auto;padding-top:25px;color:#c9b487;font-size:.73rem;font-weight:600; }
+.public-profile-card-bottom span:last-child { font-size:1.3rem;line-height:1; }
+.public-access-detail-wrap { margin-top:18px; }
+.public-access-detail { min-height:192px;padding:27px 32px;display:flex;align-items:center;justify-content:space-between;gap:30px;border:1px solid #4c4334;border-radius:20px;background:linear-gradient(110deg,#1e1d19,#121311); }
+.public-access-detail h2 { font-size:clamp(1.3rem,2vw,1.8rem); }
+.public-access-detail p { max-width:630px;margin-top:11px;font-size:.83rem; }
+.public-access-detail-copy { min-width:0; }
+.public-access-detail .public-kicker { margin-bottom:8px;font-size:.67rem; }
+.public-access-state { display:inline-flex;align-items:center;gap:7px;margin-top:17px;color:#d8b989;font-size:.7rem;font-weight:700; }
+.public-access-state i { width:7px;height:7px;border-radius:50%;background:#c69558; }
+.public-access-state.is-ready { color:#a8d6b7; }
+.public-access-state.is-ready i { background:#7fbe94; }
+.public-access-detail-action { max-width:330px;flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:10px; }
+.public-access-detail-action .public-pill { font-size:.76rem;padding-inline:20px;white-space:normal; }
+.public-access-detail-action small { color:#8f8b82;font-size:.65rem;line-height:1.5; }
+.public-access-detail-action p { margin:0;font-size:.78rem; }
+.public-access-detail-action > a:not(.public-pill) { color:var(--gold);font-size:.78rem;font-weight:700; }
+.public-access-detail-mark { margin-right:30px;color:#bda474;font-size:3rem; }
+.public-access-registration { display:flex;align-items:center;justify-content:space-between;gap:30px;margin-top:90px;padding:30px 0 0;border-top:1px solid #292927;scroll-margin-top:115px; }
+.public-access-registration h2 { font-size:clamp(1.4rem,2.5vw,2rem); }
+.public-access-registration p { max-width:670px;margin-top:10px;font-size:.81rem; }
+.public-access-registration > a { flex:none;color:var(--gold);font-size:.82rem;font-weight:700; }
 
 @media (max-width:1050px) {
  .public-header { padding-inline:25px; }
@@ -222,6 +254,8 @@
  .public-menu-heading { display:block; }
  .public-menu-tools { margin-top:20px; }
  .public-menu-grid,.public-offers-grid { grid-template-columns:repeat(2,1fr); }
+ .public-access-profiles { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .public-profile-card { min-height:220px; }
 }
 @media (max-width:760px) {
  .public-container { width:min(100% - 32px,620px); }
@@ -246,6 +280,9 @@
  .public-event-action { margin-left:85px;align-items:start; }
  .public-section-heading { display:block; }
  .public-section-heading p { margin-top:12px; }
+ .public-access-portal { padding-top:65px; }
+ .public-access-detail { align-items:flex-start;flex-direction:column; }
+ .public-access-detail-action { max-width:none; }
 }
 @media (max-width:520px) {
  .public-site { font-size:14px; }
@@ -263,4 +300,15 @@
  .public-menu-tools input { width:100%; }
  .public-dish-card { min-height:420px; }
  .public-event-action { margin-left:0;width:100%; }
+ .public-access-profiles { gap:10px; }
+ .public-profile-card { padding:16px;min-height:200px; }
+ .public-profile-icon { width:43px;height:43px; }
+ .public-profile-icon svg { width:24px;height:24px; }
+ .public-profile-card > strong { margin-top:18px;font-size:1.05rem; }
+ .public-profile-subtitle { font-size:.7rem; }
+ .public-profile-card-bottom { font-size:.65rem;padding-top:15px; }
+ .public-access-steps { gap:8px;font-size:.64rem; }
+ .public-access-steps i { width:18px; }
+ .public-access-detail { padding:21px; }
+ .public-access-registration { align-items:flex-start;flex-direction:column;margin-top:60px; }
 }

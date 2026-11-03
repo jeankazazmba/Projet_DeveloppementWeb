@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import AccessPortal from './AccessPortal.jsx'
 import { dishes, events, formatPrice, homeImage, menuImage, offers, promoImage } from './publicData.js'
 import './public.css'
 
@@ -22,7 +23,7 @@ function Header({ page }) {
     <button type="button" className="public-menu-toggle" aria-expanded={open} aria-controls="public-nav" onClick={() => setOpen(!open)}>☰ <span className="public-sr-only">Menu</span></button>
     <nav id="public-nav" className={open ? 'public-nav is-open' : 'public-nav'} aria-label="Navigation publique">
       {links.map(link => <Link key={link.label} to={link.to} aria-current={link.active ? 'page' : undefined} onClick={() => setOpen(false)}>{link.label}</Link>)}
-      <div className="public-nav-access"><Link to="/acces">Connexion</Link><Link className="public-pill" to="/acces#inscription">Inscription</Link></div>
+      <div className="public-nav-access"><Link to="/acces" aria-current={page === 'access' ? 'page' : undefined}>Connexion</Link><Link className="public-pill" to="/acces#inscription">Inscription</Link></div>
     </nav>
   </header>
 }
@@ -32,7 +33,7 @@ function Footer() {
     <div className="public-container public-footer-grid">
       <div><Link to="/"><img className="public-footer-logo" src={logo} alt="Mon Miam Miam" /></Link><p>Le climat du goût et du chill à Yansoki. Cuisine camerounaise, terrasse panoramique et moments conviviaux.</p></div>
       <div><h3>Liens rapides</h3><Link to="/">Accueil</Link><Link to="/menu">Menu</Link><Link to="/promotions">Promotions</Link><Link to="/promotions#evenements">Événements</Link></div>
-      <div><h3>Assistance</h3><Link to="/acces">Accéder à l’application</Link><Link to="/admin">Espace administration</Link><Link to="/gerant">Espace gérant</Link><a href="mailto:contact@monmiammiam.cm">Contacter le restaurant</a></div>
+      <div><h3>Assistance</h3><Link to="/acces">Choisir mon espace</Link><Link to="/acces#inscription">Créer un compte</Link><a href="mailto:contact@monmiammiam.cm">Contacter le restaurant</a></div>
       <div><h3>Contact</h3><p>Résidence La Terrasse, Yansoki, Douala, Cameroun</p><p>+237 6 00 00 00 00</p><a href="mailto:contact@monmiammiam.cm">contact@monmiammiam.cm</a></div>
     </div>
     <div className="public-container public-footer-bottom"><span>© 2026 ZeDuc-Sp@ce. Tous droits réservés.</span><span>Mon Miam Miam · Le climat du goût et du chill</span></div>
@@ -121,10 +122,6 @@ function Promotions() {
   </main>
 }
 
-function Access() {
-  return <main id="public-main" className="public-container public-access"><span className="public-kicker">Mon Miam Miam</span><h1>Accéder à l’application</h1><p>Découvrez le restaurant et son menu sur ce site. Les espaces de gestion sont accessibles en démonstration ci-dessous.</p><div className="public-access-card"><h2>Espace administrateur</h2><p>Tableau de bord, menu, équipe, promotions, réclamations et paramètres.</p><Link className="public-pill" to="/admin">Ouvrir le back-office →</Link></div><div className="public-access-card"><h2>Espace gérant</h2><p>Supervision des commandes, équipe, statistiques et validation des réclamations.</p><Link className="public-pill" to="/gerant">Ouvrir l’espace gérant →</Link></div><div id="inscription" className="public-access-note"><h2>Connexion et inscription client</h2><p>Ces parcours nécessitent l’authentification du projet commun. Ils ne sont pas encore reliés ici ; aucune inscription n’est enregistrée depuis cette page.</p><Link to="/menu">Parcourir le menu →</Link></div></main>
-}
-
 export default function PublicSite({ page }) {
   const location = useLocation()
   useEffect(() => {
@@ -132,5 +129,5 @@ export default function PublicSite({ page }) {
     if (location.hash) window.setTimeout(() => document.getElementById(location.hash.slice(1))?.scrollIntoView(), 0)
     else window.scrollTo(0, 0)
   }, [location, page])
-  return <div className="public-site"><a className="public-skip" href="#public-main">Aller au contenu</a><Header page={page} />{page === 'home' ? <Home /> : page === 'menu' ? <Menu /> : page === 'promotions' ? <Promotions /> : <Access />}<Footer /><CookieChoice /></div>
+  return <div className="public-site"><a className="public-skip" href="#public-main">Aller au contenu</a><Header page={page} />{page === 'home' ? <Home /> : page === 'menu' ? <Menu /> : page === 'promotions' ? <Promotions /> : <AccessPortal />}<Footer /><CookieChoice /></div>
 }
