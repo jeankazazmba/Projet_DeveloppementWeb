@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 
-const chartColors = { gold: '#dfc698', muted: '#88877f', green: '#83c4a4' }
+const chartColors = { gold: 'var(--mg-gold)', muted: 'var(--mg-muted)', green: 'var(--mg-green)', line: 'var(--mg-line)', text: 'var(--mg-text)' }
 
 export function AreaChart({ values, labels, suffix = '', compact = false }) {
   const gradientId = useId().replaceAll(':', '')
@@ -16,13 +16,13 @@ export function AreaChart({ values, labels, suffix = '', compact = false }) {
   const area = `${line} L568 193 L36 193 Z`
   return <div className={`manager-chart ${compact ? 'compact' : ''}`}>
     <svg viewBox="0 0 604 220" role="img" aria-label="Évolution des commandes et ventes">
-      <defs><linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#dfc698" stopOpacity=".28" /><stop offset="100%" stopColor="#dfc698" stopOpacity=".01" /></linearGradient></defs>
-      {[48, 96, 144, 193].map(y => <line key={y} x1="36" x2="568" y1={y} y2={y} stroke="#393832" strokeDasharray={y === 193 ? undefined : '4 5'} />)}
+      <defs><linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor={chartColors.gold} stopOpacity=".28" /><stop offset="100%" stopColor={chartColors.gold} stopOpacity=".01" /></linearGradient></defs>
+      {[48, 96, 144, 193].map(y => <line key={y} x1="36" x2="568" y1={y} y2={y} stroke={chartColors.line} strokeDasharray={y === 193 ? undefined : '4 5'} />)}
       <path d={area} fill={`url(#${gradientId})`} />
       <path d={line} fill="none" stroke={chartColors.gold} strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round" />
       {points.map((point, index) => <g key={index}>
         <circle cx={point.x} cy={point.y} r="11" fill="transparent" tabIndex="0" aria-label={`${labels[index] || `Point ${index + 1}`} : ${point.value}${suffix}`} onFocus={() => setActive(index)} onMouseEnter={() => setActive(index)} />
-        {activeIndex === index && <circle cx={point.x} cy={point.y} r="4.5" fill={chartColors.gold} stroke="#161615" strokeWidth="2" />}
+        {activeIndex === index && <circle cx={point.x} cy={point.y} r="4.5" fill={chartColors.gold} stroke={chartColors.text} strokeWidth="2" />}
         {(compact || index % Math.max(1, Math.floor(labels.length / 6)) === 0 || index === labels.length - 1) && <text x={point.x} y="213" textAnchor="middle" fill={chartColors.muted} fontSize="10">{labels[index]}</text>}
       </g>)}
     </svg>
@@ -33,7 +33,7 @@ export function AreaChart({ values, labels, suffix = '', compact = false }) {
 export function LoyaltyBars({ issued, used }) {
   const maximum = Math.max(...issued, ...used, 1) * 1.2
   return <div className="manager-chart"><svg viewBox="0 0 390 220" role="img" aria-label="Points de fidélité distribués et utilisés par semaine">
-    {[55, 100, 145, 190].map(y => <line key={y} x1="25" x2="365" y1={y} y2={y} stroke="#393832" strokeDasharray="4 5" />)}
+    {[55, 100, 145, 190].map(y => <line key={y} x1="25" x2="365" y1={y} y2={y} stroke={chartColors.line} strokeDasharray="4 5" />)}
     {issued.map((value, index) => {
       const x = 47 + index * 85
       const issuedHeight = value / maximum * 155
@@ -52,10 +52,10 @@ export function ServiceDonut({ onsite, delivery }) {
   const onsitePercent = total ? Math.round(onsite / total * 100) : 0
   const deliveryPercent = 100 - onsitePercent
   return <div className="manager-donut"><svg viewBox="0 0 160 160" role="img" aria-label={`${onsitePercent} % sur place et ${deliveryPercent} % en livraison`}>
-    <circle cx="80" cy="80" r="55" fill="none" stroke="#403a30" strokeWidth="19" />
+    <circle cx="80" cy="80" r="55" fill="none" stroke={chartColors.line} strokeWidth="19" />
     <circle cx="80" cy="80" r="55" fill="none" stroke={chartColors.gold} strokeWidth="19" strokeDasharray={`${onsitePercent * 3.456} 346`} transform="rotate(-90 80 80)" />
     <circle cx="80" cy="80" r="55" fill="none" stroke={chartColors.green} strokeWidth="19" strokeDasharray={`${deliveryPercent * 3.456} 346`} strokeDashoffset={-onsitePercent * 3.456} transform="rotate(-90 80 80)" />
-    <text x="80" y="77" textAnchor="middle" fill="#f7f3e8" fontSize="24" fontWeight="700">{total}</text>
+    <text x="80" y="77" textAnchor="middle" fill={chartColors.text} fontSize="24" fontWeight="700">{total}</text>
     <text x="80" y="96" textAnchor="middle" fill={chartColors.muted} fontSize="10">commandes</text>
   </svg><div className="manager-donut-legend"><span><i className="gold" /> Sur place <strong>{onsitePercent} %</strong></span><span><i className="green" /> Livraison <strong>{deliveryPercent} %</strong></span></div></div>
 }

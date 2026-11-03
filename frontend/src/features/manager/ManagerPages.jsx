@@ -7,7 +7,9 @@ const includes = (value, query) => String(value ?? '').toLocaleLowerCase('fr').i
 const elapsed = (date, now) => Math.max(0, Math.floor((now - new Date(date).getTime()) / 60000))
 
 function Heading({ eyebrow, title, description, action }) {
-  return <div className="manager-page-heading"><div><span className="manager-eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></div>{action}</div>
+  const words = title.split(' ')
+  const accent = words.pop()
+  return <div className="manager-page-heading"><div><span className="manager-eyebrow">{eyebrow}</span><h1>{words.length > 0 && `${words.join(' ')} `}<span>{accent}</span></h1><p>{description}</p></div>{action}</div>
 }
 
 function Metric({ label, value, detail, tone = 'gold' }) {
