@@ -39,6 +39,7 @@ export default function AppTopBar({
           borderRadius: 24,
           overflow: "hidden",
           borderWidth: 1,
+          borderTopWidth: 0,
           borderColor: "rgba(240,219,174,0.38)",
           backgroundColor: "rgba(26,27,26,0.42)",
           flexDirection: "row",
@@ -47,17 +48,6 @@ export default function AppTopBar({
           gap: 9,
         }}
       >
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            top: 1,
-            left: 20,
-            right: 20,
-            height: 1,
-            backgroundColor: "rgba(255,255,255,0.24)",
-          }}
-        />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Accueil Mon Miam Miam"

@@ -258,6 +258,7 @@ function BottomTabs({ blurTarget }) {
         left: 16,
         right: 16,
         borderWidth: 1,
+        borderTopWidth: 0,
         borderColor: "rgba(240,219,174,0.4)",
         borderRadius: 28,
         overflow: "hidden",
@@ -273,17 +274,6 @@ function BottomTabs({ blurTarget }) {
         zIndex: 20,
       }}
     >
-      <View
-        pointerEvents="none"
-        style={{
-          position: "absolute",
-          top: 1,
-          left: 18,
-          right: 18,
-          height: 1,
-          backgroundColor: "rgba(255,255,255,0.22)",
-        }}
-      />
       {tabs.map(([name, label, icon]) => (
         <Pressable
           key={name}
