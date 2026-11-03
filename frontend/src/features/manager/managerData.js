@@ -39,6 +39,13 @@ export const initialTables = Array.from({ length: 12 }, (_, index) => {
   }
 })
 
+// Static preview markers. A driver app and authenticated location API are required for live GPS.
+export const previewCouriers = [
+  { id: 'liv-01', name: 'Livreur démo 01', status: 'En livraison', orderId: 'MM-1044', latitude: 3.9732, longitude: 9.7895, updatedAt: null },
+  { id: 'liv-02', name: 'Livreur démo 02', status: 'Disponible', orderId: null, latitude: 3.9684, longitude: 9.7951, updatedAt: null },
+  { id: 'liv-03', name: 'Livreur démo 03', status: 'En livraison', orderId: 'MM-1049', latitude: 3.9754, longitude: 9.7973, updatedAt: null },
+]
+
 export const initialClaims = [
   {
     id: 'RC-0031', student: 'Arsène K.', location: 'Rés. La Terrasse · Douala', elapsed: 'Il y a 25 min', orderId: 'MM-1042', amount: 4400,

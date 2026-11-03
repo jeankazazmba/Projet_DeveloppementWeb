@@ -12,6 +12,7 @@ const iconPaths = {
   download: 'M12 3v13m-5-5 5 5 5-5M4 18v3h16v-3',
   chevron: 'm9 5 7 7-7 7',
   menu: 'M3 6h18M3 12h18M3 18h18',
+  delivery: 'M5 17a2 2 0 1 0 0 .1M19 17a2 2 0 1 0 0 .1M7 17h7l-3-8H7l-2 8Zm7 0h3l2-5h-6M10 9l2-2h3',
 }
 
 export default function ManagerIcon({ name, size = 18 }) {

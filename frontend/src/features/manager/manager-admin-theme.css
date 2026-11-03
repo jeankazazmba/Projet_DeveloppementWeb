@@ -229,3 +229,27 @@
 .manager-operation-switch.on span { background: #211b11; transform: translateX(18px); }
 @media(max-width:1050px) { .manager-operations-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media(max-width:600px) { .manager-operations-grid { grid-template-columns: 1fr; } }
+
+.manager-delivery-disclaimer { display: flex; gap: 11px; align-items: flex-start; margin-bottom: 19px; padding: 13px 16px; border: 1px solid var(--mg-line); border-radius: 12px; background: var(--mg-card); color: var(--mg-gold); font-size: 13px; line-height: 1.5; }
+.manager-delivery-disclaimer svg { flex: 0 0 18px; margin-top: 2px; }
+.manager-delivery-layout { display: grid; grid-template-columns: minmax(0,2fr) minmax(280px,1fr); gap: 17px; }
+.manager-delivery-map-panel { overflow: hidden; }
+.manager-delivery-map { height: 465px; width: 100%; background: var(--mg-raised); z-index: 0; }
+.manager-delivery-map .leaflet-control-attribution { font-size: 11px; }
+.manager-delivery-sidebar { display: flex; flex-direction: column; }
+.manager-delivery-filters { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 17px 14px; }
+.manager-delivery-filters button { border: 1px solid var(--mg-line); border-radius: 20px; padding: 6px 10px; color: var(--mg-muted); background: var(--mg-raised); font-size: 11px; }
+.manager-delivery-filters button.active { border-color: var(--mg-gold); color: #17140e; background: var(--mg-gold); }
+.manager-delivery-list { display: grid; gap: 8px; padding: 0 15px 15px; }
+.manager-delivery-list button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 13px; border: 1px solid var(--mg-line); border-radius: 11px; background: var(--mg-raised); color: var(--mg-text); text-align: left; }
+.manager-delivery-list button.selected { border-color: var(--mg-gold); }
+.manager-delivery-list button > span:nth-child(2) { flex: 1; min-width: 0; }
+.manager-delivery-list strong,.manager-delivery-list small { display: block; }
+.manager-delivery-list strong { font-size: 13px; }
+.manager-delivery-list small { color: var(--mg-muted); font-size: 11px; margin-top: 3px; }
+.manager-delivery-dot { width: 12px; height: 12px; flex: 0 0 12px; border-radius: 50%; }
+.manager-delivery-detail { margin: auto 15px 15px; padding: 16px; border-top: 1px solid var(--mg-line); color: var(--mg-muted); }
+.manager-delivery-detail strong { display: block; color: var(--mg-text); font-size: 16px; margin-top: 7px; }
+.manager-delivery-detail p { margin: 5px 0; font-size: 12px; }
+.manager-delivery-detail small { font-size: 11px; }
+@media(max-width:1000px) { .manager-delivery-layout { grid-template-columns: 1fr; } .manager-delivery-map { height: 390px; } }
