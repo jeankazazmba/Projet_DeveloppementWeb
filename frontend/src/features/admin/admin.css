@@ -1,0 +1,56 @@
+.admin-shell {
+  --admin-canvas: #000000;
+  --admin-surface: #121212;
+  --admin-raised: #1d1d1d;
+  --admin-text: #f4f0e7;
+  --admin-muted: #aaa497;
+  --admin-gold: #cfbd97;
+  --admin-line: #39352e;
+  min-height: 100vh;
+  display: flex;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.admin-shell.is-light {
+  --admin-canvas: #f7f5ee;
+  --admin-surface: #ffffff;
+  --admin-raised: #eeeadf;
+  --admin-text: #23211d;
+  --admin-muted: #6b665d;
+  --admin-line: #d8d2c4;
+}
+
+.admin-sidebar { width: 16rem; flex: 0 0 16rem; padding: 1.5rem .75rem; background: var(--admin-surface); border-right: 1px solid var(--admin-line); }
+.admin-brand { display: flex; flex-direction: column; gap: .35rem; padding: .75rem; color: var(--admin-gold); font-size: 1.1rem; font-weight: 700; text-decoration: none; }
+.admin-brand span, .admin-kicker { color: var(--admin-muted); font-size: .75rem; font-weight: 700; letter-spacing: .08em; }
+.admin-sidebar nav { display: grid; gap: .35rem; margin-top: 2rem; }
+.admin-sidebar nav button { border: 0; border-radius: .75rem; padding: .8rem 1rem; background: transparent; color: var(--admin-muted); text-align: left; cursor: pointer; }
+.admin-sidebar nav button:hover, .admin-sidebar nav button.is-active { background: var(--admin-gold); color: #17140e; font-weight: 700; }
+.admin-workspace { min-width: 0; flex: 1; }
+.admin-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 5rem; padding: 1rem 2rem; border-bottom: 1px solid var(--admin-line); }
+.admin-header strong { font-size: 1.15rem; }
+.admin-header-actions, .font-size-control { display: flex; align-items: center; gap: .5rem; }
+.font-size-control { padding: .3rem; border: 1px solid var(--admin-line); border-radius: .75rem; background: var(--admin-surface); }
+.font-size-control button, .admin-theme-button { min-height: 2.25rem; border: 0; border-radius: .5rem; padding: .35rem .65rem; background: var(--admin-raised); color: var(--admin-text); cursor: pointer; }
+.font-size-control button:disabled { cursor: not-allowed; opacity: .45; }
+.font-size-control span { min-width: 4.75rem; color: var(--admin-muted); font-size: .8rem; text-align: center; }
+.admin-theme-button { border: 1px solid var(--admin-line); }
+.admin-content { width: min(100%, 100rem); margin: 0 auto; padding: 2.5rem 2rem; }
+.admin-welcome h1 { margin: .5rem 0 1rem; font-size: clamp(2rem, 4vw, 3.25rem); }
+.admin-welcome p { max-width: 45rem; color: var(--admin-muted); line-height: 1.6; }
+.admin-empty-state { margin-top: 2rem; padding: 2rem; border: 1px dashed var(--admin-line); border-radius: 1rem; background: var(--admin-surface); }
+.admin-empty-state h2 { margin: 0; color: var(--admin-gold); font-size: 1.25rem; }
+.admin-empty-state p { color: var(--admin-muted); line-height: 1.6; }
+.admin-shell button:focus-visible, .admin-shell a:focus-visible { outline: 3px solid var(--admin-gold); outline-offset: 3px; }
+
+@media (max-width: 48rem) {
+  .admin-shell { display: block; }
+  .admin-sidebar { width: auto; padding: .75rem; border-right: 0; border-bottom: 1px solid var(--admin-line); }
+  .admin-sidebar nav { display: flex; overflow-x: auto; margin-top: .75rem; }
+  .admin-sidebar nav button { flex: 0 0 auto; }
+  .admin-header { align-items: flex-start; flex-direction: column; padding: 1rem; }
+  .admin-header-actions { width: 100%; justify-content: space-between; }
+  .admin-content { padding: 1.5rem 1rem; }
+}

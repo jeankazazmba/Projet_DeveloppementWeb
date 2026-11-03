@@ -1,5 +1,6 @@
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Routes, Route } from 'react-router-dom'
 import ApiStatus from './features/ApiStatus.jsx';
+import AdminApp from './features/admin/AdminApp.jsx'
 
 
 
@@ -17,6 +18,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Accueil />} />
+      <Route path="/admin" element={<AdminApp />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
