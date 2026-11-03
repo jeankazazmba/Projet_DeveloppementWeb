@@ -33,6 +33,8 @@ import SplashIntro from "./SplashIntro";
 import FloatingCart from "./FloatingCart";
 import AppTopBar from "./AppTopBar";
 import Discover from "./Discover";
+import DeliveryTracking from "./DeliveryTracking";
+import TimePickerField from "./TimePickerField";
 import PaymentMethods, { cashPaymentLabel } from "./PaymentMethods";
 import {
   Button,
@@ -1100,11 +1102,10 @@ function Checkout() {
         />
       </View>
       <Glass style={{ padding: 17, marginTop: 10 }}>
-        <Field
+        <TimePickerField
           label="Heure souhaitée"
           value={arrival}
-          onChangeText={setArrival}
-          placeholder="Ex. 12:30"
+          onChange={setArrival}
         />
         {mode === "Livraison" && (
           <Field
@@ -1252,7 +1253,7 @@ function Confirmation({ params }) {
         </Glass>
       )}
       <Button
-        title="Voir ma commande"
+        title={order?.mode === "Livraison" ? "Voir le suivi de livraison" : "Voir ma commande"}
         onPress={() => go("order", { id: order?.id })}
         style={{ marginTop: 19 }}
       />
@@ -1309,6 +1310,11 @@ function Orders() {
               {order.items.length} plat{order.items.length > 1 ? "s" : ""} ·{" "}
               {order.mode}
             </Text>
+            {order.mode === "Livraison" && (
+              <Text style={{ color: colors.gold, marginTop: 7, fontSize: 12 }}>
+                Voir la carte de suivi →
+              </Text>
+            )}
             <View style={[styles.rowBetween, { marginTop: 13 }]}>
               <Text
                 style={{ color: colors.green, fontWeight: "700", fontSize: 12 }}
@@ -1402,6 +1408,11 @@ function OrderDetail({ params }) {
         <Summary label="Réduction" value={money(order.discount)} />
         <Summary label="Total" value={money(order.total)} strong />
       </Glass>
+      {order.mode === "Livraison" && (
+        <View style={{ marginTop: 18 }}>
+          <DeliveryTracking order={order} />
+        </View>
+      )}
       <Button
         title="Signaler un problème"
         variant="secondary"

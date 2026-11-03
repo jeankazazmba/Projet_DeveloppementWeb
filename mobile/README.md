@@ -14,4 +14,8 @@ Les images de plats proviennent des SVG locaux de la maquette. `scripts/extract_
 
 La rubrique « À découvrir » présente les promotions, événements et jeux du site public dans le thème mobile. Les sept visuels des offres proviennent de l'export local `20-promotions-evenements--Public`. Le contenu est informatif : les dates et disponibilités sont à confirmer, et le quiz attend une publication réelle. La roue reste une simulation locale.
 
+Le formulaire de commande utilise le sélecteur d'heure natif du téléphone. Pour une commande en livraison, son détail présente une carte et le futur emplacement du livreur. Les repères actuels sont explicitement fictifs. Une position réelle pourra être fournie dans `order.deliveryTracking.courier` (`latitude`, `longitude`, `name`) avec `updatedAt` ; la mise à jour, l'affectation et la protection de ces données exigent encore l'API et l'application du livreur. Aucune permission GPS n'est demandée à l'étudiant pour afficher cette carte.
+
+La prévisualisation de la carte native dans Expo Go utilise `react-native-maps`. Une version Android installable utilisant Google Maps nécessitera la configuration de sa clé dans le plugin natif ; cette étape appartient à la compilation réalisée par le propriétaire du projet.
+
 Dans Expo Go, le splash natif peut différer de celui d'une application installée. La transition de marque intégrée à l'application reste visible pour prévisualiser ce parcours ; vérifier le splash natif dans une version installable lorsque la compilation sera réalisée.

@@ -1,0 +1,19 @@
+import React from "react";
+import { Text, View } from "react-native";
+import { colors, Glass, Icon } from "./ui";
+
+export default function DeliveryTracking() {
+  return <Glass style={{ padding: 16 }}>
+    <View style={{ flexDirection: "row", gap: 9, alignItems: "center", marginBottom: 10 }}><Icon name="bicycle-outline" /><Text style={{ color: colors.text, fontWeight: "800", fontSize: 17 }}>Suivi du livreur</Text></View>
+    <Text style={{ color: colors.gold, lineHeight: 19, marginBottom: 10 }}>Aperçu démo · aucune position réelle de livreur.</Text>
+    <View style={{ height: 260, overflow: "hidden", borderRadius: 17 }}>
+      <iframe
+        title="Carte indicative de Yansoki"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=9.782%2C3.962%2C9.802%2C3.978&layer=mapnik&marker=3.9732%2C9.7895"
+        style={{ width: "100%", height: "100%", border: 0 }}
+        loading="lazy"
+      />
+    </View>
+    <Text style={{ color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 10 }}>Le point visible est fictif. Le suivi réel nécessite une position transmise par un livreur et l’API.</Text>
+  </Glass>;
+}
