@@ -16,6 +16,6 @@ Authentification et réinitialisation du mot de passe ; compte et profil réels 
 
 ## Vérification effectuée
 
-Analyse syntaxique des fichiers JavaScript/JSX, résolution des versions npm dans `package-lock.json` et vérification des fichiers image. Aucun lancement ou compilation n'a été effectué, conformément au rôle réservé au propriétaire du projet.
+Analyse syntaxique des fichiers JavaScript/JSX, résolution des versions npm dans `package-lock.json` et vérification des fichiers image. Après la migration vers SDK 58, `expo-doctor` valide 20 contrôles sur 20. Aucun lancement ou compilation sous SDK 58 n'a été effectué, conformément au rôle réservé au propriétaire du projet.
 
-**Environnement** : Expo SDK 57, React Native 0.86.3, React 19.2.3. Le Node.js actuellement actif est 23.4.0 ; React Native 0.86.3 annonce les versions de Node.js 20.19.4+, 22.13.0+, 24.3.0+ ou 25+, dans les plages indiquées par son moteur npm. Prévoir une version prise en charge avant le lancement.
+**Environnement** : Expo SDK 58, React Native 0.88.1, React 19.3.0. Le Node.js actuellement actif est 23.4.0 ; Expo SDK 58 exige Node.js 22.13+ (branche 22), 24.3+ (branche 24) ou 26+. Utiliser une version prise en charge avant le lancement.
