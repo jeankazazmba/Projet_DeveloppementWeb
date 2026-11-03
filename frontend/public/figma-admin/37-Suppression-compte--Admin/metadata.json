@@ -1,0 +1,14 @@
+{
+  "id": "146:11902",
+  "page": "Page 1",
+  "pageId": "0:1",
+  "name": "Suppression compte -Admin",
+  "width": 1280,
+  "height": 1026,
+  "type": "FRAME",
+  "path": "screens/37-Suppression-compte--Admin",
+  "layerCount": 15,
+  "assetCount": 6,
+  "visualMode": "svg",
+  "notes": []
+}
