@@ -147,13 +147,15 @@ function AppProvider({ children }) {
     });
   };
   const addToCart = (id, quantity = 1) => {
+    const dish = findDish(id);
+    if (!dish || dish.available === false) return;
     setData((current) => ({
       ...current,
       cart: { ...current.cart, [id]: (current.cart[id] || 0) + quantity },
     }));
     Alert.alert(
       "Ajouté au panier",
-      `${findDish(id)?.name || "Plat"} · ${quantity} article${quantity > 1 ? "s" : ""}`,
+      `${dish.name} · ${quantity} article${quantity > 1 ? "s" : ""}`,
     );
   };
   const setQuantity = (id, quantity) =>
@@ -835,10 +837,10 @@ function Menu({ params = {} }) {
   const filtered = dishes.filter(
     (dish) =>
       (category === "Tout" || dish.category === category) &&
-      dish.name.toLowerCase().includes(query.toLowerCase()),
+      `${dish.name} ${dish.description}`.toLowerCase().includes(query.toLowerCase()),
   );
   return (
-    <Page title="Menu du jour" subtitle="Des saveurs pour chaque envie.">
+    <Page title="Toute la carte" subtitle="Des saveurs pour chaque envie.">
       <Field
         value={query}
         onChangeText={setQuery}
@@ -919,9 +921,11 @@ function Detail({ params }) {
             >
               {money(dish.price)}
             </Text>
-            <Text style={{ color: colors.muted }}>
-              ★ {dish.rating} · {dish.minutes} min
-            </Text>
+            {(dish.rating || dish.minutes) && (
+              <Text style={{ color: colors.muted }}>
+                {[dish.rating && `★ ${dish.rating}`, dish.minutes && `${dish.minutes} min`].filter(Boolean).join(" · ")}
+              </Text>
+            )}
           </View>
           <View style={[styles.rowBetween, { marginBottom: 15 }]}>
             <Text style={{ color: colors.text, fontWeight: "700" }}>
@@ -944,7 +948,8 @@ function Detail({ params }) {
             </View>
           </View>
           <Button
-            title={`Ajouter · ${money(dish.price * quantity)}`}
+            title={dish.available === false ? "Momentanément indisponible" : `Ajouter · ${money(dish.price * quantity)}`}
+            disabled={dish.available === false}
             onPress={() => {
               addToCart(dish.id, quantity);
               go("cart");

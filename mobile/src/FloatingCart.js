@@ -17,6 +17,14 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+function edgeTarget(point, bounds, velocityX = 0, velocityY = 0) {
+  const projectedX = point.x + velocityX * 90;
+  return {
+    x: projectedX < (bounds.minX + bounds.maxX) / 2 ? bounds.minX : bounds.maxX,
+    y: clamp(point.y + velocityY * 45, bounds.minY, bounds.maxY),
+  };
+}
+
 export default function FloatingCart({ count, hasTabs, hidden, onOpen }) {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -39,26 +47,35 @@ export default function FloatingCart({ count, hasTabs, hidden, onOpen }) {
   const position = useRef(new Animated.ValueXY(initial.current)).current;
 
   useEffect(() => {
-    const next = {
-      x: clamp(
-        positionRef.current.x,
-        boundsRef.current.minX,
-        boundsRef.current.maxX,
-      ),
-      y: clamp(
-        positionRef.current.y,
-        boundsRef.current.minY,
-        boundsRef.current.maxY,
-      ),
-    };
-    positionRef.current = next;
+    const listener = position.addListener((value) => {
+      positionRef.current = value;
+    });
+    return () => position.removeListener(listener);
+  }, [position]);
+
+  useEffect(() => {
+    position.stopAnimation();
+    const next = edgeTarget(positionRef.current, boundsRef.current);
     position.setValue(next);
   }, [width, height, insets.top, insets.bottom, hasTabs, position]);
+
+  const settle = (velocityX = 0, velocityY = 0) => {
+    const target = edgeTarget(positionRef.current, boundsRef.current, velocityX, velocityY);
+    Animated.spring(position, {
+      toValue: target,
+      speed: 16,
+      bounciness: 5,
+      useNativeDriver: false,
+    }).start();
+  };
+  const settleRef = useRef(settle);
+  settleRef.current = settle;
 
   const responder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
+        position.stopAnimation();
         startRef.current = positionRef.current;
       },
       onPanResponderMove: (_, gesture) => {
@@ -79,7 +96,9 @@ export default function FloatingCart({ count, hasTabs, hidden, onOpen }) {
       },
       onPanResponderRelease: (_, gesture) => {
         if (Math.hypot(gesture.dx, gesture.dy) < 7) onOpenRef.current();
+        else settleRef.current(gesture.vx, gesture.vy);
       },
+      onPanResponderTerminate: () => settleRef.current(),
       onPanResponderTerminationRequest: () => false,
     }),
   ).current;

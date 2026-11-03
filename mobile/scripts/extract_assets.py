@@ -11,6 +11,7 @@ from pathlib import Path
 from PIL import Image
 
 SELECTED = {"layer-00007", "layer-00137", "layer-00155", "layer-00172", "layer-00195", "layer-00214", "layer-00231", "layer-00248", "layer-00265"}
+PUBLIC_MENU_LAYERS = (75, 101, 129, 157, 176, 202, 228, 253, 279)
 
 
 def main(export_root: Path, output_root: Path) -> None:
@@ -36,5 +37,31 @@ def main(export_root: Path, output_root: Path) -> None:
         print(name, f"{size[0]}x{size[1]}")
 
 
+def extract_ecosystem_menu(frontend_public: Path, output_root: Path) -> None:
+    """Keep mobile menu photos aligned with the local public/admin exports."""
+    output_root.mkdir(parents=True, exist_ok=True)
+    public_assets = frontend_public / "figma-public" / "19-Menu--Public" / "assets"
+    for layer in PUBLIC_MENU_LAYERS:
+        source = (public_assets / f"layer-{layer:05d}.svg").read_text(encoding="utf-8")
+        photos = []
+        for match in re.finditer(r"data:image/(png|jpeg|webp);base64,([^\"']+)", source):
+            photo = Image.open(io.BytesIO(base64.b64decode(match.group(2))))
+            if photo.width >= 120 and photo.height >= 90:
+                photos.append(photo)
+        if not photos:
+            raise ValueError(f"No menu photo in public layer {layer}")
+        photo = max(photos, key=lambda item: item.width * item.height)
+        photo.convert("RGB").save(output_root / f"public-menu-{layer:05d}.jpg", quality=84, optimize=True)
+
+    for index in range(8):
+        source = frontend_public / "assets" / "figma" / f"menu-photo{index}.png"
+        Image.open(source).convert("RGB").save(
+            output_root / f"admin-menu-{index}.jpg", quality=84, optimize=True
+        )
+
+
 if __name__ == "__main__":
-    main(Path(sys.argv[1]), Path(sys.argv[2]))
+    if sys.argv[1] == "ecosystem-menu":
+        extract_ecosystem_menu(Path(sys.argv[2]), Path(sys.argv[3]))
+    else:
+        main(Path(sys.argv[1]), Path(sys.argv[2]))

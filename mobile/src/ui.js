@@ -211,19 +211,26 @@ export function FoodCard({ dish, onPress, onAdd, compact = false }) {
       </Pressable>
       <View style={{ padding: 12 }}>
         <Text style={styles.foodCategory}>
-          {dish.category.toUpperCase()} · ★ {dish.rating}
+          {dish.category.toUpperCase()}{dish.rating ? ` · ★ ${dish.rating}` : ""}
         </Text>
-        <Text style={styles.foodName} numberOfLines={1}>
+        <Text style={styles.foodName} numberOfLines={2}>
           {dish.name}
         </Text>
         <View style={styles.rowBetween}>
           <Text style={styles.foodPrice}>
             {dish.price.toLocaleString("fr-FR")} FCFA
           </Text>
-          <Pressable onPress={onAdd} style={styles.add}>
-            <Icon name="add" size={21} color="#211B11" />
+          <Pressable
+            onPress={onAdd}
+            disabled={dish.available === false}
+            accessibilityRole="button"
+            accessibilityLabel={dish.available === false ? `${dish.name} indisponible` : `Ajouter ${dish.name} au panier`}
+            style={[styles.add, dish.available === false && { opacity: 0.4 }]}
+          >
+            <Icon name={dish.available === false ? "close" : "add"} size={21} color="#211B11" />
           </Pressable>
         </View>
+        {dish.available === false && <Text style={{ color: colors.muted, marginTop: 5 }}>Momentanément indisponible</Text>}
       </View>
     </Glass>
   );
