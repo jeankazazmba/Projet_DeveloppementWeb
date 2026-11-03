@@ -1,5 +1,12 @@
 import { useState } from 'react'
 import FontSizeControl from '../../components/ui/FontSizeControl.jsx'
+import AdminDashboardPage from './pages/AdminDashboardPage.jsx'
+import AdminEmployeesPage from './pages/AdminEmployeesPage.jsx'
+import AdminMenuPage from './pages/AdminMenuPage.jsx'
+import AdminPromotionsPage from './pages/AdminPromotionsPage.jsx'
+import AdminComplaintsPage from './pages/AdminComplaintsPage.jsx'
+import AdminSettingsPage from './pages/AdminSettingsPage.jsx'
+import { initialComplaints, initialDishes, initialEmployees, initialPromotions, initialSettings } from './mockData.js'
 import './admin.css'
 
 const sections = [
@@ -14,6 +21,21 @@ const sections = [
 export default function AdminApp() {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [lightTheme, setLightTheme] = useState(false)
+  const [employees, setEmployees] = useState(initialEmployees)
+  const [dishes, setDishes] = useState(initialDishes)
+  const [promotions, setPromotions] = useState(initialPromotions)
+  const [complaints, setComplaints] = useState(initialComplaints)
+  const [settings, setSettings] = useState(initialSettings)
+  const openClaims = complaints.filter((claim) => ['En attente', 'En examen'].includes(claim.status)).length
+
+  const screen = {
+    dashboard: <AdminDashboardPage openClaims={openClaims} onNavigate={setActiveSection} />,
+    employees: <AdminEmployeesPage employees={employees} setEmployees={setEmployees} />,
+    menu: <AdminMenuPage dishes={dishes} setDishes={setDishes} />,
+    promotions: <AdminPromotionsPage promotions={promotions} setPromotions={setPromotions} />,
+    complaints: <AdminComplaintsPage complaints={complaints} setComplaints={setComplaints} />,
+    settings: <AdminSettingsPage settings={settings} setSettings={setSettings} />,
+  }[activeSection]
 
   return (
     <div className={`admin-shell ${lightTheme ? 'is-light' : ''}`}>
@@ -34,15 +56,7 @@ export default function AdminApp() {
           </div>
         </header>
         <main className="admin-content" id="admin-dashboard">
-          <section className="admin-welcome">
-            <p className="admin-kicker">SPRINT 3 · PMEE-34</p>
-            <h1>{activeSection === 'dashboard' ? 'Pilotage du restaurant' : sections.find(([id]) => id === activeSection)?.[1]}</h1>
-            <p>Module administrateur en cours d’intégration. Les données affichées seront reliées aux API Laravel dès que leurs contrats seront disponibles.</p>
-          </section>
-          <section className="admin-empty-state" aria-live="polite">
-            <h2>Écran à intégrer</h2>
-            <p>Cette zone réserve le bon emplacement pour la maquette et les opérations d’administration du Sprint 3.</p>
-          </section>
+          {screen}
         </main>
       </div>
     </div>
