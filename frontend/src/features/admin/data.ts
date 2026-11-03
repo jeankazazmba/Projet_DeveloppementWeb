@@ -1,6 +1,6 @@
 import { assets } from './design-assets'
 
-export type Page = 'dashboard' | 'employees' | 'menu' | 'promotions' | 'claims' | 'settings'
+export type Page = 'dashboard' | 'orders' | 'tables' | 'menu' | 'reports' | 'employees' | 'promotions' | 'claims' | 'settings'
 export type Employee = { id: string; name: string; email: string; role: 'Employé' | 'Gérant'; active: boolean; lastLogin: string }
 export type Dish = { id: string; name: string; description: string; category: string; price: number; available: boolean; featured: boolean; image: string; ingredients: string[] }
 export type Promotion = { id: string; title: string; subtitle: string; description: string; type: 'Promotion' | 'Événement' | 'Jeu concours'; status: 'Active' | 'Programmée' | 'Expirée' | 'Brouillon'; tag: string; dateLabel: string; start: string; end: string; image: string; footer: string; metric: string }
@@ -41,10 +41,18 @@ export const initialClaims: Claim[] = [
   { id: 'RC-0037', student: 'Aïcha B.', order: 'MM-1022', reason: 'Emballage endommagé', status: 'Résolue', updated: '25 oct.', credited: false },
 ]
 export type Schedule = { day: string; open: boolean; start: string; end: string; note: string }
-export type SettingsData = { gain: number; conversion: number; minimum: number; expiry: number; referral: number; schedule: Schedule[] }
+export type SettingsData = {
+  gain: number; conversion: number; minimum: number; expiry: number; referral: number; schedule: Schedule[]
+  restaurant: { name: string; address: string; phone: string; email: string; description: string }
+  payments: { mtn: boolean; orange: boolean; cash: boolean; card: boolean }
+  policies: { salesTerms: string; cancellation: string; privacy: string }
+}
 export const initialSettings: SettingsData = {
   gain: 1000, conversion: 15, minimum: 15, expiry: 12, referral: 15,
   schedule: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'].map((day, i) => ({ day, open: i !== 6, start: i === 5 ? '12:00' : '11:00', end: i === 4 ? '23:30' : i === 5 ? '00:00' : '22:00', note: i < 4 ? 'Service continu' : i === 4 ? 'Nocturne Lounge' : i === 5 ? 'Soirée Concerts & Billard' : 'Fermeture hebdomadaire' })),
+  restaurant: { name: 'ZeDuc-Sp@ce · Mon Miam Miam', address: 'Résidence La Terrasse, Yansoki, Douala', phone: '', email: '', description: 'Cuisine camerounaise, terrasse panoramique et service étudiant.' },
+  payments: { mtn: true, orange: true, cash: true, card: false },
+  policies: { salesTerms: '', cancellation: '', privacy: '' },
 }
 export const money = (value: number) => new Intl.NumberFormat('fr-FR').format(value)
 export const initials = (name: string) => name.split(/[\s-]+/).filter(Boolean).slice(0, 2).map(s => s[0]).join('').toUpperCase()

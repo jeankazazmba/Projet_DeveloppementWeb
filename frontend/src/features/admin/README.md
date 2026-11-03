@@ -6,6 +6,10 @@ Le back-office de `app_backoffice` est intégré à l'application React commune 
 
 Les dix dossiers `--Admin` de l'export `app1-tous-les-ecran222s/screens` ont été vérifiés contre les pages et dialogues intégrés. Leurs `preview.png` et `metadata.json` sont conservés dans `frontend/public/figma-admin/`. Les fichiers SVG détaillés restent dans l'export original ; l'interface utilise déjà ses ressources optimisées dans `frontend/public/assets/figma/`.
 
+Trois écrans supplémentaires, absents des exports Figma, complètent la navigation administrateur : `/admin#/orders`, `/admin#/tables` et `/admin#/reports`. Ils reprennent les composants et la palette du back-office existant. Les commandes et les tables sont modifiables pendant la session. Les graphiques SVG et les tableaux de données du tableau de bord et des rapports sont calculés à partir des mêmes commandes de démonstration. L'historique 7 et 30 jours est simulé explicitement ; aucune API temps réel n'est branchée.
+
+Les onglets auparavant inactifs de `/admin#/settings` sont ouverts : Restaurant, Paiements, Politiques et Sécurité. Les trois premiers enregistrent une configuration locale ; Sécurité décrit les branchements d'authentification et de droits encore nécessaires, sans simuler une protection réelle.
+
 | Export | Interface intégrée |
 | --- | --- |
 | `34-Tableau-de-bord--Admin` | `/admin#/dashboard` |

@@ -9,10 +9,17 @@ import Menu from './pages/Menu'
 import Promotions from './pages/Promotions'
 import Claims from './pages/Claims'
 import Settings from './pages/Settings'
+import Orders from './pages/Orders'
+import Tables from './pages/Tables'
+import Reports from './pages/Reports'
+import { initialOrders, initialTables } from './operations'
 
 const nav: { page: Page; label: string; icon: string }[] = [
   { page: 'dashboard', label: 'Tableau de bord', icon: assets.dashboard.imgIcon },
+  { page: 'orders', label: 'Commandes', icon: assets.dashboard.imgIcon1 },
+  { page: 'tables', label: 'Tables & Salle', icon: assets.dashboard.imgIcon2 },
   { page: 'menu', label: 'Menu & Stocks', icon: assets.dashboard.imgIcon3 },
+  { page: 'reports', label: 'Rapports & Ventes', icon: assets.dashboard.imgIcon4 },
   { page: 'employees', label: 'Équipe & Shifts', icon: assets.dashboard.imgIcon5 },
   { page: 'promotions', label: 'Promotions & Événements', icon: assets.promotions.imgContainer2 },
   { page: 'claims', label: 'Réclamations', icon: assets.dashboard.imgIcon6 },
@@ -37,6 +44,8 @@ export default function App() {
   const [promotions, setPromotions] = useState(initialPromotions)
   const [claims, setClaims] = useState(initialClaims)
   const [settings, setSettings] = useState(initialSettings)
+  const [orders, setOrders] = useState(initialOrders)
+  const [tables, setTables] = useState(initialTables)
   const [sidebar, setSidebar] = useState(false)
   const [query, setQuery] = useState('')
   const [notice, setNotice] = useState('')
@@ -61,21 +70,22 @@ export default function App() {
     {sidebar && <button className="sidebar-shade" aria-label="Fermer la navigation" onClick={() => setSidebar(false)} />}
     <aside id="navigation" className={`sidebar ${sidebar ? 'is-open' : ''}`}>
       <a href="#/dashboard" className="brand" aria-label="Mon Miam Miam — Tableau de bord"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="Mon Miam Miam ZeDuc-Sp@ce" /><span>YANSOKI • DOUALA</span></a>
-      <div className="role-line"><span className="badge">ADMIN</span><span className="live-label"><img src={assets.dashboard.imgEllipse} alt="" />En direct</span></div>
+      <div className="role-line"><span className="badge">ADMIN</span><span className="live-label"><img src={assets.dashboard.imgEllipse} alt="" />Démo active</span></div>
       <nav aria-label="Navigation administrateur">
-        {nav.map((item, index) => <div key={item.page}>
+        {nav.map(item => <div key={item.page}>
           <a href={`#/${item.page}`} onClick={() => setSidebar(false)} className={`nav-link ${page === item.page ? 'active' : ''}`} aria-current={page === item.page ? 'page' : undefined}><Icon src={item.icon} /><span>{item.label}</span>{item.page === 'claims' && openClaims > 0 && <span className="nav-count">{openClaims}</span>}</a>
-          {index === 0 && <><button className="nav-link unavailable" disabled title="Écran Commandes non fourni dans app1"><Icon src={assets.dashboard.imgIcon1} />Commandes<span className="nav-count">2</span></button><button className="nav-link unavailable" disabled title="Écran Tables & Salle non fourni dans app1"><Icon src={assets.dashboard.imgIcon2} />Tables & Salle</button></>}
-          {item.page === 'menu' && <a className="nav-link" href="#/dashboard" onClick={() => { navigate('dashboard'); window.setTimeout(() => document.getElementById('sales')?.scrollIntoView({ behavior: 'smooth' }), 50) }}><Icon src={assets.dashboard.imgIcon4} />Rapports & Ventes</a>}
         </div>)}
       </nav>
       <div className="sidebar-bottom"><div className="user-card"><span className="avatar">AD</span><div><strong>Admin</strong><small>Admini.ZeDuc-Sp@ce</small></div></div><div className="support-links"><button onClick={() => setInfo('Les coordonnées du support technique seront configurées avec le backend.')}><Icon src={assets.dashboard.imgContainer1} />Support<br />Technique</button><button disabled title="Authentification à connecter au backend"><Icon src={assets.dashboard.imgContainer2} />Déconnexion</button></div></div>
     </aside>
-    <div className="workspace"><header className="topbar"><button type="button" className="icon-button mobile-menu" aria-label="Ouvrir la navigation" aria-expanded={sidebar} aria-controls="navigation" onClick={() => setSidebar(!sidebar)}>☰</button><form onSubmit={e => { e.preventDefault(); navigate('menu') }}><SearchInput value={query} onChange={setQuery} placeholder="Rechercher un plat..." /></form><div className="topbar-right"><span className="demo-label" title="Données locales issues des maquettes, réinitialisées au rechargement">Démo</span><span className="service-chip"><img src={assets.dashboard.imgEllipse} alt="" />Service en cours</span><button type="button" className="theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button className="notification-button" aria-label={`Voir les ${openClaims} réclamations ouvertes`} onClick={() => navigate('claims')}><Icon src={assets.dashboard.imgIconBell} /></button><button className="profile-button" onClick={() => navigate('settings')}><span className="avatar">AD</span><span>Admin</span></button></div></header>
+    <div className="workspace"><header className="topbar"><button type="button" className="icon-button mobile-menu" aria-label="Ouvrir la navigation" aria-expanded={sidebar} aria-controls="navigation" onClick={() => setSidebar(!sidebar)}>☰</button><form onSubmit={e => { e.preventDefault(); navigate('menu') }}><SearchInput value={query} onChange={setQuery} placeholder="Rechercher un plat..." /></form><div className="topbar-right"><span className="demo-label" title="Données locales issues des maquettes, réinitialisées au rechargement">Démo</span><span className="service-chip"><img src={assets.dashboard.imgEllipse} alt="" />Service démo</span><button type="button" className="theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button className="notification-button" aria-label={`Voir les ${openClaims} réclamations ouvertes`} onClick={() => navigate('claims')}><Icon src={assets.dashboard.imgIconBell} /></button><button className="profile-button" onClick={() => navigate('settings')}><span className="avatar">AD</span><span>Admin</span></button></div></header>
       <main id="main" tabIndex={-1} className={`main-content page-${page}`}>
-        {page === 'dashboard' && <Dashboard navigate={navigate} openClaims={openClaims} />}
+        {page === 'dashboard' && <Dashboard navigate={navigate} openClaims={openClaims} orders={orders} />}
+        {page === 'orders' && <Orders orders={orders} setOrders={setOrders} notify={setNotice} />}
+        {page === 'tables' && <Tables tables={tables} setTables={setTables} orders={orders} notify={setNotice} />}
         {page === 'employees' && <Employees employees={employees} setEmployees={setEmployees} notify={setNotice} />}
         {page === 'menu' && <Menu dishes={dishes} setDishes={setDishes} query={query} setQuery={setQuery} notify={setNotice} />}
+        {page === 'reports' && <Reports orders={orders} notify={setNotice} />}
         {page === 'promotions' && <Promotions promotions={promotions} setPromotions={setPromotions} notify={setNotice} />}
         {page === 'claims' && <Claims claims={claims} setClaims={setClaims} notify={setNotice} />}
         {page === 'settings' && <Settings settings={settings} setSettings={setSettings} notify={setNotice} />}
