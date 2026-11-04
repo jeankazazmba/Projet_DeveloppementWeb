@@ -4,6 +4,12 @@ Le projet Vercel utilise le dossier `frontend/` comme racine. Une seule applicat
 
 La branche `feature/sprint-3-frontend-features` doit être déployée en **Preview**. La production de `main` reste séparée.
 
+## État au 4 novembre 2026
+
+Le projet Vercel [`mon-miam-miam-web`](https://vercel.com/bagumakazamba-4703s-projects/mon-miam-miam-web) est créé dans l’équipe `bagumakazamba-4703s-projects` (`prj_SaDBcGCuIO10hPQN6PwNQs5KmvJg`). Il est configuré pour Vite, la racine `frontend/`, `npm run build`, `dist` et Node 22.
+
+Le dépôt GitHub ne peut pas encore être relié : Vercel répond « You need to add a Login Connection to your GitHub account first ». Le propriétaire du compte doit ajouter GitHub dans les [paramètres d’authentification Vercel](https://vercel.com/account/settings/authentication), puis relier `jeankazazmba/Projet_DeveloppementWeb` depuis les [paramètres Git du projet](https://vercel.com/bagumakazamba-4703s-projects/mon-miam-miam-web/settings/git). Vérifier la branche avant tout déploiement de production. Aucun déploiement n’existe encore pour ce projet.
+
 ## Données communes
 
 - `VITE_API_URL` : origine HTTPS du backend Laravel, **sans** `/api` final. Si elle n’est pas définie ou si l’API ne répond pas, le site affiche les données de démonstration locales.
