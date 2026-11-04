@@ -315,3 +315,100 @@
  .public-access-detail { padding:21px; }
  .public-access-registration { align-items:flex-start;flex-direction:column;margin-top:60px; }
 }
+
+html:has(.public-site) { scroll-behavior:smooth; }
+.public-site #public-main,.public-site section[id] { scroll-margin-top:90px; }
+.public-theme-toggle { flex:none;display:grid;place-items:center;width:42px;height:42px;border:1px solid #5b503d;border-radius:50%;background:#24221d;color:var(--gold);font-size:1.35rem!important; }
+.public-theme-toggle:hover { border-color:var(--gold); }
+.public-home-section { padding:100px 0; }
+.public-home-promotions,.public-home-games { background:#0b0b0b; }
+.public-home-events { background:#111; }
+.public-home-section .public-offer-card a.public-text-link { margin-top:auto;color:var(--gold);font-size:.82rem;font-weight:700; }
+.public-home-games-inner { display:flex;align-items:center;justify-content:space-between;gap:40px; }
+.public-home-games-inner > div { max-width:650px; }
+.public-home-games-inner p { margin-top:16px; }
+.public-contact { padding:95px 0;background:#0c0c0c;border-top:1px solid #302a20; }
+.public-contact-inner { display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:55px; }
+.public-contact-inner > div:first-child p { max-width:540px;margin-top:20px; }
+.public-contact-card { display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:33px;border:1px solid #554734;border-radius:22px;background:#1b1b19; }
+.public-contact-card > span { color:var(--gold);font-size:.75rem;font-weight:700;letter-spacing:.08em; }
+.public-contact-card strong { overflow-wrap:anywhere;font-size:clamp(1.1rem,2vw,1.55rem); }
+.public-contact-card small { color:var(--muted); }
+.public-contact-card .public-pill { margin-top:10px; }
+.public-contact-card p { margin-top:8px;font-size:.83rem; }
+.public-newsletter-pending { color:var(--gold)!important;font-weight:600; }
+
+.public-site[data-theme='light'] { --gold:#755d2e;--surface:#f5efe3;--muted:#625d55;background:#faf8f3;color:#1d211e; }
+.public-site[data-theme='light'] .public-header { background:#fffdf8;border-bottom:1px solid #e4dac8; }
+.public-site[data-theme='light'] .public-nav > a,.public-site[data-theme='light'] .public-nav-access > a:not(.public-pill) { color:#4c4b44; }
+.public-site[data-theme='light'] .public-nav a:hover,.public-site[data-theme='light'] .public-nav a[aria-current] { color:var(--gold); }
+.public-site[data-theme='light'] .public-pill { color:#fff!important;background:var(--gold); }
+.public-site[data-theme='light'] .public-pill:hover { background:#604a23; }
+.public-site[data-theme='light'] .public-pill-dark { color:#5b431d!important;background:#efe4cf; }
+.public-site[data-theme='light'] .public-pill-dark:hover { background:#e6d8b9; }
+.public-site[data-theme='light'] .public-nav-access .public-pill[aria-current] { box-shadow:0 0 0 2px #1d211e; }
+.public-site[data-theme='light'] .public-theme-toggle { border-color:#c9b994;background:#f5ecdb;color:#5b431d; }
+.public-site[data-theme='light'] .public-hero-art::before { background:radial-gradient(circle,#b99d6940,transparent 70%); }
+.public-site[data-theme='light'] .public-hero-badge { background:#fffdf8;color:var(--gold);box-shadow:0 12px 30px #3b2d1e30; }
+.public-site[data-theme='light'] .public-hero-badge small { color:#675f51; }
+.public-site[data-theme='light'] .public-hero-badge strong { color:#20221e; }
+.public-site[data-theme='light'] .public-feature-offers > a,.public-site[data-theme='light'] .public-mini-dish,.public-site[data-theme='light'] .public-referral,.public-site[data-theme='light'] .public-experience-cards a,.public-site[data-theme='light'] .public-review-grid blockquote,.public-site[data-theme='light'] .public-newsletter-box,.public-site[data-theme='light'] .public-dish-card,.public-site[data-theme='light'] .public-offer-card,.public-site[data-theme='light'] .public-event-list article,.public-site[data-theme='light'] .public-games-banner { background:#fff;border:1px solid #e8ddca;box-shadow:0 9px 30px #56442b0b; }
+.public-site[data-theme='light'] .public-menu-preview,.public-site[data-theme='light'] .public-gallery,.public-site[data-theme='light'] .public-newsletter,.public-site[data-theme='light'] .public-home-promotions,.public-site[data-theme='light'] .public-home-games { background:#f5f0e7; }
+.public-site[data-theme='light'] .public-home-events { background:#faf8f3; }
+.public-site[data-theme='light'] .public-filters button { background:#eee5d6;color:#443d30; }
+.public-site[data-theme='light'] .public-filters button:hover,.public-site[data-theme='light'] .public-filters button.active { background:var(--gold);color:#fff; }
+.public-site[data-theme='light'] .public-mini-dish:hover { background:#f7f0e5; }
+.public-site[data-theme='light'] .public-mini-dish small,.public-site[data-theme='light'] .public-gift-offer span,.public-site[data-theme='light'] .public-review-grid footer small { color:#655f54; }
+.public-site[data-theme='light'] .public-referral code { background:#eee4d4; }
+.public-site[data-theme='light'] .public-referral > span { background:#eee4d4; }
+.public-site[data-theme='light'] .public-experience-cards a b { color:#fff;background:var(--gold); }
+.public-site[data-theme='light'] .public-carousel-actions button,.public-site[data-theme='light'] .public-pagination button { background:#eee5d6;color:#5d4922; }
+.public-site[data-theme='light'] .public-carousel-actions button:hover,.public-site[data-theme='light'] .public-pagination button.active { background:var(--gold);color:#fff; }
+.public-site[data-theme='light'] .public-newsletter-box > span { background:#f1e7d6; }
+.public-site[data-theme='light'] .public-newsletter-box input,.public-site[data-theme='light'] .public-menu-tools input,.public-site[data-theme='light'] .public-menu-tools select { border:1px solid #d2c4ac;background:#fff;color:#1d211e; }
+.public-site[data-theme='light'] .public-newsletter-box small,.public-site[data-theme='light'] .public-dish-bottom small,.public-site[data-theme='light'] .public-dish-bottom del { color:#655f54; }
+.public-site[data-theme='light'] .public-menu-spotlight,.public-site[data-theme='light'] .public-promo-hero { background:#fff;border:1px solid #e8ddca; }
+.public-site[data-theme='light'] .public-dish-bottom button { background:#e9e3d8;color:#57544e; }
+.public-site[data-theme='light'] .public-menu-referral { background:#fff;border:1px solid #e8ddca; }
+.public-site[data-theme='light'] .public-menu-referral button { border-color:#b29e77;color:var(--gold); }
+.public-site[data-theme='light'] .public-event-date { background:#f0e8da; }
+.public-site[data-theme='light'] .public-promo-hero ul { color:#5d584f; }
+.public-site[data-theme='light'] .public-event-list article > div:nth-child(2) small { color:var(--gold); }
+.public-site[data-theme='light'] .public-modal { background:#fffdf8;border-color:#c6b795;box-shadow:0 30px 80px #44331d35; }
+.public-site[data-theme='light'] .public-modal-close { color:#292b27; }
+.public-site[data-theme='light'] .public-access-portal { background:radial-gradient(ellipse 58% 35% at 50% 8%,#dfcca160,transparent 75%),#faf8f3; }
+.public-site[data-theme='light'] .public-access-steps { color:#555047; }
+.public-site[data-theme='light'] .public-access-steps i { background:#bfb092; }
+.public-site[data-theme='light'] .public-profile-card { color:#1d211e;background:#fff;border-color:#d9cbb3; }
+.public-site[data-theme='light'] .public-profile-card:hover,.public-site[data-theme='light'] .public-profile-card.is-selected { background:#f9f1e3;border-color:#927444;box-shadow:0 15px 35px #49391e22; }
+.public-site[data-theme='light'] .public-profile-icon { background:#eee3ce;color:#755d2e; }
+.public-site[data-theme='light'] .public-profile-number,.public-site[data-theme='light'] .public-profile-subtitle { color:#5d584f; }
+.public-site[data-theme='light'] .public-profile-card-bottom { color:#735c32; }
+.public-site[data-theme='light'] .public-access-detail { background:#fff;border-color:#d9cbb3; }
+.public-site[data-theme='light'] .public-access-detail-action small,.public-site[data-theme='light'] .public-access-detail-mark { color:#665f53; }
+.public-site[data-theme='light'] .public-access-state { color:#7b5a21; }
+.public-site[data-theme='light'] .public-access-state.is-ready { color:#286d3d; }
+.public-site[data-theme='light'] .public-access-registration { border-color:#ddd0bc; }
+.public-site[data-theme='light'] .public-contact { background:#eee7da;border-color:#d1c1a4; }
+.public-site[data-theme='light'] .public-contact-card { background:#fff;border-color:#d1c1a4; }
+.public-site[data-theme='light'] .public-footer { background:#eee6d8; }
+.public-site[data-theme='light'] .public-footer-grid p,.public-site[data-theme='light'] .public-footer-grid a,.public-site[data-theme='light'] .public-footer-bottom { color:#534f47; }
+.public-site[data-theme='light'] .public-cookie { background:#fff;border:1px solid #dbcdb6;box-shadow:0 15px 35px #55432830; }
+.public-site[data-theme='light'] .public-cookie button:not(.public-pill) { color:#514c43; }
+@media (max-width:1120px) {
+  .public-header { justify-content:space-between; }
+  .public-menu-toggle { display:block;order:2; }
+  .public-theme-toggle { order:1;margin-left:auto; }
+  .public-nav { display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:8px;padding:20px 32px;background:#161616;box-shadow:0 15px 30px #0007;font-size:1rem; }
+  .public-nav.is-open { display:flex; }
+  .public-nav-access { margin:8px 0 0; }
+  .public-site[data-theme='light'] .public-nav { background:#fffdf8;box-shadow:0 15px 30px #40311d22; }
+}
+@media (max-width:760px) {
+  .public-home-games-inner,.public-contact-inner { display:flex;flex-direction:column;align-items:stretch; }
+  .public-site[data-theme='light'] .public-nav { background:#fffdf8;box-shadow:0 15px 30px #40311d22; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html:has(.public-site) { scroll-behavior:auto; }
+  .public-site * { transition-duration:0.01ms!important;animation-duration:0.01ms!important; }
+}
