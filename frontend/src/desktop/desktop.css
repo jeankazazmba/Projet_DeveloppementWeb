@@ -1,0 +1,63 @@
+.desktop-gateway {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: #f5f7f4;
+  background: radial-gradient(circle at 50% -15%, #263d42 0, #111e25 48%, #0c151b 100%);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.desktop-glow { position: absolute; z-index: -1; width: 420px; height: 420px; border-radius: 50%; filter: blur(85px); opacity: .2; pointer-events: none; }
+.desktop-glow-a { top: -180px; left: -100px; background: #78c2b2; }
+.desktop-glow-b { right: -150px; bottom: -190px; background: #d9a569; }
+.desktop-splash { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px; }
+.desktop-logo-halo { display: grid; place-items: center; width: 154px; height: 154px; border-radius: 42px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.23); box-shadow: 0 24px 80px #0005, inset 0 1px #fff3; backdrop-filter: blur(18px); margin-bottom: 32px; }
+.desktop-logo-halo img { width: 115px; height: 108px; object-fit: contain; }
+.desktop-kicker { color: #e7b875; font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .17em; }
+.desktop-splash h1 { font-size: clamp(2.5rem, 5vw, 4rem); margin: 12px 0 4px; letter-spacing: -.05em; }
+.desktop-splash p { color: #b8c7c8; margin: 0; font-size: 1.08rem; }
+.desktop-progress { width: 155px; height: 4px; border-radius: 10px; overflow: hidden; background: #ffffff2c; margin: 45px 0 12px; }
+.desktop-progress span { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, #d5a05d, #f2cf93); transform-origin: left; animation: desktop-load 1.8s linear forwards; }
+@keyframes desktop-load { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.desktop-skip, .desktop-back { border: 0; color: #d1dddd; background: none; cursor: pointer; font: inherit; }
+.desktop-skip { padding: 12px; font-size: .86rem; }
+.desktop-gateway-main { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 32px; }
+.desktop-gateway-header { display: flex; align-items: center; gap: 12px; width: min(100%, 1120px); }
+.desktop-gateway-header img { width: 48px; height: 45px; object-fit: contain; }
+.desktop-gateway-header div { display: grid; gap: 2px; }
+.desktop-gateway-header strong { font-size: 1.05rem; }
+.desktop-gateway-header span { font-size: .75rem; color: #aebdbf; }
+.desktop-panel { width: min(100%, 690px); margin: auto; padding: 45px; border: 1px solid #ffffff26; background: #ffffff10; border-radius: 30px; backdrop-filter: blur(24px); box-shadow: 0 24px 80px #0004, inset 0 1px #fff2; }
+.desktop-panel h1 { font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: -.045em; line-height: 1.1; margin: 10px 0 10px; }
+.desktop-panel > p { color: #c1cdce; margin: 0; line-height: 1.55; }
+.desktop-roles { display: grid; gap: 13px; margin-top: 32px; }
+.desktop-role { display: flex; align-items: center; gap: 17px; width: 100%; text-align: left; border: 1px solid #ffffff20; background: #ffffff0d; border-radius: 20px; padding: 18px 20px; color: inherit; cursor: pointer; transition: border-color .2s, background .2s, transform .2s; font: inherit; }
+.desktop-role:hover, .desktop-role:focus-visible { background: #ffffff1d; border-color: #e5bb83a8; transform: translateY(-2px); outline: none; }
+.desktop-role-icon { flex: 0 0 auto; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 17px; background: linear-gradient(145deg, #f2d5a9, #bd8551); color: #251b12; font-size: .84rem; font-weight: 900; }
+.desktop-role-copy { display: grid; gap: 5px; }
+.desktop-role-copy strong { font-size: 1.03rem; }
+.desktop-role-copy small { color: #b9c8c9; font-size: .87rem; line-height: 1.45; }
+.desktop-role-arrow { margin-left: auto; color: #e5bb83; font-size: 1.4rem; }
+.desktop-panel .desktop-note { font-size: .78rem; color: #9eafb2; margin-top: 23px; }
+.desktop-gateway-footer { display: flex; justify-content: space-between; gap: 15px; width: min(100%, 1120px); color: #a4b4b6; font-size: .78rem; padding-top: 20px; }
+.desktop-login { width: min(100%, 500px); }
+.desktop-back { margin: -10px 0 25px; padding: 5px 0; }
+.desktop-back:hover, .desktop-skip:hover { color: white; }
+.desktop-login-icon { margin-bottom: 20px; }
+.desktop-login-form { display: grid; gap: 9px; margin-top: 29px; }
+.desktop-login-form label { font-size: .88rem; font-weight: 650; color: #e7eeee; }
+.desktop-login-form input { width: 100%; height: 47px; margin-bottom: 8px; border: 1px solid #ffffff35; border-radius: 12px; padding: 0 14px; background: #ffffff12; color: white; font: inherit; }
+.desktop-login-form input::placeholder { color: #9bacaf; }
+.desktop-login-form input:focus { outline: 2px solid #e3b27b; outline-offset: 1px; }
+.desktop-primary, .desktop-demo { min-height: 47px; border: 0; border-radius: 12px; font: inherit; font-weight: 750; }
+.desktop-primary { margin-top: 6px; color: #82908e; background: #e5e8e4; cursor: not-allowed; }
+.desktop-panel .desktop-auth-note { font-size: .79rem; margin-top: 12px; color: #bdcbca; }
+.desktop-demo { display: flex; justify-content: center; align-items: center; gap: 9px; width: 100%; margin-top: 22px; color: #221a12; background: linear-gradient(110deg, #f4d7a7, #d7a367); cursor: pointer; }
+.desktop-demo:hover { filter: brightness(1.08); }
+.desktop-workspace { min-height: 100vh; }
+.desktop-switch { position: fixed; z-index: 9999; right: 22px; bottom: 18px; border: 1px solid #ffffff55; border-radius: 999px; padding: 11px 17px; color: #fff; background: #1c3037ed; box-shadow: 0 10px 32px #0007; cursor: pointer; font: 700 .82rem system-ui, sans-serif; backdrop-filter: blur(16px); }
+.desktop-switch:hover { background: #37525a; }
+.desktop-route-return { display: grid; place-content: center; min-height: 70vh; text-align: center; gap: 15px; }
+.desktop-route-return button { border: 0; border-radius: 10px; background: #d7a367; padding: 12px 18px; cursor: pointer; }
+@media (max-width: 600px) { .desktop-gateway-main { padding: 18px; } .desktop-panel { padding: 28px 22px; border-radius: 24px; } .desktop-gateway-footer { flex-direction: column; text-align: center; } .desktop-role { padding: 14px; } }
+@media (prefers-reduced-motion: reduce) { .desktop-progress span { animation: none; } .desktop-role { transition: none; } }
