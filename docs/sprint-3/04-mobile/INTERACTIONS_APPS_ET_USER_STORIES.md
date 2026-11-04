@@ -100,6 +100,8 @@ L'employé marque le plat indisponible sur mobile ou web. L'autre écran employ�
 
 Admin publie une promotion, un événement ou un jeu avec audience et dates. Site public et mobile étudiant affichent les contenus qui leur sont destinés. L'API attribue points et récompenses avec un journal anti-doublon. Le paiement à la caisse/livraison peut être indiqué « à régler » puis confirmé par le personnel autorisé. Visa, Mastercard, Mobile Money et crypto restent **visuels et désactivés** jusqu'au choix d'un prestataire ; si ajoutés, seul un webhook vérifié côté serveur confirme le règlement.
 
+La [recherche sur e-COM EasyPay](../08-fidelite-paiement/RECHERCHE_ECOM_EASYPAY.md) confirme seulement que le fournisseur annonce Visa, Mastercard et Mobile Money. La prise en charge de notre devise et l'accès au contrat sandbox restent à confirmer ; aucune prise en charge des cryptomonnaies n'est annoncée sur les pages consultées.
+
 ## 5. User stories et critères d'acceptation
 
 Priorités : **P0** noyau d'une commande réelle ; **P1** périmètre métier ; **P2** extension ou bonus. Les ID servent au suivi des tickets et à la recette.
