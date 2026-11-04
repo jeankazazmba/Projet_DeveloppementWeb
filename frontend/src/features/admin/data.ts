@@ -44,14 +44,14 @@ export type Schedule = { day: string; open: boolean; start: string; end: string;
 export type SettingsData = {
   gain: number; conversion: number; minimum: number; expiry: number; referral: number; schedule: Schedule[]
   restaurant: { name: string; address: string; phone: string; email: string; description: string }
-  payments: { mtn: boolean; orange: boolean; cash: boolean; card: boolean }
+  payments: { orange: boolean; airtel: boolean; mpesa: boolean; cash: boolean; card: boolean }
   policies: { salesTerms: string; cancellation: string; privacy: string }
 }
 export const initialSettings: SettingsData = {
   gain: 1000, conversion: 15, minimum: 15, expiry: 12, referral: 15,
   schedule: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'].map((day, i) => ({ day, open: i !== 6, start: i === 5 ? '12:00' : '11:00', end: i === 4 ? '23:30' : i === 5 ? '00:00' : '22:00', note: i < 4 ? 'Service continu' : i === 4 ? 'Nocturne Lounge' : i === 5 ? 'Soirée Concerts & Billard' : 'Fermeture hebdomadaire' })),
   restaurant: { name: 'ZeDuc-Sp@ce · Mon Miam Miam', address: 'Résidence La Terrasse, Yansoki, Douala', phone: '', email: '', description: 'Cuisine camerounaise, terrasse panoramique et service étudiant.' },
-  payments: { mtn: true, orange: true, cash: true, card: false },
+  payments: { orange: false, airtel: false, mpesa: false, cash: true, card: false },
   policies: { salesTerms: '', cancellation: '', privacy: '' },
 }
 export const money = (value: number) => new Intl.NumberFormat('fr-FR').format(value)

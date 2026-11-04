@@ -2,7 +2,7 @@ import { initialDishes } from './data'
 
 export type OrderStatus = 'Reçue' | 'En préparation' | 'Prête' | 'En livraison' | 'Terminée' | 'Annulée'
 export type Service = 'Sur place' | 'Livraison'
-export type PaymentMethod = 'MTN Mobile Money' | 'Orange Money' | 'Espèces' | 'Carte bancaire'
+export type PaymentMethod = 'Orange Money' | 'Airtel Money' | 'M-Pesa' | 'Espèces' | 'Carte bancaire'
 export type Order = { id: string; customer: string; placedAt: string; service: Service; table: string | null; items: string[]; amount: number; payment: PaymentMethod; status: OrderStatus }
 export type TableStatus = 'Libre' | 'Occupée' | 'Réservée' | 'Nettoyage'
 export type RestaurantTable = { id: string; zone: string; seats: number; status: TableStatus; orderId: string | null }
@@ -12,7 +12,7 @@ export type ChartPoint = { label: string; value: number; count: number }
 const hourlySales = [8000, 13000, 42000, 21000, 16000, 13000, 22000, 25000, 14500, 10000, 3000]
 const hourlyCounts = [2, 4, 10, 8, 6, 4, 8, 8, 6, 5, 3]
 const customers = ['Arsène K.', 'Clarisse M.', 'Brice K.', 'Éric T.', 'Mireille D.', 'Sarah M.', 'Boris K.', 'Aïcha B.', 'Patrick L.', 'Nadia F.']
-const methods: PaymentMethod[] = ['MTN Mobile Money', 'MTN Mobile Money', 'MTN Mobile Money', 'MTN Mobile Money', 'Orange Money', 'Orange Money', 'Orange Money', 'Espèces', 'Espèces', 'Carte bancaire']
+const methods: PaymentMethod[] = ['Airtel Money', 'Airtel Money', 'Airtel Money', 'Orange Money', 'Orange Money', 'M-Pesa', 'M-Pesa', 'Espèces', 'Espèces', 'Carte bancaire']
 const activeOnSiteIndexes = [56, 58, 59, 61, 63]
 const now = new Date()
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
@@ -55,7 +55,7 @@ export const pointsIssued = (orders: Order[]) => orders.filter(order => order.st
 
 export function paymentBreakdown(orders: Order[]) {
   const total = totalRevenue(orders)
-  return (['MTN Mobile Money', 'Orange Money', 'Espèces', 'Carte bancaire'] as PaymentMethod[]).map(name => {
+  return (['Orange Money', 'Airtel Money', 'M-Pesa', 'Espèces', 'Carte bancaire'] as PaymentMethod[]).map(name => {
     const value = orders.filter(order => order.status !== 'Annulée' && order.payment === name).reduce((sum, order) => sum + order.amount, 0)
     return { name, value, percent: total ? Math.round(value / total * 100) : 0 }
   })

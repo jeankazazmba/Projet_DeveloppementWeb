@@ -7,8 +7,9 @@ const onlineMethods = [
   {
     title: "Mobile Money",
     items: [
-      { id: "mtn", name: "MTN Mobile Money", detail: "Paiement depuis votre compte MoMo" },
       { id: "orange", name: "Orange Money", detail: "Paiement depuis votre compte Orange Money" },
+      { id: "airtel", name: "Airtel Money", detail: "Paiement depuis votre compte Airtel Money" },
+      { id: "mpesa", name: "M-Pesa", detail: "Paiement depuis votre compte Vodacom M-Pesa" },
     ],
   },
   {

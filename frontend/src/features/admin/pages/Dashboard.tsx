@@ -25,7 +25,7 @@ export default function Dashboard({ navigate, openClaims, orders }: { navigate: 
   const services = serviceBreakdown(orders)
   const topDishes = popularDishes(orders)
   const peak = series.reduce((best, point) => point.value > best.value ? point : best, series[0])
-  const mobileMoney = payments.filter(item => item.name.includes('Money')).reduce((sum, item) => sum + item.percent, 0)
+  const mobileMoney = payments.filter(item => item.name.includes('Money') || item.name === 'M-Pesa').reduce((sum, item) => sum + item.percent, 0)
   return <>
     <PageHeading first="Tableau de" accent="bord" description="Vue d’ensemble du service de démonstration · ZeDuc-Sp@ce, Yansoki, Douala." action={<div className="segmented period">{([['day', 'Aujourd’hui'], ['week', '7 jours'], ['month', '30 jours']] as [Period, string][]).map(([value, label]) => <button key={value} className={period === value ? 'selected' : ''} aria-pressed={period === value} onClick={() => setPeriod(value)}>{label}</button>)}<button onClick={() => setPreview(true)}><Icon src={a.imgContainer3} />Aperçu rapide</button></div>} />
     <div className="metrics dashboard-metrics">

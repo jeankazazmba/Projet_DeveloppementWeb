@@ -12,8 +12,9 @@ const fields: { key: 'gain' | 'conversion' | 'minimum' | 'expiry' | 'referral'; 
 ]
 const tabs = ['Restaurant', 'Horaires', 'Fidélité et parrainage', 'Paiements', 'Politiques', 'Sécurité']
 const paymentLabels: { key: keyof SettingsData['payments']; label: string; description: string }[] = [
-  { key: 'mtn', label: 'MTN Mobile Money', description: 'Paiement mobile MTN' },
   { key: 'orange', label: 'Orange Money', description: 'Paiement mobile Orange' },
+  { key: 'airtel', label: 'Airtel Money', description: 'Paiement mobile Airtel' },
+  { key: 'mpesa', label: 'M-Pesa', description: 'Paiement mobile Vodacom M-Pesa' },
   { key: 'cash', label: 'Espèces', description: 'Encaissement sur place' },
   { key: 'card', label: 'Carte bancaire', description: 'Intégration d’un agrégateur requise' },
 ]
