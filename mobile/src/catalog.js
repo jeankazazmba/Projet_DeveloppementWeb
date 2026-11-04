@@ -6,6 +6,14 @@ export const categories = [
   "Desserts",
 ];
 
+export const categoryLabels = {
+  Tout: "Tout",
+  Plats: "Plats chauds",
+  Grillades: "Grillades & braisés",
+  Boissons: "Boissons fraîches",
+  Desserts: "Desserts & douceurs",
+};
+
 export const dishes = [
   {
     id: "poulet",

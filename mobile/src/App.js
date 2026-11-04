@@ -27,7 +27,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { categories, dishes, findDish, money } from "./catalog";
+import { categories, categoryLabels, dishes, findDish, money } from "./catalog";
 import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
 import FloatingCart from "./FloatingCart";
@@ -834,50 +834,89 @@ function Menu({ params = {} }) {
   const { go, addToCart } = useApp();
   const [category, setCategory] = useState("Tout");
   const [query, setQuery] = useState("");
-  const filtered = dishes.filter(
-    (dish) =>
-      (category === "Tout" || dish.category === category) &&
-      `${dish.name} ${dish.description}`.toLowerCase().includes(query.toLowerCase()),
-  );
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [priceOrder, setPriceOrder] = useState(false);
+  const normalizedQuery = query.trim().toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const matches = dishes.filter((dish) => {
+    const content = `${dish.name} ${dish.description}`.toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return (!availableOnly || dish.available !== false) && content.includes(normalizedQuery);
+  });
+  const filtered = matches.filter((dish) => category === "Tout" || dish.category === category);
+  const sections = (category === "Tout" ? categories.slice(1) : [category])
+    .map((name) => ({
+      name,
+      items: filtered.filter((dish) => dish.category === name)
+        .sort((a, b) =>
+          Number(a.available === false) - Number(b.available === false) ||
+          (priceOrder ? a.price - b.price : 0),
+        ),
+    }))
+    .filter((section) => section.items.length);
   return (
-    <Page title="Toute la carte" subtitle="Des saveurs pour chaque envie.">
+    <Page title="La carte" subtitle="Plats, grillades et douceurs à découvrir.">
       <Field
         value={query}
         onChangeText={setQuery}
-        placeholder="Rechercher un plat…"
+        placeholder="Rechercher un plat, une boisson…"
         autoFocus={params.autoFocus}
         right={<Icon name="search-outline" color={colors.muted} />}
       />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ marginBottom: 17 }}
+        style={{ marginBottom: 10 }}
       >
         {categories.map((item) => (
           <Pill
             key={item}
-            title={item}
+            title={`${categoryLabels[item]} (${item === "Tout" ? matches.length : matches.filter((dish) => dish.category === item).length})`}
             active={category === item}
             onPress={() => setCategory(item)}
           />
         ))}
       </ScrollView>
-      <Text style={{ color: colors.muted, marginBottom: 13 }}>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
+        <Pill
+          title="Disponibles"
+          icon="checkmark-circle-outline"
+          active={availableOnly}
+          onPress={() => setAvailableOnly((current) => !current)}
+        />
+        <Pill
+          title="Prix croissant"
+          icon="swap-vertical-outline"
+          active={priceOrder}
+          onPress={() => setPriceOrder((current) => !current)}
+        />
+      </View>
+      <Text style={{ color: colors.muted, fontSize: 13, marginBottom: 4 }}>
         {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
       </Text>
-      {filtered.map((dish) => (
-        <FoodCard
-          key={dish.id}
-          dish={dish}
-          onPress={() => go("detail", { id: dish.id })}
-          onAdd={() => addToCart(dish.id)}
-        />
+      {sections.map((section) => (
+        <View key={section.name}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 17, marginBottom: 13 }}>
+            <Text style={{ color: colors.text, fontSize: 19, fontWeight: "800" }}>{categoryLabels[section.name]}</Text>
+            <Text style={{ color: colors.gold, fontSize: 13, fontWeight: "800" }}>{section.items.length}</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: "rgba(236,217,177,0.18)" }} />
+          </View>
+          {section.items.map((dish) => (
+            <FoodCard
+              key={dish.id}
+              dish={dish}
+              onPress={() => go("detail", { id: dish.id })}
+              onAdd={() => addToCart(dish.id)}
+            />
+          ))}
+        </View>
       ))}
       {!filtered.length && (
         <Glass style={{ padding: 22 }}>
           <Text style={{ color: colors.muted }}>
-            Aucun plat trouvé. Essayez une autre recherche.
+            Aucun résultat avec ces filtres.
           </Text>
+          <Pressable onPress={() => { setQuery(""); setCategory("Tout"); setAvailableOnly(false); setPriceOrder(false); }} style={{ marginTop: 14 }}>
+            <Text style={{ color: colors.gold, fontWeight: "800" }}>Afficher toute la carte →</Text>
+          </Pressable>
         </Glass>
       )}
     </Page>
