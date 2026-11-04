@@ -14,14 +14,14 @@ class SessionController extends Controller
     {
         $credentials = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string']]);
         $user = User::where('email', $credentials['email'])->first();
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        if (!$user || !$user->is_active || !Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages(['email' => 'Identifiants incorrects.']);
         }
 
         return response()->json([
             'token' => $user->createToken('app')->plainTextToken,
-            'user' => $user->only(['id', 'name', 'email', 'is_platform_admin']),
-            'restaurants' => $user->restaurants()->get(['restaurants.id', 'name', 'location', 'hours', 'description', 'is_public', 'is_demo']),
+            'user' => $user->only(['id', 'name', 'email', 'is_platform_admin', 'is_active']),
+            'restaurants' => $user->restaurants()->get(['restaurants.id', 'name', 'location', 'hours', 'description', 'status', 'is_public', 'is_demo']),
         ]);
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\StaffRestaurantController;
 use App\Http\Controllers\Api\PlatformRestaurantController;
 use App\Http\Controllers\Api\PlatformUserController;
+use App\Http\Controllers\Api\PlatformInsightsController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -28,7 +29,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/staff/restaurants/{restaurant}/content/{content}', [StaffRestaurantController::class, 'update']);
     Route::delete('/staff/restaurants/{restaurant}/content/{content}', [StaffRestaurantController::class, 'destroy']);
     Route::post('/platform/restaurants', [PlatformRestaurantController::class, 'store']);
+    Route::get('/platform/restaurants', [PlatformRestaurantController::class, 'index']);
     Route::patch('/platform/restaurants/{restaurant}', [PlatformRestaurantController::class, 'update']);
+    Route::get('/platform/users', [PlatformUserController::class, 'index']);
     Route::post('/platform/users', [PlatformUserController::class, 'store']);
+    Route::patch('/platform/users/{user}', [PlatformUserController::class, 'update']);
     Route::put('/platform/restaurants/{restaurant}/members/{user}', [PlatformUserController::class, 'assign']);
+    Route::delete('/platform/restaurants/{restaurant}/members/{user}', [PlatformUserController::class, 'revoke']);
+    Route::get('/platform/insights', [PlatformInsightsController::class, 'index']);
+    Route::get('/platform/audit', [PlatformInsightsController::class, 'audit']);
 });

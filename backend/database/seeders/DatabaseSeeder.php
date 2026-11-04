@@ -60,7 +60,7 @@ class DatabaseSeeder extends Seeder
             $restaurant = Restaurant::updateOrCreate(['id' => $sample['id']], [
                 'name' => $sample['name'], 'location' => $sample['location'],
                 'hours' => $sample['hours'], 'description' => $sample['description'],
-                'is_public' => true, 'is_demo' => true,
+                'is_public' => true, 'is_demo' => true, 'status' => 'active',
             ]);
             foreach ($sample['contents'] as $content) {
                 $restaurant->contents()->updateOrCreate(
@@ -71,6 +71,6 @@ class DatabaseSeeder extends Seeder
         }
 
         // Masquer les anciennes fiches de démonstration sans effacer de données.
-        Restaurant::whereIn('id', ['zeduc', 'partenaire-demo'])->update(['is_public' => false]);
+        Restaurant::whereIn('id', ['zeduc', 'partenaire-demo'])->update(['is_public' => false, 'status' => 'draft']);
     }
 }

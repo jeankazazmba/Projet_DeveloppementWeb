@@ -9,13 +9,13 @@ class User extends Authenticatable
 {
     use HasApiTokens;
 
-    protected $fillable = ['name', 'email', 'password', 'is_platform_admin'];
+    protected $fillable = ['name', 'email', 'password', 'is_platform_admin', 'is_active'];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'is_platform_admin' => 'boolean'];
+        return ['password' => 'hashed', 'is_platform_admin' => 'boolean', 'is_active' => 'boolean'];
     }
 
     public function restaurants()

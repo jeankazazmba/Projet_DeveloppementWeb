@@ -10,7 +10,7 @@ class Restaurant extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['id', 'name', 'location', 'hours', 'description', 'is_public', 'is_demo'];
+    protected $fillable = ['id', 'name', 'location', 'hours', 'description', 'is_public', 'is_demo', 'status'];
 
     protected function casts(): array
     {

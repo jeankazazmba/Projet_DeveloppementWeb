@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use App\Models\RestaurantContent;
+use App\Support\PlatformAudit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StaffRestaurantController extends Controller
 {
@@ -39,14 +41,28 @@ class StaffRestaurantController extends Controller
     {
         $this->canWrite($request, $restaurant);
         $data = $this->validatedContent($request);
-        return response()->json($restaurant->contents()->create($data), 201);
+        $content = DB::transaction(function () use ($request, $restaurant, $data) {
+            $content = $restaurant->contents()->create($data);
+            if ($request->user()->is_platform_admin) {
+                PlatformAudit::record($request->user(), 'content.created', 'content', (string) $content->id, $restaurant->id);
+            }
+            return $content;
+        });
+        return response()->json($content, 201);
     }
 
     public function update(Request $request, Restaurant $restaurant, RestaurantContent $content)
     {
         $this->canWrite($request, $restaurant);
         abort_unless($content->restaurant_id === $restaurant->id, 404);
-        $content->update($this->validatedContent($request, true));
+        $data = $this->validatedContent($request, true);
+        DB::transaction(function () use ($request, $restaurant, $content, $data) {
+            $before = $content->only(array_keys($data));
+            $content->update($data);
+            if ($request->user()->is_platform_admin) {
+                PlatformAudit::record($request->user(), 'content.updated', 'content', (string) $content->id, $restaurant->id, null, ['before' => $before, 'after' => $content->only(array_keys($data))]);
+            }
+        });
         return $content->refresh();
     }
 
@@ -54,7 +70,12 @@ class StaffRestaurantController extends Controller
     {
         $this->canWrite($request, $restaurant);
         abort_unless($content->restaurant_id === $restaurant->id, 404);
-        $content->delete();
+        DB::transaction(function () use ($request, $restaurant, $content) {
+            $content->delete();
+            if ($request->user()->is_platform_admin) {
+                PlatformAudit::record($request->user(), 'content.deleted', 'content', (string) $content->id, $restaurant->id);
+            }
+        });
         return response()->noContent();
     }
 

@@ -107,7 +107,7 @@ Le socle actuel comprend `users`, `restaurants`, `restaurant_user`, `restaurant_
 
 **Isolation :** tout plat, événement, jeu, promotion, commande ou réclamation possède un restaurant propriétaire. Une liste globale de plateforme peut agréger ces lignes, mais chaque élément indique toujours son restaurant. Le changement de restaurant dans les autres applications recharge leur périmètre ; la plateforme n'utilise pas ce sélecteur pour masquer artificiellement une réponse serveur non filtrée.
 
-## 6. État réel du projet au 4 novembre 2026
+## 6. État avant l'implémentation P1/P2 du 4 novembre 2026
 
 | Capacité | Présent | Manquant pour l'espace plateforme complet |
 | --- | --- | --- |
@@ -117,7 +117,7 @@ Le socle actuel comprend `users`, `restaurants`, `restaurant_user`, `restaurant_
 | Démo multi-restaurants | Khalifa_food et sleepy hollow avec des contenus distincts sur site/mobile, dans les espaces de démo et le seeder. | Synchronisation serveur des commandes, réclamations, paramètres et statistiques ; données réelles. |
 | Tauri | Écran de rôle puis choix du restaurant pour les profils multi-affectés en démo. | Connexion réelle commune et contrôle des droits dans tous les espaces. |
 
-La vue `/plateforme` **n'est pas actuellement le tableau de bord connecté de toute la plateforme**. Les totaux affichés par les écrans admin/gérant sont des exemples locaux et ne doivent pas être additionnés pour former des « ventes globales ».
+L'implémentation P1/P2 et les limites des flux encore non raccordés sont décrites dans [IMPLEMENTATION_P1_P2.md](IMPLEMENTATION_P1_P2.md). Les totaux affichés par les écrans admin/gérant restent des exemples locaux et ne doivent pas être additionnés pour former des « ventes globales ».
 
 ## 7. Ordre de réalisation recommandé
 
