@@ -14,6 +14,10 @@ import Tables from './pages/Tables'
 import Reports from './pages/Reports'
 import DataReadiness from './pages/DataReadiness'
 import { initialOrders, initialTables } from './operations'
+import { sleepyClaims, sleepyDishes, sleepyEmployees, sleepyOrders, sleepyPromotions, sleepySettings, sleepyTables } from './sleepyData'
+import { useRestaurantScope } from '../shared/useRestaurantScope.js'
+import { RestaurantScopeControl } from '../shared/RestaurantScope.jsx'
+import { RestaurantNameContext } from './restaurantContext'
 
 const nav: { page: Page; label: string; icon: string }[] = [
   { page: 'dashboard', label: 'Tableau de bord', icon: assets.dashboard.imgIcon },
@@ -33,6 +37,11 @@ function readPage(): Page {
   return nav.find(item => item.page === key)?.page ?? 'dashboard'
 }
 export default function App() {
+  const scope = useRestaurantScope('admin')
+  return <AdminWorkspace key={scope.restaurantId} {...scope} />
+}
+function AdminWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRestaurants }: { restaurant: { id: string; name: string }; restaurantId: string; setRestaurantId: (id: string) => void; allowedRestaurants: { id: string; name: string }[] }) {
+  const sleepy = restaurantId === 'sleepy-hollow'
   const [page, setPage] = useState<Page>(readPage)
   const [theme, setTheme] = useState<Theme>(() => {
     try {
@@ -41,13 +50,13 @@ export default function App() {
       return 'dark'
     }
   })
-  const [employees, setEmployees] = useState(initialEmployees)
-  const [dishes, setDishes] = useState(initialDishes)
-  const [promotions, setPromotions] = useState(initialPromotions)
-  const [claims, setClaims] = useState(initialClaims)
-  const [settings, setSettings] = useState(initialSettings)
-  const [orders, setOrders] = useState(initialOrders)
-  const [tables, setTables] = useState(initialTables)
+  const [employees, setEmployees] = useState(sleepy ? sleepyEmployees : initialEmployees)
+  const [dishes, setDishes] = useState(sleepy ? sleepyDishes : initialDishes)
+  const [promotions, setPromotions] = useState(sleepy ? sleepyPromotions : initialPromotions)
+  const [claims, setClaims] = useState(sleepy ? sleepyClaims : initialClaims)
+  const [settings, setSettings] = useState(sleepy ? sleepySettings : initialSettings)
+  const [orders, setOrders] = useState(sleepy ? sleepyOrders : initialOrders)
+  const [tables, setTables] = useState(sleepy ? sleepyTables : initialTables)
   const [sidebar, setSidebar] = useState(false)
   const [query, setQuery] = useState('')
   const [notice, setNotice] = useState('')
@@ -67,21 +76,21 @@ export default function App() {
   useEffect(() => { if (!sidebar) return; const close = (e: KeyboardEvent) => { if (e.key === 'Escape') setSidebar(false) }; window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close) }, [sidebar])
   const navigate = (next: Page) => { window.location.hash = `/${next}`; setSidebar(false) }
   const openClaims = claims.filter(c => ['En attente', 'En examen'].includes(c.status)).length
-  return <div className="app-shell">
+  return <RestaurantNameContext.Provider value={restaurant.name}><div className="app-shell">
     <a className="skip-link" href="#main">Aller au contenu</a>
     {sidebar && <button className="sidebar-shade" aria-label="Fermer la navigation" onClick={() => setSidebar(false)} />}
     <aside id="navigation" className={`sidebar ${sidebar ? 'is-open' : ''}`}>
       <a href="#/dashboard" className="brand" aria-label="Mon Miam Miam — Tableau de bord"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="Mon Miam Miam ZeDuc-Sp@ce" /><span>KINSHASA • RDC</span></a>
       <div className="role-line"><span className="badge">ADMIN RESTAURANT</span><span className="live-label"><img src={assets.dashboard.imgEllipse} alt="" />Démo active</span></div>
-      <p className="admin-restaurant-scope">Restaurant : <strong>ZeDuc-Sp@ce</strong></p>
+      <p className="admin-restaurant-scope">Restaurant : <strong>{restaurant.name}</strong></p>
       <nav aria-label="Navigation administrateur">
         {nav.map(item => <div key={item.page}>
           <a href={`#/${item.page}`} onClick={() => setSidebar(false)} className={`nav-link ${page === item.page ? 'active' : ''}`} aria-current={page === item.page ? 'page' : undefined}><Icon src={item.icon} /><span>{item.label}</span>{item.page === 'claims' && openClaims > 0 && <span className="nav-count">{openClaims}</span>}</a>
         </div>)}
       </nav>
-      <div className="sidebar-bottom"><a className="admin-platform-link" href="/catalogue-pro">Catalogue partagé →</a><a className="admin-platform-link" href="/plateforme">Vue admin plateforme →</a><div className="user-card"><span className="avatar">AD</span><div><strong>Admin</strong><small>Admini.ZeDuc-Sp@ce</small></div></div><div className="support-links"><button onClick={() => setInfo('Les coordonnées du support technique seront configurées avec le backend.')}><Icon src={assets.dashboard.imgContainer1} />Support<br />Technique</button><button disabled title="Authentification à connecter au backend"><Icon src={assets.dashboard.imgContainer2} />Déconnexion</button></div></div>
+      <div className="sidebar-bottom"><a className="admin-platform-link" href="/catalogue-pro">Catalogue partagé →</a><a className="admin-platform-link" href="/plateforme">Vue admin plateforme →</a><div className="user-card"><span className="avatar">AD</span><div><strong>Admin</strong><small>{restaurant.name}</small></div></div><div className="support-links"><button onClick={() => setInfo('Les coordonnées du support technique seront configurées avec le backend.')}><Icon src={assets.dashboard.imgContainer1} />Support<br />Technique</button><button disabled title="Authentification à connecter au backend"><Icon src={assets.dashboard.imgContainer2} />Déconnexion</button></div></div>
     </aside>
-    <div className="workspace"><header className="topbar"><button type="button" className="icon-button mobile-menu" aria-label="Ouvrir la navigation" aria-expanded={sidebar} aria-controls="navigation" onClick={() => setSidebar(!sidebar)}>☰</button><form onSubmit={e => { e.preventDefault(); navigate('menu') }}><SearchInput value={query} onChange={setQuery} placeholder="Rechercher un plat..." /></form><div className="topbar-right"><span className="admin-current-restaurant">ZeDuc-Sp@ce</span><span className="demo-label" title="Données locales issues des maquettes, réinitialisées au rechargement">Démo</span><span className="service-chip"><img src={assets.dashboard.imgEllipse} alt="" />Service démo</span><button type="button" className="theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button className="notification-button" aria-label={`Voir les ${openClaims} réclamations ouvertes`} onClick={() => navigate('claims')}><Icon src={assets.dashboard.imgIconBell} /></button><button className="profile-button" onClick={() => navigate('settings')}><span className="avatar">AD</span><span>Admin</span></button></div></header>
+    <div className="workspace"><header className="topbar"><button type="button" className="icon-button mobile-menu" aria-label="Ouvrir la navigation" aria-expanded={sidebar} aria-controls="navigation" onClick={() => setSidebar(!sidebar)}>☰</button><form onSubmit={e => { e.preventDefault(); navigate('menu') }}><SearchInput value={query} onChange={setQuery} placeholder="Rechercher un plat..." /></form><div className="topbar-right"><RestaurantScopeControl restaurant={restaurant} restaurants={allowedRestaurants} onChange={setRestaurantId} /><span className="demo-label" title="Données locales issues des maquettes, réinitialisées au rechargement">Démo</span><span className="service-chip"><img src={assets.dashboard.imgEllipse} alt="" />Service démo</span><button type="button" className="theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button className="notification-button" aria-label={`Voir les ${openClaims} réclamations ouvertes`} onClick={() => navigate('claims')}><Icon src={assets.dashboard.imgIconBell} /></button><button className="profile-button" onClick={() => navigate('settings')}><span className="avatar">AD</span><span>Admin</span></button></div></header>
       <main id="main" tabIndex={-1} className={`main-content page-${page}`}>
         {page === 'dashboard' && <Dashboard navigate={navigate} openClaims={openClaims} orders={orders} />}
         {page === 'orders' && <Orders orders={orders} setOrders={setOrders} notify={setNotice} />}
@@ -98,5 +107,5 @@ export default function App() {
     </div>
     {notice && <div className="toast" role="status">{notice}<button aria-label="Fermer la notification" onClick={() => setNotice('')}>×</button></div>}
     {info && <Modal title="Information" onClose={() => setInfo('')}><p className="muted">{info}</p><div className="dialog-actions"><button className="button primary" onClick={() => setInfo('')}>Fermer</button></div></Modal>}
-  </div>
+  </div></RestaurantNameContext.Provider>
 }

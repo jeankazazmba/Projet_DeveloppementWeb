@@ -1,13 +1,19 @@
 import { dishes as demoDishes, events as demoEvents, menuImage, offers as demoOffers, promoImage } from '../features/public/publicData.js'
-import { getPublicRestaurants } from './restaurants.js'
+import { getPublicRestaurants, PRIMARY_RESTAURANT_ID, SECONDARY_RESTAURANT_ID } from './restaurants.js'
 
 export const demoCatalog = () => ({
-  restaurants: getPublicRestaurants(), dishes: demoDishes, offers: demoOffers, events: demoEvents,
+  restaurants: getPublicRestaurants(),
+  dishes: demoDishes.filter(item => getPublicRestaurants().some(restaurant => restaurant.id === item.restaurantId)),
+  offers: demoOffers.filter(item => getPublicRestaurants().some(restaurant => restaurant.id === item.restaurantId)),
+  events: demoEvents.filter(item => getPublicRestaurants().some(restaurant => restaurant.id === item.restaurantId)),
   games: [
-    { id: 'demo-wheel', restaurantId: 'zeduc', title: 'Roue gourmande', description: 'Une tentative quotidienne dans l’application étudiante.' },
-    { id: 'demo-quiz', restaurantId: 'zeduc', title: 'Quiz gourmand', description: 'Trois questions sur le restaurant.' },
-    { id: 'demo-memory', restaurantId: 'zeduc', title: 'Paires gourmandes', description: 'Retrouvez les paires de plats.' },
-  ],
+    { id: 'khalifa-wheel', restaurantId: PRIMARY_RESTAURANT_ID, title: 'Roue gourmande', description: 'Une tentative quotidienne chez Khalifa_food.' },
+    { id: 'khalifa-quiz', restaurantId: PRIMARY_RESTAURANT_ID, title: 'Quiz gourmand', description: 'Trois questions sur Khalifa_food.' },
+    { id: 'khalifa-memory', restaurantId: PRIMARY_RESTAURANT_ID, title: 'Paires gourmandes', description: 'Retrouvez les paires de plats de Khalifa_food.' },
+    { id: 'sleepy-wheel', restaurantId: SECONDARY_RESTAURANT_ID, title: 'Roue du soir', description: 'Une tentative quotidienne chez sleepy hollow.' },
+    { id: 'sleepy-quiz', restaurantId: SECONDARY_RESTAURANT_ID, title: 'Quiz du soir', description: 'Découvrez les plats de sleepy hollow.' },
+    { id: 'sleepy-memory', restaurantId: SECONDARY_RESTAURANT_ID, title: 'Paires du soir', description: 'Retrouvez les paires gourmandes de sleepy hollow.' },
+  ].filter(item => getPublicRestaurants().some(restaurant => restaurant.id === item.restaurantId)),
   connected: false,
 })
 

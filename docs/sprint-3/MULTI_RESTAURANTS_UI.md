@@ -12,6 +12,6 @@ Les commandes, stocks, tables, livraisons, réclamations, statistiques et jeux d
 
 ## Démonstration encore locale
 
-Sans adresse d’API, ZeDuc et un partenaire fictif sont disponibles pour prévisualiser les écrans. La plateforme locale peut créer d’autres fiches dans le navigateur, mais cela ne crée aucun restaurant sur le serveur. L’espace Tauri et les écrans historiques admin/gérant/employé utilisent encore leurs données de maquette ; seul `/catalogue-pro` est relié à l’API.
+Sans adresse d’API, **Khalifa_food** (`khalifa-food`) et **sleepy hollow** (`sleepy-hollow`) sont les deux restaurants de démonstration. **ZeDuc-Sp@ce** désigne la plateforme. Le site et le mobile étudiant filtrent plats, promotions, événements et jeux par restaurant ; les espaces admin, gérant, employé et Tauri sélectionnent un restaurant et disposent de données de démonstration distinctes. La plateforme locale peut créer d’autres fiches dans le navigateur, sans création sur le serveur. Seul `/catalogue-pro` est relié à l’API pour les modifications de contenu.
 
 L’authentification du catalogue est indépendante des écrans de démonstration historiques. Elle doit être étendue aux commandes, stocks, tables, livraisons, réclamations et statistiques avant de considérer l’ensemble du backoffice comme connecté.

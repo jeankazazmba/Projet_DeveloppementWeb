@@ -1,3 +1,5 @@
+import { PRIMARY_RESTAURANT_ID, SECONDARY_RESTAURANT_ID } from './restaurants';
+
 export const categories = [
   "Tout",
   "Plats",
@@ -189,7 +191,7 @@ export let dishes = [
   },
   {
     id: "admin-poulet",
-    name: "Poulet DG Spécial ZeDuc",
+    name: "Poulet DG Spécial Khalifa",
     category: "Plats",
     price: 4500,
     description: "Poulet fermier · Légumes sautés",
@@ -205,7 +207,7 @@ export let dishes = [
   },
   {
     id: "admin-burger",
-    name: "Burger maison ZeDuc",
+    name: "Burger maison Khalifa",
     category: "Plats",
     price: 3000,
     description: "Bœuf braisé · Sauce secrète",
@@ -245,26 +247,28 @@ export let dishes = [
     image: require("../assets/images/admin-menu-7.jpg"),
   },
   {
-    id: "demo-assiette",
-    restaurantId: "partenaire-demo",
+    id: "sleepy-burger",
+    restaurantId: SECONDARY_RESTAURANT_ID,
     example: true,
-    name: "Assiette du partenaire (exemple)",
+    name: "Burger nocturne sleepy hollow",
     category: "Plats",
-    price: 4500,
-    description: "Article fictif pour tester le parcours multi-restaurants.",
-    image: require("../assets/images/admin-menu-0.jpg"),
+    price: 4200,
+    description: "Bœuf grillé, crudités et sauce maison.",
+    image: require("../assets/images/admin-menu-3.jpg"),
   },
   {
-    id: "demo-boisson",
-    restaurantId: "partenaire-demo",
+    id: "sleepy-limonade",
+    restaurantId: SECONDARY_RESTAURANT_ID,
     example: true,
-    name: "Boisson du partenaire (exemple)",
+    name: "Limonade gingembre et menthe",
     category: "Boissons",
-    price: 2000,
-    description: "Article fictif pour tester le changement de restaurant.",
+    price: 1500,
+    description: "Boisson fraîche au gingembre et à la menthe.",
     image: require("../assets/images/admin-menu-6.jpg"),
   },
-].map(dish => ({ restaurantId: 'zeduc', ...dish }));
+  { id: 'sleepy-brochettes', restaurantId: SECONDARY_RESTAURANT_ID, example: true, name: 'Brochettes du soir', category: 'Grillades', price: 3200, description: 'Brochettes de bœuf, épices douces et légumes.', image: require('../assets/images/admin-menu-4.jpg') },
+  { id: 'sleepy-dessert', restaurantId: SECONDARY_RESTAURANT_ID, example: true, name: 'Douceur mangue', category: 'Desserts', price: 2500, description: 'Dessert fruité à la mangue.', image: require('../assets/images/public-menu-00279.jpg') },
+].map(dish => ({ restaurantId: PRIMARY_RESTAURANT_ID, ...dish }));
 
 export const findDish = (id) => dishes.find((dish) => dish.id === id);
 export function setDishes(items) {

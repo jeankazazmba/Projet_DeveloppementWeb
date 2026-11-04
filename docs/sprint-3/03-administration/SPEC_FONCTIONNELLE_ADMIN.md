@@ -4,6 +4,8 @@
 
 Les mentions **Cahier**, **Demande ultérieure** et **Proposition** indiquent l'origine des besoins. **Interface présente** désigne un écran manipulant des données locales ; cela ne signifie ni persistance en base ni synchronisation entre applications.
 
+**Démo multi-restaurants (4 novembre 2026) :** ZeDuc-Sp@ce désigne désormais la plateforme. L’administration de restaurant peut sélectionner Khalifa_food ou sleepy hollow ; chaque sélection charge des exemples propres à cet établissement. Ce sélecteur local ne remplace pas encore les autorisations issues du compte connecté.
+
 ## 1. Périmètre et responsabilités
 
 Le cahier confie à l'administrateur, membre de la direction du restaurant, la gestion des employés et du menu, les statistiques, les promotions, événements et jeux, les réclamations et les paramètres. Il lui confie aussi l'observation du programme de fidélité et de parrainage, le réglage des points et la validation de réclamations de points. Le paiement en ligne est un **bonus facultatif** du cahier.

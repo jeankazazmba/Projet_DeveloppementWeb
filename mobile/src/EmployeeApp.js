@@ -7,11 +7,11 @@ import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppTopBar from "./AppTopBar";
 import { categories, categoryLabels, dishes, money } from "./catalog";
-import { claimStages, employeeWeeks, initialEmployeeData, orderStages, topEmployeeDishes } from "./employeeData";
+import { claimStages, employeeWeeks, initialEmployeeData, orderStages, topEmployeeDishes, sleepyEmployeeData, sleepyEmployeeWeeks, sleepyTopEmployeeDishes } from "./employeeData";
 import { Button, colors, Field, Glass, Icon, Page, Pill, SectionTitle, styles } from "./ui";
 import { getRestaurant, restaurants } from './restaurants';
 import { remoteApiUrl, staffRequest } from './remoteCatalog';
-const STORAGE_KEY = "mon-miam-miam-employee-v1";
+const STORAGE_KEY = "mon-miam-miam-employee-v2";
 const EMPLOYEE = "MON MIAM MIAM · EMPLOYÉ";
 const tabs = [["orders", "Commandes", "receipt-outline"], ["menu", "Menu", "restaurant-outline"], ["claims", "Réclamations", "chatbubble-ellipses-outline"], ["stats", "Stats", "stats-chart-outline"], ["profile", "Profil", "person-outline"]];
 const mainScreens = tabs.map(([name]) => name);
@@ -477,9 +477,9 @@ function Bars({
       }}>{labels[index]}</Text></View>)}
   </View>;
 }
-function StatsScreen() {
+function StatsScreen({ weeks = employeeWeeks, topDishes = topEmployeeDishes }) {
   const [weekIndex, setWeekIndex] = useState(1);
-  const week = employeeWeeks[weekIndex];
+  const week = weeks[weekIndex];
   const revenue = week.sales.reduce((sum, value) => sum + value, 0);
   const onsiteShare = Math.round(week.onsite / week.orders * 100);
   return <Page eyebrow={EMPLOYEE} title="Statistiques" subtitle="Activité hebdomadaire · données de maquette."><Glass style={{
@@ -494,9 +494,9 @@ function StatsScreen() {
       }} accessibilityLabel="Semaine précédente"><Icon name="chevron-back" /></Pressable><Text style={{
         color: colors.goldBright,
         fontWeight: "800"
-      }}>{week.label} 2026</Text><Pressable disabled={weekIndex === employeeWeeks.length - 1} onPress={() => setWeekIndex(current => current + 1)} style={{
+      }}>{week.label} 2026</Text><Pressable disabled={weekIndex === weeks.length - 1} onPress={() => setWeekIndex(current => current + 1)} style={{
         padding: 9,
-        opacity: weekIndex === employeeWeeks.length - 1 ? 0.3 : 1
+        opacity: weekIndex === weeks.length - 1 ? 0.3 : 1
       }} accessibilityLabel="Semaine suivante"><Icon name="chevron-forward" /></Pressable></Glass><View style={{
       flexDirection: "row",
       flexWrap: "wrap",
@@ -528,7 +528,7 @@ function StatsScreen() {
         marginTop: 5
       }}>Livraison : {week.delivery} · {100 - onsiteShare} %</Text></Glass><SectionTitle title="Top 5 des plats" /><Glass style={{
       padding: 17
-    }}>{topEmployeeDishes.map((dish, index) => <View key={dish.name} style={{
+    }}>{topDishes.map((dish, index) => <View key={dish.name} style={{
         marginBottom: 13
       }}><View style={styles.rowBetween}><Text style={{
             color: colors.text,
@@ -543,7 +543,7 @@ function StatsScreen() {
           marginTop: 7
         }}><View style={{
             height: 5,
-            width: `${dish.count / topEmployeeDishes[0].count * 100}%`,
+            width: `${dish.count / topDishes[0].count * 100}%`,
             borderRadius: 3,
             backgroundColor: colors.gold
           }} /></View></View>)}</Glass><SectionTitle title="Heures de pointe" /><Glass style={{
@@ -598,7 +598,7 @@ function RestaurantScreen({ select, items = restaurants, connected = false }) {
 export default function EmployeeApp({
   onExit
 }) {
-  const [restaurantId, setRestaurantId] = useState(remoteApiUrl ? null : 'zeduc');
+  const [restaurantId, setRestaurantId] = useState(remoteApiUrl ? null : 'khalifa-food');
   const [auth, setAuth] = useState(null);
   const [assigned, setAssigned] = useState([]);
   const [staffContent, setStaffContent] = useState([]);
@@ -611,8 +611,8 @@ export default function EmployeeApp({
   const [selectedId, setSelectedId] = useState(null);
   const [searchRequested, setSearchRequested] = useState(false);
   const blurTarget = useRef(null);
-  const storeKey = restaurantId === 'zeduc' ? STORAGE_KEY : `${STORAGE_KEY}-${restaurantId}`;
-  const baseData = !remoteApiUrl && restaurantId === 'zeduc' ? initialEmployeeData : { orders: [], claims: [], menu: dishes.filter(dish => dish.restaurantId === restaurantId).map(dish => ({ id: dish.id, available: true, featured: false })) };
+  const storeKey = `${STORAGE_KEY}-${restaurantId}`;
+  const baseData = remoteApiUrl ? { orders: [], claims: [], menu: [] } : restaurantId === 'sleepy-hollow' ? sleepyEmployeeData : initialEmployeeData;
   useEffect(() => {
     if (remoteApiUrl) { setData(baseData); setReady(true); return; }
     let active = true;
@@ -715,7 +715,7 @@ export default function EmployeeApp({
         setScreen("claim-detail");
       }} />}
     {screen === "claim-detail" && <ClaimDetailScreen claim={selectedClaim} back={back} update={updateClaim} />}
-    {screen === "stats" && (!remoteApiUrl && restaurantId === 'zeduc' ? <StatsScreen /> : <Page eyebrow={EMPLOYEE} title="Statistiques" subtitle={(remoteApiUrl ? assigned.find(item => item.id === restaurantId) : getRestaurant(restaurantId))?.name}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Les statistiques de cet établissement seront disponibles avec l’API des commandes.</Text></Glass></Page>)}
+    {screen === "stats" && (!remoteApiUrl ? <StatsScreen weeks={restaurantId === 'sleepy-hollow' ? sleepyEmployeeWeeks : employeeWeeks} topDishes={restaurantId === 'sleepy-hollow' ? sleepyTopEmployeeDishes : topEmployeeDishes} /> : <Page eyebrow={EMPLOYEE} title="Statistiques" subtitle={(remoteApiUrl ? assigned.find(item => item.id === restaurantId) : getRestaurant(restaurantId))?.name}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Les statistiques de cet établissement seront disponibles avec l’API des commandes.</Text></Glass></Page>)}
     {screen === "profile" && <ProfileScreen exit={exitEmployee} restaurant={(remoteApiUrl ? assigned.find(item => item.id === restaurantId) : getRestaurant(restaurantId)) || { name: 'Restaurant' }} connected={Boolean(remoteApiUrl)} employeeName={auth?.user?.name || 'Marie T.'} onChangeRestaurant={() => setScreen('restaurant')} />}
   </BlurTargetView><TabBar active={screen} onSelect={selectTab} blurTarget={blurTarget} /></View>;
 }

@@ -29,7 +29,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { categories, categoryLabels, dishes, findDish, money } from "./catalog";
-import { getRestaurant, restaurants } from "./restaurants";
+import { getRestaurant, restaurants, normalizeRestaurantId, PRIMARY_RESTAURANT_ID } from "./restaurants";
 import { loadRemoteCatalog } from './remoteCatalog';
 import { getGamesForRestaurant, playable } from './games';
 import Onboarding from "./Onboarding";
@@ -72,9 +72,18 @@ const initialData = {
   notificationsReadAt: null,
   points: 120,
   referralUsed: false,
-  lastSpin: null,
+  lastSpin: {},
   gameResults: {},
 };
+function migrateStudentDemo(saved) {
+  const dishId = id => id === 'demo-assiette' ? 'sleepy-burger' : id === 'demo-boisson' ? 'sleepy-limonade' : id;
+  const cart = Object.fromEntries(Object.entries(saved.cart || {}).map(([id, quantity]) => [dishId(id), quantity]));
+  const orders = (saved.orders || []).map(order => ({ ...order, restaurantId: normalizeRestaurantId(order.restaurantId), items: (order.items || []).map(item => ({ ...item, id: dishId(item.id), restaurantId: normalizeRestaurantId(item.restaurantId) })) }));
+  const previousSpins = saved.lastSpin && typeof saved.lastSpin === 'object' ? saved.lastSpin : saved.lastSpin ? { [PRIMARY_RESTAURANT_ID]: saved.lastSpin } : {};
+  const lastSpin = Object.fromEntries(Object.entries(previousSpins).map(([id, value]) => [normalizeRestaurantId(id), value]));
+  const gameResults = Object.fromEntries(Object.entries(saved.gameResults || {}).map(([id, value]) => [normalizeRestaurantId(id), value]));
+  return { ...saved, cart, orders, lastSpin, gameResults, restaurantFilter: normalizeRestaurantId(saved.restaurantFilter) || null };
+}
 const tabNames = ["home", "restaurant", "menu", "orders", "loyalty", "profile"];
 const tabs = [
   ["home", "Accueil", "home-outline"],
@@ -141,7 +150,7 @@ function AppProvider({ children, skipOnboarding = false }) {
       .then((raw) => {
         if (raw) {
           const saved = JSON.parse(raw);
-          setData({ ...initialData, ...saved });
+          setData({ ...initialData, ...migrateStudentDemo(saved) });
           if (skipOnboarding)
             setStack([{ name: saved.user ? "home" : "login", params: {} }]);
         }
@@ -778,7 +787,7 @@ function RestaurantHome() {
   const { data, go, addToCart, tab } = useApp();
   const selected = restaurants.find(item => item.id === data.restaurantFilter);
   if (!selected) return <Page title="Choisir un restaurant"><Button title="Voir les restaurants" onPress={() => tab('home')} /></Page>;
-  if (selected.id !== 'zeduc') return <Page title={selected.name} subtitle={`${selected.location} · ${selected.hours}`} onBack={() => tab('home')}><Glass style={{ padding: 19, marginBottom: 18 }}><Text style={{ color: colors.gold, fontWeight: '900' }}>{selected.example ? 'Établissement de démonstration' : 'Votre restaurant'}</Text><Text style={{ color: colors.muted, marginTop: 8 }}>Les plats, promotions, événements et jeux présentés ici sont propres à cet établissement.</Text></Glass><Button title="Voir les plats" onPress={() => tab('menu')} /><Button title="Promotions, événements et jeux" variant="secondary" onPress={() => go('discover')} style={{ marginTop: 10 }} /><SectionTitle title="La carte" />{dishes.filter(dish => dish.restaurantId === selected.id).map(dish => <FoodCard key={dish.id} dish={dish} onPress={() => go('detail', { id: dish.id })} onAdd={() => addToCart(dish.id)} />)}</Page>;
+  if (selected.id !== PRIMARY_RESTAURANT_ID) return <Page title={selected.name} subtitle={`${selected.location} · ${selected.hours}`} onBack={() => tab('home')}><Glass style={{ padding: 19, marginBottom: 18 }}><Text style={{ color: colors.gold, fontWeight: '900' }}>{selected.example ? 'Établissement de démonstration' : 'Votre restaurant'}</Text><Text style={{ color: colors.muted, marginTop: 8 }}>Les plats, promotions, événements et jeux présentés ici sont propres à cet établissement.</Text></Glass><Button title="Voir les plats" onPress={() => tab('menu')} /><Button title="Promotions, événements et jeux" variant="secondary" onPress={() => go('discover')} style={{ marginTop: 10 }} /><SectionTitle title="La carte" />{dishes.filter(dish => dish.restaurantId === selected.id).map(dish => <FoodCard key={dish.id} dish={dish} onPress={() => go('detail', { id: dish.id })} onAdd={() => addToCart(dish.id)} />)}</Page>;
   return (
     <Page
       title={selected.name}
@@ -841,7 +850,7 @@ function RestaurantHome() {
           >
             {data.points}
           </Text>
-          <Text style={{ color: colors.muted }}>Points fidélité</Text>
+          <Text style={{ color: colors.muted }}>Points fidélité plateforme</Text>
         </Glass>
         <Glass style={{ flex: 1, padding: 16 }} onPress={() => tab("orders")}>
           <Icon name="receipt-outline" />
@@ -853,7 +862,7 @@ function RestaurantHome() {
               marginTop: 9,
             }}
           >
-            {data.orders.length}
+            {data.orders.filter(order => order.restaurantId === selected.id).length}
           </Text>
           <Text style={{ color: colors.muted }}>Commandes</Text>
         </Glass>
@@ -879,7 +888,7 @@ function RestaurantHome() {
         <View style={styles.rowBetween}>
           <View style={{ flex: 1 }}>
             <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>Promotions & événements</Text>
-            <Text style={{ color: colors.muted, marginTop: 4 }}>Découvrez les offres et l’agenda du rooftop.</Text>
+            <Text style={{ color: colors.muted, marginTop: 4 }}>Découvrez les offres et l’agenda de ce restaurant.</Text>
           </View>
           <Icon name="pricetags-outline" size={27} />
         </View>
@@ -1964,7 +1973,7 @@ function Games() {
   const restaurantId = data.restaurantFilter;
   const restaurant = restaurants.find(item => item.id === restaurantId);
   const games = getGamesForRestaurant(restaurantId);
-  const lastSpin = typeof data.lastSpin === 'object' ? data.lastSpin?.[restaurantId] : restaurantId === 'zeduc' ? data.lastSpin : null;
+  const lastSpin = data.lastSpin?.[restaurantId];
   const available = lastSpin !== new Date().toDateString();
   if (!restaurant) return <Page title="Choisir un restaurant" onBack={back}><Button title="Voir les restaurants" onPress={() => go('home')} /></Page>;
   return <Page title={`Jeux · ${restaurant.name}`} subtitle="Les jeux de cet établissement uniquement." onBack={back}>
@@ -2060,7 +2069,7 @@ function Wheel() {
   const [result, setResult] = useState(null);
   const [spinning, setSpinning] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
-  const lastSpin = typeof data.lastSpin === 'object' ? data.lastSpin?.[restaurantId] : restaurantId === 'zeduc' ? data.lastSpin : null;
+  const lastSpin = data.lastSpin?.[restaurantId];
   const available = lastSpin !== new Date().toDateString();
   const rewards = [10, 20, 25, 30, 50, 75];
   const spin = () => {
@@ -2081,7 +2090,7 @@ function Wheel() {
       setData((current) => ({
         ...current,
         points: current.points + prize,
-        lastSpin: { ...(typeof current.lastSpin === 'object' && current.lastSpin ? current.lastSpin : { zeduc: current.lastSpin }), [restaurantId]: new Date().toDateString() },
+        lastSpin: { ...(current.lastSpin && typeof current.lastSpin === 'object' ? current.lastSpin : {}), [restaurantId]: new Date().toDateString() },
       }));
     });
   };

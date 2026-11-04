@@ -6,13 +6,13 @@ import EmployeeApp from '../features/employee/EmployeeApp.jsx'
 import PlatformAdminApp from '../features/platform/PlatformAdminApp.jsx'
 import PublicSite from '../features/public/PublicSite.jsx'
 import StaffCatalog from '../features/shared/StaffCatalog.jsx'
-import { getRestaurants, restaurantScopeKey } from '../data/restaurants.js'
+import { getRestaurants, restaurantScopeKey, PRIMARY_RESTAURANT_ID, SECONDARY_RESTAURANT_ID } from '../data/restaurants.js'
 
 const logo = '/assets/figma/dashboard-imgMonMiamMiamZeDucSpCe.png'
 const roles = [
-  { id: 'admin', name: 'Admin restaurant', short: 'AD', description: 'Piloter les commandes, le catalogue, les équipes et les rapports de ZeDuc.', path: '/admin', restaurantIds: ['zeduc'] },
-  { id: 'manager', name: 'Gérant', short: 'GE', description: 'Suivre le service, les livreurs, les tables et les stocks.', path: '/gerant', restaurantIds: ['zeduc', 'partenaire-demo'] },
-  { id: 'employee', name: 'Employé', short: 'EM', description: 'Traiter les commandes, le menu et les réclamations.', path: '/employe', restaurantIds: ['zeduc', 'partenaire-demo'] },
+  { id: 'admin', name: 'Admin restaurant', short: 'AD', description: 'Piloter les commandes, le catalogue, les équipes et les rapports du restaurant.', path: '/admin', restaurantIds: [PRIMARY_RESTAURANT_ID, SECONDARY_RESTAURANT_ID] },
+  { id: 'manager', name: 'Gérant', short: 'GE', description: 'Suivre le service, les livreurs, les tables et les stocks.', path: '/gerant', restaurantIds: [PRIMARY_RESTAURANT_ID, SECONDARY_RESTAURANT_ID] },
+  { id: 'employee', name: 'Employé', short: 'EM', description: 'Traiter les commandes, le menu et les réclamations.', path: '/employe', restaurantIds: [PRIMARY_RESTAURANT_ID, SECONDARY_RESTAURANT_ID] },
   { id: 'platform', name: 'Admin plateforme', short: 'AP', description: 'Gérer les établissements et leur mise en service.', path: '/plateforme', restaurantIds: [] },
 ]
 

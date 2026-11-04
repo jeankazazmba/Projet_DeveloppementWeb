@@ -15,9 +15,9 @@ export const initialEmployees: Employee[] = [
 ]
 const dishRows: [string, string, number, number, string][] = [
   ['Ndolé Royal aux Crevettes', 'Mijoté traditionnel · Plantains vapeur', 0, 4000, assets.menu.photo0],
-  ['Poulet DG Spécial ZeDuc', 'Poulet fermier · Légumes sautés', 0, 4500, assets.menu.photo1],
+  ['Poulet DG Spécial Khalifa', 'Poulet fermier · Légumes sautés', 0, 4500, assets.menu.photo1],
   ['Poisson braisé & Bobolo', 'Bar entier braisé au feu de bois', 1, 3500, assets.menu.photo2],
-  ['Burger maison ZeDuc', 'Bœuf braisé · Sauce secrète', 0, 3000, assets.menu.photo3],
+  ['Burger maison Khalifa', 'Bœuf braisé · Sauce secrète', 0, 3000, assets.menu.photo3],
   ['Brochettes de bœuf Suya', 'Épices Kankankan · Oignons rouges', 1, 2500, assets.menu.photo4],
   ['Beignets-Haricots (Koki/BH)', 'Beignets soufflés · Bouillie maison', 0, 1000, assets.menu.photo5],
   ['Jus de Gingembre frais', 'Gingembre pressé · Citron vert', 2, 1000, assets.menu.photo6],
@@ -25,10 +25,10 @@ const dishRows: [string, string, number, number, string][] = [
 ]
 export const initialDishes: Dish[] = dishRows.map(([name, description, category, price, image], i) => ({ id: `d${i + 1}`, name, description, category: categories[category], price, image, available: i !== 7, featured: [0, 1, 4].includes(i), ingredients: i === 0 ? ['Feuilles de ndolé', 'Gambas fraîches', 'Plantains mûrs', 'Pâte d’arachide'] : [] }))
 export const initialPromotions: Promotion[] = [
-  { id: 'p1', title: 'Promo Bar Braisé -15 %', subtitle: 'Spécialité du chef ZeDuc', description: 'Bar entier mariné aux épices du Congo, servi avec ses accompagnements.', type: 'Promotion', status: 'Active', tag: 'OFFRE LOUNGE', dateLabel: 'Valable jusqu’au 30 oct. · Sur place & Emporter', start: '2024-10-01', end: '2024-10-30', image: assets.promotions.photo0, footer: 'Affichage écran & application', metric: 'Portée : 1.2k vues' },
+  { id: 'p1', title: 'Promo Bar Braisé -15 %', subtitle: 'Spécialité du chef Khalifa', description: 'Bar entier mariné aux épices du Congo, servi avec ses accompagnements.', type: 'Promotion', status: 'Active', tag: 'OFFRE LOUNGE', dateLabel: 'Valable jusqu’au 30 oct. · Sur place & Emporter', start: '2024-10-01', end: '2024-10-30', image: assets.promotions.photo0, footer: 'Affichage écran & application', metric: 'Portée : 1.2k vues' },
   { id: 'p2', title: 'Code ETUDIANT10 -10 %', subtitle: 'Avantage campus de Kinshasa', description: 'Réduction automatique sur toute la carte sur présentation de votre carte étudiant.', type: 'Promotion', status: 'Active', tag: 'CAMPUS PRIVILEGE', dateLabel: 'Sur présentation carte campus université · En cours', start: '2024-10-01', end: '2024-11-30', image: assets.promotions.photo1, footer: 'Scan QR au comptoir', metric: '88 utilisations' },
   { id: 'p3', title: 'Soirée Ligue des champions', subtitle: 'Ambiance Lounge VIP', description: 'Service tapas spécial match, brochettes de bœuf et ambiance lounge.', type: 'Événement', status: 'Active', tag: 'DIFFUSION LIVE', dateLabel: 'Mercredi 28 octobre · 21 h · Écrans géants & Tapas', start: '2024-10-28', end: '2024-10-28', image: assets.promotions.photo2, footer: 'Réservations tables 85%', metric: 'Quasi complet' },
-  { id: 'p4', title: 'Tournoi de billard', subtitle: 'Cash Prize 150 000 CDF', description: 'Inscriptions limitées à 16 joueurs. Cocktail de bienvenue.', type: 'Événement', status: 'Programmée', tag: 'COMPÉTITION ZEDUC', dateLabel: 'Samedi 31 octobre · 18 h · Inscriptions ouvertes', start: '2024-10-31', end: '2024-10-31', image: assets.promotions.photo3, footer: '12/16 inscrits', metric: 'Début J-3' },
+  { id: 'p4', title: 'Tournoi de billard', subtitle: 'Cash Prize 150 000 CDF', description: 'Inscriptions limitées à 16 joueurs. Cocktail de bienvenue.', type: 'Événement', status: 'Programmée', tag: 'COMPÉTITION KHALIFA', dateLabel: 'Samedi 31 octobre · 18 h · Inscriptions ouvertes', start: '2024-10-31', end: '2024-10-31', image: assets.promotions.photo3, footer: '12/16 inscrits', metric: 'Début J-3' },
   { id: 'p5', title: 'Soirée acoustique & Ndolé', subtitle: 'Dégustation Royale aux Crevettes', description: 'Accords mets et vins africains, buffet dégustation et musique live.', type: 'Événement', status: 'Programmée', tag: 'CONCERT & GASTRONOMIE', dateLabel: 'Vendredi 6 novembre · 19 h 30 · Live Band & Buffet', start: '2024-11-06', end: '2024-11-06', image: assets.promotions.photo4, footer: 'Accès sur réservation', metric: '15 000 CDF / pers' },
   { id: 'p6', title: 'Happy hour de rentrée', subtitle: 'Cocktails 1 acheté = 1 offert', description: 'Offre de rentrée sur tous les mocktails de la maison.', type: 'Promotion', status: 'Expirée', tag: 'CAMPAGNE TERMINÉE', dateLabel: 'Terminé le 15 oct. · 18 h - 20 h', start: '2024-10-01', end: '2024-10-15', image: assets.promotions.photo5, footer: 'Statistiques archivées', metric: 'Réactiver' },
 ]
@@ -50,7 +50,7 @@ export type SettingsData = {
 export const initialSettings: SettingsData = {
   gain: 1000, conversion: 15, minimum: 15, expiry: 12, referral: 15,
   schedule: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'].map((day, i) => ({ day, open: i !== 6, start: i === 5 ? '12:00' : '11:00', end: i === 4 ? '23:30' : i === 5 ? '00:00' : '22:00', note: i < 4 ? 'Service continu' : i === 4 ? 'Nocturne Lounge' : i === 5 ? 'Soirée Concerts & Billard' : 'Fermeture hebdomadaire' })),
-  restaurant: { name: 'ZeDuc-Sp@ce · Mon Miam Miam', address: 'Kinshasa, République démocratique du Congo · adresse exacte à confirmer', phone: '', email: '', description: 'Cuisine congolaise, terrasse panoramique et service étudiant.' },
+  restaurant: { name: 'Khalifa_food', address: 'Kinshasa, République démocratique du Congo · adresse exacte à confirmer', phone: '', email: '', description: 'Cuisine congolaise, terrasse panoramique et service étudiant.' },
   payments: { orange: false, airtel: false, mpesa: false, cash: true, card: false },
   policies: { salesTerms: '', cancellation: '', privacy: '' },
 }

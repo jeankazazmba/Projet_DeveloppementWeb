@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { initialDishes } from '../admin/data'
-import { initialClaims, initialEmployees, initialOrders, initialTables, rights } from './managerData.js'
+import { sleepyDishes } from '../admin/sleepyData'
+import { initialClaims, initialEmployees, initialOrders, initialTables, rights, sleepyClaims, sleepyEmployees, sleepyOrders, sleepyTables, sleepyStats, sleepyPopularDishes, sleepyPreviewCouriers } from './managerData.js'
 import ManagerIcon from './ManagerIcon.jsx'
 import { ClaimsPage, DashboardPage, StatisticsPage, TeamPage } from './ManagerPages.jsx'
 import { MenuStockPage, TablesPage } from './ManagerOperations.jsx'
 import ManagerDeliveryMap from './ManagerDeliveryMap.jsx'
-import { RestaurantEmpty, RestaurantScopeControl } from '../shared/RestaurantScope.jsx'
+import { RestaurantScopeControl } from '../shared/RestaurantScope.jsx'
 import { useRestaurantScope } from '../shared/useRestaurantScope.js'
 import './manager.css'
 import './manager-admin-theme.css'
@@ -79,13 +80,13 @@ function ManagerWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRe
   const navigate = useNavigate()
   const pathname = location.pathname
   const page = pathname.startsWith('/gerant/equipe') ? 'team' : pathname.startsWith('/gerant/tables') ? 'tables' : pathname.startsWith('/gerant/livraisons') ? 'delivery' : pathname.startsWith('/gerant/menu') ? 'menu' : pathname.startsWith('/gerant/statistiques') ? 'statistics' : pathname.startsWith('/gerant/reclamations') ? 'claims' : 'dashboard'
-  const sample = restaurantId === 'zeduc'
-  const storagePrefix = sample ? 'mmm-manager' : `mmm-manager-${restaurantId}`
-  const [employees, setEmployees] = useState(() => readSaved(`${storagePrefix}-employees-v1`, sample ? initialEmployees : []))
-  const [claims, setClaims] = useState(() => readSaved(`${storagePrefix}-claims-v1`, sample ? initialClaims : []))
-  const [orders] = useState(sample ? initialOrders : [])
-  const [tables, setTables] = useState(() => readSaved(`${storagePrefix}-tables-v1`, sample ? initialTables : []))
-  const [dishes, setDishes] = useState(() => readSaved(`${storagePrefix}-dishes-v1`, sample ? initialDishes : []))
+  const sleepy = restaurantId === 'sleepy-hollow'
+  const storagePrefix = `mmm-manager-${restaurantId}`
+  const [employees, setEmployees] = useState(() => readSaved(`${storagePrefix}-employees-v1`, sleepy ? sleepyEmployees : initialEmployees))
+  const [claims, setClaims] = useState(() => readSaved(`${storagePrefix}-claims-v1`, sleepy ? sleepyClaims : initialClaims))
+  const [orders] = useState(sleepy ? sleepyOrders : initialOrders)
+  const [tables, setTables] = useState(() => readSaved(`${storagePrefix}-tables-v1`, sleepy ? sleepyTables : initialTables))
+  const [dishes, setDishes] = useState(() => readSaved(`${storagePrefix}-dishes-v1`, sleepy ? sleepyDishes : initialDishes))
   const [query, setQuery] = useState('')
   const [editor, setEditor] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -130,16 +131,16 @@ function ManagerWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRe
       <Link to="/gerant" className="manager-brand" onClick={() => setSidebarOpen(false)} aria-label="Mon Miam Miam — espace gérant"><img src={logo} alt="Mon Miam Miam ZeDuc-Sp@ce" /><span>KINSHASA • RDC</span></Link>
       <div className="manager-role-line"><span className="manager-role-tag">GÉRANT</span><span className="manager-live-label"><img src={liveDot} alt="" />Démo active</span></div>
       <nav aria-label="Espace gérant" className="manager-nav">{navigation.map(item => <Link key={item.key} to={item.path} className={page === item.key ? 'active' : ''} aria-current={page === item.key ? 'page' : undefined} onClick={() => setSidebarOpen(false)}>{item.icon ? <img className="manager-nav-icon" src={item.icon} alt="" /> : <ManagerIcon name="delivery" />}<span>{item.label}</span>{item.key === 'claims' && openClaims > 0 && <b>{openClaims}</b>}</Link>)}<Link to="/catalogue-pro" onClick={() => setSidebarOpen(false)}><ManagerIcon name="menu" /><span>Catalogue partagé</span></Link></nav>
-      <div className="manager-sidebar-profile"><span className="manager-avatar">GE</span><span><strong>Gérant</strong><small>Direction.ZeDuc-Sp@ce</small></span></div>
+      <div className="manager-sidebar-profile"><span className="manager-avatar">GE</span><span><strong>Gérant</strong><small>{restaurant.name}</small></span></div>
     </aside>
     <div className="manager-shell"><header className="manager-topbar"><form onSubmit={event => { event.preventDefault(); if (page === 'statistics') go('/gerant') }} className="manager-global-search"><img src="/assets/figma/dashboard-imgIconSearch.svg" alt="" /><input value={query} onChange={event => setQuery(event.target.value)} aria-label="Rechercher" placeholder="Commande, employé, réclamation..." /></form><RestaurantScopeControl restaurant={restaurant} restaurants={allowedRestaurants} onChange={setRestaurantId} /><div className="manager-topbar-actions"><span className="manager-demo-chip" title="Données locales de démonstration">Démo</span><span className="manager-service-chip"><img src={liveDot} alt="" /> Service démo</span><button type="button" className="manager-theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button type="button" className="manager-icon-button manager-notification-button" onClick={() => go('/gerant/reclamations')} aria-label={`${openClaims} réclamations à valider`}><img src="/assets/figma/dashboard-imgIconBell.svg" alt="" />{openClaims > 0 && <b>{openClaims}</b>}</button><span className="manager-top-profile"><span className="manager-avatar">GE</span><span>Gérant</span></span></div></header>
       <main id="manager-main" className="manager-main">
-        {page === 'dashboard' && (sample ? <DashboardPage orders={orders} claims={claims} query={query} onNotice={setNotice} onNavigate={go} /> : <RestaurantEmpty restaurant={restaurant} topic="Supervision" />)}
+        {page === 'dashboard' && <DashboardPage orders={orders} claims={claims} query={query} onNotice={setNotice} onNavigate={go} statsSource={sleepy ? sleepyStats : undefined} restaurantName={restaurant.name} />}
         {page === 'team' && <TeamPage employees={employees} query={query} onAdd={() => go('/gerant/equipe/nouveau')} onEdit={employee => setEditor(employee.id)} />}
         {page === 'tables' && <TablesPage tables={tables} orders={orders} query={query} onSave={saveTable} />}
-        {page === 'delivery' && (sample ? <ManagerDeliveryMap /> : <RestaurantEmpty restaurant={restaurant} topic="Suivi des livreurs" />)}
+        {page === 'delivery' && <ManagerDeliveryMap couriers={sleepy ? sleepyPreviewCouriers : undefined} />}
         {page === 'menu' && <MenuStockPage dishes={dishes} query={query} onUpdate={updateDish} />}
-        {page === 'statistics' && (sample ? <StatisticsPage onNotice={setNotice} /> : <RestaurantEmpty restaurant={restaurant} topic="Statistiques" />)}
+        {page === 'statistics' && <StatisticsPage onNotice={setNotice} statsSource={sleepy ? sleepyStats : undefined} dishes={sleepy ? sleepyPopularDishes : undefined} restaurantName={restaurant.name} />}
         {page === 'claims' && <ClaimsPage claims={claims} query={query} onDecide={decideClaim} />}
       </main>
       <footer className="manager-footer"><img src={logo} alt="" /><span>© Mon Miam Miam · ZeDuc-Sp@ce, Kinshasa, RDC · adresse exacte à confirmer</span><Link to="/">Site public</Link><span>Mode démo</span></footer>

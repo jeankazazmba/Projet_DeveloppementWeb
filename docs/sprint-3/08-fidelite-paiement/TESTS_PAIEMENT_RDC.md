@@ -2,7 +2,7 @@
 
 ## Décision d'implantation
 
-À la demande du propriétaire, les interfaces actives présentent désormais **ZeDuc-Sp@ce / Mon Miam Miam à Kinshasa, RDC**. L'adresse précise et les coordonnées du restaurant restent à fournir. Les cartes montrent des **repères fictifs** autour de Kinshasa. La monnaie affichée est le **franc congolais (CDF)** ; les nombres des maquettes sont conservés comme **tarifs fictifs**, sans conversion de FCFA vers CDF. Le cahier des charges original, qui situe le restaurant à Douala, reste inchangé comme document historique : cette décision de projet s'en écarte.
+À la demande du propriétaire, les interfaces actives présentent désormais **ZeDuc-Sp@ce** comme plateforme, avec **Khalifa_food** et **sleepy hollow** comme restaurants de démonstration à Kinshasa, RDC. Les adresses précises et les coordonnées restent à fournir. Les cartes montrent des **repères fictifs** autour de Kinshasa. La monnaie affichée est le **franc congolais (CDF)** ; les nombres des maquettes sont conservés comme **tarifs fictifs**, sans conversion de FCFA vers CDF. Le cahier des charges original, qui situe le restaurant à Douala, reste inchangé comme document historique : cette décision de projet s'en écarte.
 
 ## Ce qui est testable tout de suite dans le mobile
 

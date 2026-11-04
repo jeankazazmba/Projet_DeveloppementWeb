@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import EmployeeIcon from './EmployeeIcon.jsx'
-import { initialClaims, initialMenu, initialOrders, orderSteps } from './employeeData.js'
+import { initialClaims, initialMenu, initialOrders, orderSteps, sleepyClaims, sleepyMenu, sleepyOrders, sleepyWeeklyStats, sleepyTopDishes } from './employeeData.js'
 import { ClaimsPage, MenuPage, OrdersPage, StatisticsPage } from './EmployeePages.jsx'
-import { RestaurantEmpty, RestaurantScopeControl } from '../shared/RestaurantScope.jsx'
+import { RestaurantScopeControl } from '../shared/RestaurantScope.jsx'
 import { useRestaurantScope } from '../shared/useRestaurantScope.js'
 import './employee.css'
 import './employee-admin-theme.css'
@@ -35,11 +35,11 @@ export default function EmployeeApp() {
 function EmployeeWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRestaurants }) {
   const location = useLocation()
   const page = location.pathname.startsWith('/employe/menu') ? 'menu' : location.pathname.startsWith('/employe/reclamations') ? 'claims' : location.pathname.startsWith('/employe/statistiques') ? 'stats' : 'orders'
-  const sample = restaurantId === 'zeduc'
-  const prefix = sample ? 'mmm-employee' : `mmm-employee-${restaurantId}`
-  const [orders, setOrders] = useStoredState(`${prefix}-orders-v1`, sample ? initialOrders : [])
-  const [menu, setMenu] = useStoredState(`${prefix}-menu-v1`, sample ? initialMenu : [])
-  const [claims, setClaims] = useStoredState(`${prefix}-claims-v1`, sample ? initialClaims : [])
+  const sleepy = restaurantId === 'sleepy-hollow'
+  const prefix = `mmm-employee-${restaurantId}`
+  const [orders, setOrders] = useStoredState(`${prefix}-orders-v1`, sleepy ? sleepyOrders : initialOrders)
+  const [menu, setMenu] = useStoredState(`${prefix}-menu-v1`, sleepy ? sleepyMenu : initialMenu)
+  const [claims, setClaims] = useStoredState(`${prefix}-claims-v1`, sleepy ? sleepyClaims : initialClaims)
   const [query, setQuery] = useState('')
   const [notice, setNotice] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -70,8 +70,8 @@ function EmployeeWorkspace({ restaurant, restaurantId, setRestaurantId, allowedR
     {sidebarOpen && <button className="employee-sidebar-scrim" aria-label="Fermer la navigation" onClick={() => setSidebarOpen(false)} />}
     <aside className={`employee-sidebar ${sidebarOpen ? 'open' : ''}`}><Link to="/employe" className="employee-brand" onClick={() => setSidebarOpen(false)}><img src={logo} alt="Mon Miam Miam" /><span>KINSHASA · RDC</span></Link><div className="employee-role"><strong>EMPLOYÉ</strong><small><i /> Démo locale</small></div><nav aria-label="Navigation employé">{renderLinks()}<Link to="/catalogue-pro" onClick={() => setSidebarOpen(false)}>Catalogue partagé</Link></nav><div className="employee-sidebar-bottom"><div className="employee-profile"><span>MT</span><div><strong>Marie T.</strong><small>Service du midi · Démo</small></div></div><Link to="/acces">Changer d’espace →</Link><Link to="/">Site public →</Link></div></aside>
     <div className="employee-shell"><header className="employee-topbar"><button className="employee-mobile-menu employee-icon-button" aria-label="Ouvrir la navigation" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(current => !current)}><EmployeeIcon name="hamburger" size={21} /></button><Link to="/employe" className="employee-mobile-brand"><img src={logo} alt="Mon Miam Miam" /><span>Espace employé</span></Link>{page !== 'stats' && <label className="employee-global-search"><EmployeeIcon name="search" /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder={page === 'orders' ? 'Commande, client, plat…' : page === 'claims' ? 'Réclamation, étudiant…' : 'Rechercher un plat…'} aria-label="Rechercher dans cette page" /></label>}<RestaurantScopeControl restaurant={restaurant} restaurants={allowedRestaurants} onChange={setRestaurantId} /><div className="employee-top-actions"><span className="employee-service-chip"><i /> Service en cours</span><span className="employee-demo-chip">Démo</span><button type="button" className="employee-theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><Link to="/employe/reclamations" className="employee-icon-button employee-alert" aria-label={`${pending} réclamations à traiter`} onClick={() => setQuery('')}><EmployeeIcon name="bell" />{pending > 0 && <b>{pending}</b>}</Link><span className="employee-top-profile"><b>MT</b><span>Marie T.<small>Employée</small></span></span></div></header>
-      <main id="employee-main" className="employee-main">{page === 'orders' && <OrdersPage orders={orders} onAdvance={advanceOrder} query={query} onNotice={setNotice} />}{page === 'menu' && <MenuPage menu={menu} onSave={saveMenu} query={query} />}{page === 'claims' && <ClaimsPage claims={claims} onUpdate={updateClaim} query={query} onNotice={setNotice} />}{page === 'stats' && (sample ? <StatisticsPage /> : <RestaurantEmpty restaurant={restaurant} topic="Statistiques" />)}</main>
-      <footer className="employee-footer"><span>Mon Miam Miam · ZeDuc-Sp@ce · Démo employé</span><Link to="/">Site public</Link></footer>
+      <main id="employee-main" className="employee-main">{page === 'orders' && <OrdersPage restaurantName={restaurant.name} orders={orders} onAdvance={advanceOrder} query={query} onNotice={setNotice} />}{page === 'menu' && <MenuPage restaurantName={restaurant.name} menu={menu} onSave={saveMenu} query={query} />}{page === 'claims' && <ClaimsPage restaurantName={restaurant.name} claims={claims} onUpdate={updateClaim} query={query} onNotice={setNotice} />}{page === 'stats' && (<StatisticsPage restaurantName={restaurant.name} weeks={sleepy ? sleepyWeeklyStats : undefined} dishes={sleepy ? sleepyTopDishes : undefined} />)}</main>
+      <footer className="employee-footer"><span>Mon Miam Miam · {restaurant.name} · Démo employé</span><Link to="/">Site public</Link></footer>
     </div>
     <nav className="employee-bottom-nav" aria-label="Navigation employé mobile">{renderLinks()}</nav>
     {notice && <div className="employee-toast" role="status">{notice}<button aria-label="Fermer la notification" onClick={() => setNotice('')}>×</button></div>}

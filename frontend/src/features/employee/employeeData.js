@@ -14,13 +14,13 @@ export const initialOrders = [
   { id: 'MM-1048', customer: 'Arsène K.', service: 'Livraison', location: 'campus de Kinshasa', items: 'Poulet DG Royal ×2, Poisson braisé & bobolo, Bissap', amount: 9750, status: 'En préparation', createdAt: minutesAgo(9) },
   { id: 'MM-1047', customer: 'Yannick S.', service: 'Sur place', location: 'Table 11', items: 'Brochettes de bœuf ×3', amount: 4500, status: 'En préparation', createdAt: minutesAgo(12) },
   { id: 'MM-1046', customer: 'Mireille D.', service: 'Livraison', location: 'campus de Kinshasa', items: 'Beignets-haricots ×2', amount: 1000, status: 'En préparation', createdAt: minutesAgo(14) },
-  { id: 'MM-1045', customer: 'Paul N.', service: 'Sur place', location: 'Table 14', items: 'Poulet DG, Bissap', amount: 4000, status: 'Prête', createdAt: minutesAgo(18) },
+  { id: 'MM-1045', customer: 'Paul N.', service: 'Sur place', location: 'Table 14', items: 'Poulet DG, Bissap', amount: 4200, status: 'Prête', createdAt: minutesAgo(18) },
   { id: 'MM-1044', customer: 'Sandra O.', service: 'Livraison', location: 'campus de Kinshasa', items: 'Poisson braisé & bobolo', amount: 4500, status: 'Prête', createdAt: minutesAgo(21) },
 ]
 
 export const initialMenu = [
-  { id: 'plat-poulet', name: 'Poulet DG Spécial ZeDuc', description: 'Bananes plantains frites et poulet fermier mijoté', category: 'Plats chauds', price: 3500, available: true, featured: true, image: menuImage(129) },
-  { id: 'plat-ndole', name: 'Ndolé Royal aux Crevettes', description: 'Feuilles de ndolé, crevettes et plantains vapeur', category: 'Plats chauds', price: 4000, available: true, featured: false, image: menuImage(75) },
+  { id: 'plat-poulet', name: 'Poulet DG Spécial Khalifa', description: 'Bananes plantains frites et poulet fermier mijoté', category: 'Plats chauds', price: 3500, available: true, featured: true, image: menuImage(129) },
+  { id: 'plat-ndole', name: 'Ndolé Royal aux Crevettes', description: 'Feuilles de ndolé, crevettes et plantains vapeur', category: 'Plats chauds', price: 4200, available: true, featured: false, image: menuImage(75) },
   { id: 'plat-poisson', name: 'Bar Braisé & Bobolo Artisanal', description: 'Poisson braisé au feu de bois et bobolo', category: 'Grillades & Braisés', price: 3800, available: false, featured: false, image: menuImage(101) },
   { id: 'plat-brochettes', name: 'Brochettes de Bœuf Suya', description: 'Bœuf mariné et épices du Nord', category: 'Grillades & Braisés', price: 2200, available: true, featured: false, image: menuImage(176) },
   { id: 'plat-bissap', name: 'Bissap Glacé & Feuilles de Menthe', description: 'Infusion d’hibiscus et menthe fraîche', category: 'Boissons fraîches', price: 1000, available: true, featured: false, image: menuImage(279) },
@@ -46,9 +46,33 @@ export const weeklyStats = [
 ]
 
 export const topDishes = [
-  { name: 'Poulet DG Spécial ZeDuc', count: 38 },
+  { name: 'Poulet DG Spécial Khalifa', count: 38 },
   { name: 'Poisson braisé et bobolo', count: 27 },
   { name: 'Ndolé royal aux crevettes', count: 22 },
   { name: 'Riz sauté au poulet', count: 19 },
   { name: 'Brochettes de bœuf Suya', count: 16 },
+]
+
+export const sleepyOrders = [
+  { id: 'SH-2001', customer: 'Nadia F.', service: 'Sur place', location: 'Table 01', items: 'Burger nocturne sleepy hollow', amount: 4200, status: 'Reçue', createdAt: minutesAgo(3) },
+  { id: 'SH-2002', customer: 'Paul K.', service: 'Livraison', location: 'Campus universitaire', items: 'Brochettes du soir, Limonade gingembre et menthe', amount: 4700, status: 'En préparation', createdAt: minutesAgo(12) },
+]
+export const sleepyMenu = [
+  { id: 'sh-d1', name: 'Burger nocturne sleepy hollow', description: 'Bœuf braisé et sauce maison', category: 'Plats chauds', price: 4200, available: true, featured: true, image: menuImage(129) },
+  { id: 'sh-d2', name: 'Brochettes du soir', description: 'Bœuf mariné et légumes', category: 'Grillades & Braisés', price: 3200, available: true, featured: false, image: menuImage(176) },
+  { id: 'sh-d3', name: 'Limonade gingembre et menthe', description: 'Gingembre frais et citron', category: 'Boissons fraîches', price: 1500, available: true, featured: false, image: menuImage(253) },
+  { id: 'sh-d4', name: 'Douceur mangue', description: 'Dessert fruité à la mangue', category: 'Desserts & Douceurs', price: 2500, available: true, featured: false, image: menuImage(279) },
+]
+export const sleepyClaims = [
+  { id: 'SH-RC-01', student: 'Paul K.', orderId: 'SH-2002', reason: 'Temps de livraison', message: 'Je souhaite connaître le délai de livraison.', status: 'À traiter', received: 'Il y a 8 min', amount: 4700, location: 'Campus universitaire', attachment: null, response: '' },
+]
+export const sleepyWeeklyStats = [
+  { label: '12 – 18 oct. 2026', sales: [12000, 17000, 15000, 21000, 18000, 24000, 19000], orders: 29, onsite: 17, delivery: 12, peak: [1, 3, 4, 7, 5, 3, 2, 4, 8, 6, 2] },
+  { label: '19 – 25 oct. 2026', sales: [15000, 19000, 18000, 22000, 25000, 28000, 21000], orders: 35, onsite: 20, delivery: 15, peak: [2, 4, 5, 8, 6, 4, 2, 5, 9, 7, 3] },
+  { label: '26 oct. – 1 nov. 2026', sales: [17000, 22000, 20000, 25000, 27000, 30000, 24000], orders: 39, onsite: 23, delivery: 16, peak: [2, 4, 6, 8, 6, 4, 3, 6, 10, 8, 3] },
+]
+export const sleepyTopDishes = [
+  { name: 'Burger nocturne sleepy hollow', count: 18 },
+  { name: 'Brochettes du soir', count: 14 },
+  { name: 'Limonade gingembre et menthe', count: 9 },
 ]

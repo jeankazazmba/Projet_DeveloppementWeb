@@ -1,3 +1,4 @@
+import { PRIMARY_RESTAURANT_ID, SECONDARY_RESTAURANT_ID } from './restaurants';
 import { dishes } from "./catalog";
 
 export const orderStages = ["Reçue", "En préparation", "Prête", "Servie", "Remise au livreur"];
@@ -17,7 +18,7 @@ export const initialEmployeeData = {
     { id: "MM-1045", customer: "Paul N.", service: "Sur place", location: "Table 14", items: "Poulet DG, Bissap", amount: 4000, status: "Prête", createdAt: minutesAgo(18) },
     { id: "MM-1044", customer: "Sandra O.", service: "Livraison", location: "campus de Kinshasa", items: "Poisson braisé & bobolo", amount: 4500, status: "Prête", createdAt: minutesAgo(21) },
   ],
-  menu: dishes.filter(dish => dish.restaurantId === 'zeduc').map((dish) => ({
+  menu: dishes.filter(dish => dish.restaurantId === PRIMARY_RESTAURANT_ID).map((dish) => ({
     id: dish.id,
     available: dish.available !== false,
     featured: dish.id === "public-poulet",
@@ -46,3 +47,23 @@ export const topEmployeeDishes = [
   ...item,
   name: dishes.find((dish) => dish.id === item.id).name,
 }));
+
+export const sleepyEmployeeData = {
+  orders: [
+    { id: 'SH-2001', customer: 'Nadia F.', service: 'Sur place', location: 'Table 01', items: 'Burger nocturne sleepy hollow', amount: 4200, status: 'Reçue', createdAt: minutesAgo(3) },
+    { id: 'SH-2002', customer: 'Paul K.', service: 'Livraison', location: 'Campus universitaire', items: 'Brochettes du soir, Limonade gingembre', amount: 4700, status: 'En préparation', createdAt: minutesAgo(12) },
+  ],
+  menu: dishes.filter(dish => dish.restaurantId === SECONDARY_RESTAURANT_ID).map(dish => ({ id: dish.id, available: true, featured: dish.id === 'sleepy-burger' })),
+  claims: [
+    { id: 'SH-RC-01', student: 'Paul K.', orderId: 'SH-2002', reason: 'Temps de livraison', message: 'Je souhaite connaître le délai de livraison.', status: 'À traiter', received: 'Il y a 8 min', amount: 4700, response: '' },
+  ],
+};
+export const sleepyEmployeeWeeks = employeeWeeks.map(week => ({
+  ...week, sales: week.sales.map(value => Math.round(value * 0.25)), orders: Math.round(week.orders * 0.25),
+  onsite: Math.round(week.onsite * 0.25), delivery: Math.round(week.delivery * 0.25), peak: week.peak.map(value => Math.round(value * 0.25)),
+}));
+export const sleepyTopEmployeeDishes = [
+  { name: 'Burger nocturne sleepy hollow', count: 18 },
+  { name: 'Brochettes du soir', count: 14 },
+  { name: 'Limonade gingembre et menthe', count: 9 },
+];

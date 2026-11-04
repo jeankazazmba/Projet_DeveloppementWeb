@@ -53,7 +53,7 @@ export const initialClaims = [
     message: 'Bonjour, le ndolé aux crevettes est arrivé totalement froid et le plantain n’était pas assez cuit. Déçu pour une commande livrée en résidence.',
     item: 'Ndolé aux crevettes + Plantain vapeur', attachment: 'Photo justificative · JPEG · 2,4 Mo',
     proposedBy: 'Marie T.', proposedAt: '12:51',
-    proposal: 'Bonjour Arsène, nous vous présentons toutes nos excuses pour cet incident. Notre brigade de cuisine prend note immédiatement. Nous vous proposons un avoir de 1 000 CDF déductible sur votre prochaine commande ZeDuc-Sp@ce.',
+    proposal: 'Bonjour Arsène, nous vous présentons toutes nos excuses pour cet incident. Notre brigade de cuisine prend note immédiatement. Nous vous proposons un avoir de 1 000 CDF déductible sur votre prochaine commande Khalifa_food.',
     gesture: 'Réduction de 1 000 CDF', note: '',
   },
   {
@@ -94,8 +94,35 @@ export const popularDishes = [
   { name: 'Poulet DG', portions: 142, revenue: 426000 },
   { name: 'Ndolé aux crevettes', portions: 118, revenue: 354000 },
   { name: 'Poisson braisé & bobolo', portions: 96, revenue: 432000 },
-  { name: 'Burger maison ZeDuc', portions: 74, revenue: 222000 },
+  { name: 'Burger maison Khalifa', portions: 74, revenue: 222000 },
   { name: 'Beignets-haricots & bouillie', portions: 68, revenue: 68000 },
 ]
 
 export const gestures = ['Aucun geste', 'Réduction de 1 000 CDF', 'Avoir portefeuille client', 'Plat offert', '+150 points fidélité']
+
+export const sleepyEmployees = [
+  { id: 'sh-e1', name: 'Patrick M.', email: 'patrick@sleepy-hollow.cd', phone: '000 00 00 00', status: 'Actif', lastLogin: 'Aujourd’hui', rights: ['orders', 'menu', 'claims'] },
+]
+export const sleepyOrders = [
+  { id: 'SH-2001', customer: 'Nadia F.', service: 'Sur place', location: 'Table 01', employee: 'Patrick M.', status: 'Reçue', createdAt: age(3), amount: 4000 },
+  { id: 'SH-2002', customer: 'Paul K.', service: 'Livraison', location: 'Campus universitaire', employee: 'Patrick M.', status: 'En préparation', createdAt: age(12), amount: 4700 },
+]
+export const sleepyTables = Array.from({ length: 6 }, (_, index) => ({ id: `T${String(index + 1).padStart(2, '0')}`, zone: 'Salle', seats: 4, status: index === 0 ? 'Occupée' : 'Libre', orderId: index === 0 ? 'SH-2001' : null }))
+export const sleepyClaims = [
+  { id: 'SH-RC-01', student: 'Paul K.', location: 'Campus universitaire', elapsed: 'Il y a 8 min', orderId: 'SH-2002', amount: 4700, reason: 'Temps de livraison', status: 'À valider', message: 'Je souhaite connaître le délai de livraison.', item: 'Brochettes du soir', attachment: null, proposedBy: 'Patrick M.', proposedAt: 'Aujourd’hui', proposal: 'Nous vérifions la livraison.', gesture: 'Aucun geste', note: '' },
+]
+export const sleepyStats = Object.fromEntries(Object.entries(stats).map(([period, value]) => [period, {
+  ...value, revenue: Math.round(value.revenue * 0.22), orders: Math.round(value.orders * 0.25), students: Math.round(value.students * 0.25),
+  points: Math.round(value.points * 0.25), usedPoints: Math.round(value.usedPoints * 0.25),
+  sales: value.sales.map(amount => Math.round(amount * 0.22)), issued: value.issued.map(amount => Math.round(amount * 0.25)),
+  used: value.used.map(amount => Math.round(amount * 0.25)), referrals: value.referrals.map(amount => Math.round(amount * 0.25)),
+  onsite: Math.round(value.onsite * 0.25), delivery: Math.round(value.delivery * 0.25),
+}]))
+export const sleepyPopularDishes = [
+  { name: 'Burger nocturne sleepy hollow', portions: 18, revenue: 75600 },
+  { name: 'Brochettes du soir', portions: 14, revenue: 44800 },
+  { name: 'Limonade gingembre et menthe', portions: 9, revenue: 13500 },
+]
+export const sleepyPreviewCouriers = [
+  { id: 'sh-liv-01', name: 'Livreur sleepy hollow', status: 'En livraison', orderId: 'SH-2002', latitude: -4.3258, longitude: 15.3206, updatedAt: null },
+]

@@ -7,6 +7,8 @@ import { averageBasket, paymentBreakdown, pointsIssued, popularDishes, salesSeri
 import { SalesChart, DonutChart } from '../components/charts'
 import { Badge, Icon, Metric, Modal, PageHeading, Panel } from '../components/ui'
 
+import { useAdminRestaurantName } from '../restaurantContext'
+
 const a = assets.dashboard
 const activity = [
   ['19:02', 'Commande MM-1048 reçue', 'Arsène K. · Livraison campus de Kinshasa', '9 750 CDF', 'blue'],
@@ -18,6 +20,7 @@ const activity = [
 ]
 
 export default function Dashboard({ navigate, openClaims, orders }: { navigate: (page: Page) => void; openClaims: number; orders: Order[] }) {
+  const restaurantName = useAdminRestaurantName()
   const [preview, setPreview] = useState(false)
   const [period, setPeriod] = useState<Period>('day')
   const series = salesSeries(orders, period)
@@ -25,9 +28,10 @@ export default function Dashboard({ navigate, openClaims, orders }: { navigate: 
   const services = serviceBreakdown(orders)
   const topDishes = popularDishes(orders)
   const peak = series.reduce((best, point) => point.value > best.value ? point : best, series[0])
+  const currentActivity = restaurantName === 'sleepy hollow' ? orders.slice(0, 5).map(order => [order.placedAt.slice(11, 16), `Commande ${order.id} · ${order.status}`, `${order.customer} · ${order.service}`, `${money(order.amount)} CDF`, 'gold']) : activity
   const mobileMoney = payments.filter(item => item.name.includes('Money') || item.name === 'M-Pesa').reduce((sum, item) => sum + item.percent, 0)
   return <>
-    <PageHeading first="Tableau de" accent="bord" description="Vue d’ensemble du service de démonstration · ZeDuc-Sp@ce, Kinshasa, RDC." action={<div className="segmented period">{([['day', 'Aujourd’hui'], ['week', '7 jours'], ['month', '30 jours']] as [Period, string][]).map(([value, label]) => <button key={value} className={period === value ? 'selected' : ''} aria-pressed={period === value} onClick={() => setPeriod(value)}>{label}</button>)}<button onClick={() => setPreview(true)}><Icon src={a.imgContainer3} />Aperçu rapide</button></div>} />
+    <PageHeading first="Tableau de" accent="bord" description={`Vue d’ensemble du service de démonstration · ${restaurantName}, Kinshasa, RDC.`} action={<div className="segmented period">{([['day', 'Aujourd’hui'], ['week', '7 jours'], ['month', '30 jours']] as [Period, string][]).map(([value, label]) => <button key={value} className={period === value ? 'selected' : ''} aria-pressed={period === value} onClick={() => setPeriod(value)}>{label}</button>)}<button onClick={() => setPreview(true)}><Icon src={a.imgContainer3} />Aperçu rapide</button></div>} />
     <div className="metrics dashboard-metrics">
       <Metric label="VENTES DU SERVICE" value={money(totalRevenue(orders))} unit="CDF" note="Calculé depuis les commandes locales" icon={a.imgContainer4} tone="positive" />
       <Metric label="COMMANDES PASSÉES" value={orders.length} unit="tickets" note={`${orders.filter(order => order.status !== 'Terminée' && order.status !== 'Annulée').length} commandes à suivre`} icon={a.imgContainer6} />
@@ -45,7 +49,7 @@ export default function Dashboard({ navigate, openClaims, orders }: { navigate: 
       <Panel title="Plats les plus commandés" subtitle="Top 5 calculé depuis les commandes" action={<Icon src={a.imgContainer12} />}><ol className="top-dishes">{topDishes.map(([name, total], index) => <li key={name}><span className="rank">{index + 1}</span><span>{name}</span><strong>{total} commandes</strong></li>)}</ol><button className="text-button end" onClick={() => navigate('menu')}>Gérer les ruptures de stock <Icon src={a.imgContainer13} /></button></Panel>
       <Panel title="Entonnoir du parrainage" subtitle="Exemple d’acquisition campus" action={<Icon src={a.imgContainer14} />}><div className="funnel">{[['1. Codes partagés', '148 partages', 148], ['2. Inscriptions validées', '54 inscrits', 54], ['3. Premières commandes', '29 convertis', 29]].map(([label, value, total]) => <div key={label}><div className="split"><strong>{label}</strong><span>{value}</span></div><progress value={Number(total)} max="148" aria-label={String(label)} /></div>)}</div><p className="referral-total">Bonus parrainage · données d’exemple <strong>14 500 CDF</strong></p></Panel>
     </div>
-    <Panel title="Fil d’activité du service" subtitle="Exemple chronologique des opérations du restaurant" action={<span className="live-label"><img src={a.imgEllipse} alt="" />Flux de démonstration</span>}><ol className="activity-list">{activity.map(([hour, title, description, result, tone]) => <li key={hour}><time>{hour}</time><span className={`activity-dot ${tone}`} /><strong>{title}</strong><span className="muted">{description}</span><span className="activity-result">{tone === 'red' || result === 'Livrée' ? <Badge tone={tone}>{result}</Badge> : result}</span></li>)}</ol></Panel>
+    <Panel title="Fil d’activité du service" subtitle="Exemple chronologique des opérations du restaurant" action={<span className="live-label"><img src={a.imgEllipse} alt="" />Flux de démonstration</span>}><ol className="activity-list">{currentActivity.map(([hour, title, description, result, tone]) => <li key={hour}><time>{hour}</time><span className={`activity-dot ${tone}`} /><strong>{title}</strong><span className="muted">{description}</span><span className="activity-result">{tone === 'red' || result === 'Livrée' ? <Badge tone={tone}>{result}</Badge> : result}</span></li>)}</ol></Panel>
     {preview && <Modal title="Aperçu rapide" onClose={() => setPreview(false)}><p className="muted">Instantané de démonstration calculé depuis les commandes locales.</p><dl className="summary"><div><dt>Ventes</dt><dd>{money(totalRevenue(orders))} CDF</dd></div><div><dt>Commandes</dt><dd>{orders.length}</dd></div><div><dt>Réclamations à traiter</dt><dd>{openClaims}</dd></div></dl><div className="dialog-actions"><button className="button primary" onClick={() => { setPreview(false); navigate('reports') }}>Voir les rapports</button></div></Modal>}
   </>
 }

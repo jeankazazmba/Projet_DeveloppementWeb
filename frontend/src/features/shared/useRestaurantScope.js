@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { getRestaurant, getRestaurants, PRIMARY_RESTAURANT_ID, restaurantScopeKey } from '../../data/restaurants.js'
+import { getRestaurant, getRestaurants, initialRestaurants, normalizeRestaurantId, restaurantScopeKey } from '../../data/restaurants.js'
 
-export function useRestaurantScope(role, allowedIds = [PRIMARY_RESTAURANT_ID, 'partenaire-demo']) {
+export function useRestaurantScope(role, allowedIds = initialRestaurants.map(item => item.id)) {
   const key = restaurantScopeKey(role)
   const [restaurantId, setId] = useState(() => {
     try {
       const saved = localStorage.getItem(key)
-      return allowedIds.includes(saved) ? saved : allowedIds[0]
+      const selected = normalizeRestaurantId(saved)
+      return allowedIds.includes(selected) ? selected : allowedIds[0]
     } catch { return allowedIds[0] }
   })
   const setRestaurantId = id => {

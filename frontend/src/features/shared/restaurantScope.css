@@ -2,6 +2,7 @@
 .restaurant-scope-control span{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
 .restaurant-scope-control select{max-width:100%;border:1px solid #cfbd9766;border-radius:10px;padding:7px 9px;background:#222;color:#f5f1e8;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer}
 .manager-app[data-theme='light'] .restaurant-scope-control select{background:#fff;color:#222;border-color:#b7a780}
+.employee-app[data-theme='light'] .restaurant-scope-control select{background:#fff;color:#222;border-color:#b7a780}
 .restaurant-empty{margin:24px;padding:30px;border:1px solid #cfbd9766;border-radius:18px;background:#cfbd9710;color:#eee}
 .restaurant-empty strong{display:block;font-size:18px;margin-bottom:8px}
 .restaurant-empty p{color:#bcb8ae;line-height:1.5}
