@@ -9,21 +9,59 @@ const readSaved = (key, fallback) => {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback } catch { return fallback }
 }
 
-function Header({ page }) {
+const navSections = {
+  home: [['public-main', 'home'], ['a-propos', 'about'], ['apercu-menu', 'menu'], ['experience', 'home'], ['contact', 'contact']],
+  menu: [['public-main', 'menu'], ['contact', 'contact']],
+  promotions: [['public-main', 'promotions'], ['contact', 'contact']],
+  access: [['public-main', 'access'], ['inscription', 'signup'], ['contact', 'contact']],
+}
+const promotionSections = [['promotions', 'promotions'], ['evenements', 'evenements'], ['jeux', 'jeux']]
+
+function useVisibleSection(sections, fallback, lastSection) {
+  const [active, setActive] = useState(fallback)
+
+  useEffect(() => {
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const focusLine = Math.min(window.innerHeight * 0.38, 360)
+      let current = fallback
+      for (const [id, key] of sections) {
+        const element = document.getElementById(id)
+        if (element && element.getBoundingClientRect().top <= focusLine) current = key
+      }
+      if (lastSection && window.scrollY > 30 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 3) current = lastSection
+      setActive(previous => previous === current ? previous : current)
+    }
+    const schedule = () => { if (!frame) frame = window.requestAnimationFrame(update) }
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
+    schedule()
+    return () => {
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', schedule)
+      if (frame) window.cancelAnimationFrame(frame)
+    }
+  }, [sections, fallback, lastSection])
+
+  return active
+}
+
+function Header({ page, activeSection }) {
   const [open, setOpen] = useState(false)
   const links = [
-    { to: '/', label: 'Accueil', active: page === 'home' },
-    { to: '/#a-propos', label: 'À propos' },
-    { to: '/menu', label: 'Menu', active: page === 'menu' },
-    { to: '/promotions', label: 'Promotions & Événements', active: page === 'promotions' },
-    { to: '/#contact', label: 'Contact' },
+    { to: '/', label: 'Accueil', key: 'home' },
+    { to: '/#a-propos', label: 'À propos', key: 'about' },
+    { to: '/menu', label: 'Menu', key: 'menu' },
+    { to: '/promotions', label: 'Promotions & Événements', key: 'promotions' },
+    { to: '/#contact', label: 'Contact', key: 'contact' },
   ]
   return <header className="public-header">
     <Link to="/" className="public-brand" aria-label="Mon Miam Miam, accueil"><img src={logo} alt="Mon Miam Miam ZeDuc-Sp@ce" /></Link>
     <button type="button" className="public-menu-toggle" aria-expanded={open} aria-controls="public-nav" onClick={() => setOpen(!open)}>☰ <span className="public-sr-only">Menu</span></button>
     <nav id="public-nav" className={open ? 'public-nav is-open' : 'public-nav'} aria-label="Navigation publique">
-      {links.map(link => <Link key={link.label} to={link.to} aria-current={link.active ? 'page' : undefined} onClick={() => setOpen(false)}>{link.label}</Link>)}
-      <div className="public-nav-access"><Link to="/acces" aria-current={page === 'access' ? 'page' : undefined}>Connexion</Link><Link className="public-pill" to="/acces#inscription">Inscription</Link></div>
+      {links.map(link => <Link key={link.key} to={link.to} aria-current={activeSection === link.key ? (page === link.key ? 'page' : 'location') : undefined} onClick={() => setOpen(false)}>{link.label}</Link>)}
+      <div className="public-nav-access"><Link to="/acces" aria-current={activeSection === 'access' ? 'page' : undefined}>Connexion</Link><Link className="public-pill" to="/acces#inscription" aria-current={activeSection === 'signup' ? 'location' : undefined}>Inscription</Link></div>
     </nav>
   </header>
 }
@@ -73,7 +111,7 @@ function Home() {
       <section className="public-hero public-container"><div className="public-hero-copy"><h1><span>Le goût qui</span><br />rassemble les<br /><span>étudiants</span></h1><p>Préparé avec passion, servi avec soin : commandez en ligne, cumulez des points et profitez de la terrasse, de la vue sur la Dibamba et des matchs sur Canal+.</p><div className="public-actions"><Link className="public-pill" to="/acces">Commander maintenant <span aria-hidden="true">→</span></Link><Link className="public-pill public-pill-dark" to="/menu">Voir le menu <span aria-hidden="true">→</span></Link></div></div><div className="public-hero-art"><img src={homeImage(10)} alt="Poulet DG avec plantains et légumes" /><span className="public-hero-badge">✦ <small>Spécialité maison<br /><strong>Poulet DG Royal</strong></small></span></div></section>
       <section className="public-container public-feature-offers" aria-label="Offres en vedette"><Link to="/promotions" className="public-photo-offer"><img src={homeImage(401)} alt="Double plaisir du week-end" /></Link><Link to="/promotions" className="public-gift-offer"><small>✦ Chèque privilège</small><strong>5 000 FCFA</strong><p>Bon d’achat pour les résidents et abonnés mensuels</p><span>Code : RESIDENT-2026 <b>En profiter →</b></span></Link><Link to="/promotions" className="public-photo-offer"><img src={homeImage(431)} alt="Offre famille et partage" /></Link></section>
       <section id="a-propos" className="public-container public-about"><div className="public-about-photo"><img src={homeImage(41)} alt="Terrasse panoramique du restaurant à Yansoki" /><strong>500+<small>étudiants servis chaque semaine</small></strong></div><div><span className="public-kicker">À propos</span><h2>Plus qu’un restaurant, <em>un lieu de vie.</em></h2><p>Niché au sein de la Résidence La Terrasse à Yansoki (Douala), ZeDuc-Sp@ce réinvente le quotidien des étudiants et riverains avec son service gourmand « Mon Miam Miam ».</p><p>Savourez une cuisine camerounaise authentique et généreuse sur notre terrasse aérée. Venez réviser au calme, vibrer devant les matchs ou défier vos collègues au billard.</p><a className="public-pill" href="#experience">En savoir plus →</a></div></section>
-      <section className="public-menu-preview"><div className="public-container"><div className="public-section-title"><span className="public-kicker">Choix du chef</span><h2>Notre <em>menu du jour</em></h2></div><div className="public-filters" role="group" aria-label="Filtrer le menu du jour">{['Tout', 'Petit-déjeuner', 'Plats', 'Grillades'].map(cat => <button key={cat} className={category === cat ? 'active' : ''} onClick={() => setCategory(cat)}>{cat}</button>)}</div><div className="public-mini-menu">{filtered.length ? filtered.map(d => <Link to="/menu" key={d.name} className="public-mini-dish"><img src={d.image} alt="" /><span><strong>{d.name}</strong><small>{d.description}</small></span><b>{formatPrice(d.price)}</b></Link>) : <p>Aucun plat dans cette catégorie aujourd’hui.</p>}</div><Link className="public-pill public-centered-cta" to="/menu">Voir tout le menu →</Link></div></section>
+      <section id="apercu-menu" className="public-menu-preview"><div className="public-container"><div className="public-section-title"><span className="public-kicker">Choix du chef</span><h2>Notre <em>menu du jour</em></h2></div><div className="public-filters" role="group" aria-label="Filtrer le menu du jour">{['Tout', 'Petit-déjeuner', 'Plats', 'Grillades'].map(cat => <button key={cat} className={category === cat ? 'active' : ''} onClick={() => setCategory(cat)}>{cat}</button>)}</div><div className="public-mini-menu">{filtered.length ? filtered.map(d => <Link to="/menu" key={d.name} className="public-mini-dish"><img src={d.image} alt="" /><span><strong>{d.name}</strong><small>{d.description}</small></span><b>{formatPrice(d.price)}</b></Link>) : <p>Aucun plat dans cette catégorie aujourd’hui.</p>}</div><Link className="public-pill public-centered-cta" to="/menu">Voir tout le menu →</Link></div></section>
       <div className="public-container public-referral"><span>♛</span><div><strong>Parrainez un ami, gagnez des points fidélité !</strong><p>Chaque parrainage débloque des récompenses.</p></div><code>MIAM-ARS24</code><Link to="/acces">Découvrir le parrainage →</Link></div>
       <section id="experience" className="public-container public-experience"><div><span className="public-kicker">Expérience exclusive</span><h2>Une expérience <em>extraordinaire pour tous.</em></h2><ul><li><strong>Cuisine généreuse & rapide</strong><p>Des recettes soignées pour les appétits studieux.</p></li><li><strong>Produits 100 % frais</strong><p>Des produits locaux sélectionnés chaque jour.</p></li><li><strong>Ambiance mémorable</strong><p>Terrasse panoramique, billard et retransmissions sportives.</p></li></ul></div><div className="public-experience-cards"><Link to="/acces"><span>▣</span><strong>Commander pour arriver</strong><p>Choisissez votre heure d’arrivée sur la terrasse.</p><b>Accéder →</b></Link><Link to="/promotions#evenements"><span>✣</span><strong>Matchs et billard</strong><p>Canal+ et billard sur la terrasse festive.</p><b>Explorer →</b></Link><Link to="/acces" className="public-wide-card"><strong>Commander en ligne</strong><p>Pour profiter des services de l’application</p><b>Accéder à l’application →</b></Link></div></section>
       <section className="public-gallery"><div className="public-container"><div className="public-section-title"><span className="public-kicker">Galerie visuelle</span><h2>Notre <em>galerie</em></h2><p>Découvrez l’atmosphère vibrante et les créations gourmandes de ZeDuc-Sp@ce.</p></div><div className="public-gallery-grid">{[298, 300, 302, 304, 306, 308].map((layer, i) => <img key={layer} src={homeImage(layer)} alt={['Burger gourmand', 'Repas entre amis', 'Grillades braisées', 'Chef en cuisine', 'Terrasse au coucher du soleil', 'Dessert maison'][i]} loading="lazy" />)}</div></div></section>
@@ -109,11 +147,11 @@ function Menu() {
 }
 
 function Promotions() {
-  const [tab, setTab] = useState('promotions')
+  const tab = useVisibleSection(promotionSections, 'promotions')
   const [selected, setSelected] = useState(null)
   const [copied, setCopied] = useState(false)
-  const selectTab = next => { setTab(next); document.getElementById(next)?.scrollIntoView({ behavior: 'smooth' }) }
-  return <main id="public-main" className="public-container public-promotions-page"><div className="public-section-title"><h1>Promotions et <em>événements</em></h1><p>Découvrez les offres gourmandes étudiantes, nos packs du soir et l’ambiance nocturne sur le rooftop de Yansoki, Douala.</p></div><div className="public-filters" role="group" aria-label="Sections de promotions">{[['promotions','Promotions'],['evenements','Événements'],['jeux','Jeux MIAM']].map(([id,label]) => <button key={id} className={tab === id ? 'active' : ''} onClick={() => selectTab(id)}>{label}</button>)}</div>
+  const selectTab = next => document.getElementById(next)?.scrollIntoView({ behavior: 'smooth' })
+  return <main id="public-main" className="public-container public-promotions-page"><div className="public-section-title"><h1>Promotions et <em>événements</em></h1><p>Découvrez les offres gourmandes étudiantes, nos packs du soir et l’ambiance nocturne sur le rooftop de Yansoki, Douala.</p></div><div className="public-filters" role="group" aria-label="Sections de promotions">{[['promotions','Promotions'],['evenements','Événements'],['jeux','Jeux MIAM']].map(([id,label]) => <button key={id} className={tab === id ? 'active' : ''} aria-pressed={tab === id} onClick={() => selectTab(id)}>{label}</button>)}</div>
     <section id="promotions" className="public-promo-hero"><img src={promoImage(24)} alt="Grillades sur le rooftop" /><div><span className="public-kicker">−20 % · Spécial week-end</span><h2>Double plaisir du week-end</h2><p>Profitez d’un tarif privilégié sur les plats à partager, planches dégustation et cocktails du rooftop.</p><ul><li>Accès libre aux tables de billard dès deux commandes</li><li>Double points de fidélité MIAM</li></ul><button className="public-pill" onClick={() => setSelected({ title: 'Double plaisir du week-end', terms: 'Cette offre est présentée dans la maquette. Disponibilité et dates à confirmer auprès du restaurant.' })}>Voir les conditions →</button></div></section>
     <section className="public-offers-section"><div className="public-section-heading"><div><span className="public-kicker">Sélection gourmande</span><h2>Les Formules & <em>Privilèges</em></h2></div><p>Tarifs en FCFA à confirmer lors de votre commande.</p></div><div className="public-offers-grid">{offers.map(offer => <article className="public-offer-card" key={offer.title}><div className="public-offer-image"><img src={offer.image} alt="" loading="lazy" /><span>{offer.badge}</span><small>{offer.tag}</small></div><div><h3>{offer.title}</h3><p>{offer.description}</p><button onClick={() => setSelected(offer)}>Voir les conditions ›</button></div></article>)}</div></section>
     <section id="evenements" className="public-events-section"><div className="public-section-heading"><div><span className="public-kicker">Agenda ZeDuc-Sp@ce</span><h2>Événements <em>à venir</em></h2></div><p>Programmation issue de la maquette ; dates à confirmer.</p></div><div className="public-event-list">{events.map(event => { const closed = new Date(`2026-${event.month === 'OCT' ? '10' : '11'}-${event.day}T23:59:59`) < new Date(); return <article key={event.title}><div className="public-event-date"><small>{event.month}</small><strong>{event.day}</strong></div><div><small>{event.time} · {event.place}</small><h3>{event.title}</h3><p>{event.description}</p></div><div className="public-event-action"><span>{event.price}</span><button className="public-pill" disabled={closed} onClick={() => setSelected({ title: event.title, terms: `Participation à confirmer auprès du restaurant. ${event.price}.` })}>{closed ? 'Date passée' : 'Je participe'}</button></div></article> })}</div></section>
@@ -124,10 +162,11 @@ function Promotions() {
 
 export default function PublicSite({ page }) {
   const location = useLocation()
+  const activeSection = useVisibleSection(navSections[page], page === 'home' ? 'home' : page, 'contact')
   useEffect(() => {
     document.title = `${page === 'home' ? 'Accueil' : page === 'menu' ? 'Menu' : page === 'promotions' ? 'Promotions et événements' : 'Accès'} · Mon Miam Miam`
     if (location.hash) window.setTimeout(() => document.getElementById(location.hash.slice(1))?.scrollIntoView(), 0)
     else window.scrollTo(0, 0)
   }, [location, page])
-  return <div className="public-site"><a className="public-skip" href="#public-main">Aller au contenu</a><Header page={page} />{page === 'home' ? <Home /> : page === 'menu' ? <Menu /> : page === 'promotions' ? <Promotions /> : <AccessPortal />}<Footer /><CookieChoice /></div>
+  return <div className="public-site"><a className="public-skip" href="#public-main">Aller au contenu</a><Header page={page} activeSection={activeSection} />{page === 'home' ? <Home /> : page === 'menu' ? <Menu /> : page === 'promotions' ? <Promotions /> : <AccessPortal />}<Footer /><CookieChoice /></div>
 }
