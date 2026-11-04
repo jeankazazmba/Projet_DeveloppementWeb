@@ -3,9 +3,9 @@ import { Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { colors, Glass, Icon } from "./ui";
 
-// Approximate Yansoki centre for the preview, never a restaurant or courier GPS fix.
-const preview = { latitude: 3.9701, longitude: 9.7922 };
-const sampleCourier = { latitude: 3.9732, longitude: 9.7895 };
+// Approximate Kinshasa centre for the preview, never a restaurant or courier GPS fix.
+const preview = { latitude: -4.3249, longitude: 15.3222 };
+const sampleCourier = { latitude: -4.3221, longitude: 15.3187 };
 const validPosition = (value) =>
   value && Number.isFinite(value.latitude) && Number.isFinite(value.longitude) &&
   Math.abs(value.latitude) <= 90 && Math.abs(value.longitude) <= 180;
@@ -30,7 +30,7 @@ export default function DeliveryTracking({ order }) {
         showsUserLocation={false}
         showsMyLocationButton={false}
       >
-        <Marker coordinate={restaurant} title={realCourier ? "Point de départ" : "Yansoki · repère indicatif"} pinColor="#DCC79C" />
+        <Marker coordinate={restaurant} title={realCourier ? "Point de départ" : "Kinshasa · repère indicatif"} pinColor="#DCC79C" />
         <Marker coordinate={courier} title={realCourier ? tracking.courier.name || "Livreur" : "Position fictive du livreur"} pinColor="#65BFA0" />
       </MapView>
     </View>

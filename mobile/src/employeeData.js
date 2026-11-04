@@ -10,12 +10,12 @@ export const initialEmployeeData = {
   orders: [
     { id: "MM-1051", customer: "Carine M.", service: "Sur place", location: "Table 07", items: "Riz sauté au poulet", amount: 3000, status: "Reçue", createdAt: minutesAgo(2) },
     { id: "MM-1050", customer: "Éric T.", service: "Sur place", location: "Table 03", items: "Burger maison ×2, Jus de gingembre", amount: 5500, status: "Reçue", createdAt: minutesAgo(4) },
-    { id: "MM-1049", customer: "Linda B.", service: "Livraison", location: "Rés. La Terrasse", items: "Ndolé aux crevettes", amount: 3000, status: "Reçue", createdAt: minutesAgo(5) },
-    { id: "MM-1048", customer: "Arsène K.", service: "Livraison", location: "Rés. La Terrasse", items: "Poulet DG Royal ×2, Poisson braisé, Bissap", amount: 9750, status: "En préparation", createdAt: minutesAgo(9) },
+    { id: "MM-1049", customer: "Linda B.", service: "Livraison", location: "campus de Kinshasa", items: "Ndolé aux crevettes", amount: 3000, status: "Reçue", createdAt: minutesAgo(5) },
+    { id: "MM-1048", customer: "Arsène K.", service: "Livraison", location: "campus de Kinshasa", items: "Poulet DG Royal ×2, Poisson braisé, Bissap", amount: 9750, status: "En préparation", createdAt: minutesAgo(9) },
     { id: "MM-1047", customer: "Yannick S.", service: "Sur place", location: "Table 11", items: "Brochettes de bœuf ×3", amount: 4500, status: "En préparation", createdAt: minutesAgo(12) },
-    { id: "MM-1046", customer: "Mireille D.", service: "Livraison", location: "Rés. La Terrasse", items: "Beignets-haricots ×2", amount: 1000, status: "En préparation", createdAt: minutesAgo(14) },
+    { id: "MM-1046", customer: "Mireille D.", service: "Livraison", location: "campus de Kinshasa", items: "Beignets-haricots ×2", amount: 1000, status: "En préparation", createdAt: minutesAgo(14) },
     { id: "MM-1045", customer: "Paul N.", service: "Sur place", location: "Table 14", items: "Poulet DG, Bissap", amount: 4000, status: "Prête", createdAt: minutesAgo(18) },
-    { id: "MM-1044", customer: "Sandra O.", service: "Livraison", location: "Rés. La Terrasse", items: "Poisson braisé & bobolo", amount: 4500, status: "Prête", createdAt: minutesAgo(21) },
+    { id: "MM-1044", customer: "Sandra O.", service: "Livraison", location: "campus de Kinshasa", items: "Poisson braisé & bobolo", amount: 4500, status: "Prête", createdAt: minutesAgo(21) },
   ],
   menu: dishes.map((dish) => ({
     id: dish.id,

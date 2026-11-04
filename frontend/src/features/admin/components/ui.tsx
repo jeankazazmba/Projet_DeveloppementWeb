@@ -6,7 +6,7 @@ export function Icon({ src }: { src: string }) {
   return <span className="icon" aria-hidden="true"><img src={src} alt="" /></span>
 }
 export function PageHeading({ first, accent, description, action }: { first: string; accent?: string; description: string; action?: ReactNode }) {
-  return <header className="page-heading"><div><p className="eyebrow">ESPACE ADMINISTRATEUR · ZEDUC-SP@CE · YANSOKI</p><h1>{first} <span>{accent}</span></h1><p className="muted">{description}</p></div>{action}</header>
+  return <header className="page-heading"><div><p className="eyebrow">ESPACE ADMINISTRATEUR · ZEDUC-SP@CE · KINSHASA</p><h1>{first} <span>{accent}</span></h1><p className="muted">{description}</p></div>{action}</header>
 }
 export function Panel({ children, title, subtitle, action, className = '', id }: { children: ReactNode; title?: string; subtitle?: string; action?: ReactNode; className?: string; id?: string }) {
   return <section id={id} className={`panel ${className}`}>{title && <header className="panel-heading"><div><h2>{title}</h2>{subtitle && <p className="muted small">{subtitle}</p>}</div>{action}</header>}{children}</section>

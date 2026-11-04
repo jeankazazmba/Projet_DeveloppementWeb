@@ -1,5 +1,7 @@
 # Audit du cahier des charges et des interfaces — 4 novembre 2026
 
+> Cet audit décrit l'état **avant** la relocalisation des interfaces en RDC et l'ajout des scénarios locaux de paiement. Voir [Tests de paiement RDC](08-fidelite-paiement/TESTS_PAIEMENT_RDC.md) pour l'état actuel. Le cahier des charges original conserve Douala comme implantation historique.
+
 ## Périmètre et règle de lecture
 
 Source métier : `CAHIER DE CHARGE PROJET Mon Miam Miam.docx`, version 1.0.2 du 16 septembre 2024, 17 pages. Les identifiants ci-dessous correspondent à la [synthèse structurée](../CAHIER_DES_CHARGES.md). Audit du code présent sur la branche `feature/sprint-3-frontend-features`, sans lancement ni compilation. Il constate les écrans et leur logique visible dans le dépôt ; il ne valide pas leur comportement sur appareil ou navigateur.

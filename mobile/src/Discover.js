@@ -9,14 +9,14 @@ const promotions = [
   { id: "duo", title: "Offre Duo Grillades", badge: "−15 %", description: "Un assortiment de grillades à partager, accompagné de bobolo et de deux bissaps.", terms: "Offre présentée sur le site. Disponibilité et conditions à confirmer auprès du restaurant.", image: require("../assets/images/20-Promotions-layer-00074.jpg") },
   { id: "happy", title: "Happy Hour Rooftop", badge: "1 acheté = 1 offert", description: "Cocktails artisanaux et jus pressés maison au coucher du soleil.", terms: "Sélection de boissons et horaires à confirmer auprès du restaurant.", image: require("../assets/images/20-Promotions-layer-00103.jpg") },
   { id: "ndole", title: "Menu Spécial Ndolé Royal", badge: "−20 %", description: "Ndolé aux crevettes fraîches et plantains mûrs dorés.", terms: "Offre ponctuelle présentée sur le site ; date et tarif à confirmer.", image: require("../assets/images/20-Promotions-layer-00132.jpg") },
-  { id: "etudiant", title: "Formule Étudiant Recharger", badge: "2 800 FCFA", description: "Plat du jour Poulet DG et boisson fraîche.", terms: "Sous réserve de présentation d’une carte étudiante valide et de confirmation du tarif.", image: require("../assets/images/20-Promotions-layer-00161.jpg") },
+  { id: "etudiant", title: "Formule Étudiant Recharger", badge: "2 800 CDF", description: "Plat du jour Poulet DG et boisson fraîche.", terms: "Sous réserve de présentation d’une carte étudiante valide et de confirmation du tarif.", image: require("../assets/images/20-Promotions-layer-00161.jpg") },
   { id: "billard", title: "Plateau Apéro Billard", badge: "−25 %", description: "Beignets, brochettes et trio de sauces pour les soirées matchs.", terms: "Offre liée aux soirées matchs, sous réserve de réservation et de confirmation.", image: require("../assets/images/20-Promotions-layer-00190.jpg") },
   { id: "anniversaire", title: "Pack Anniversaire & Chill", badge: "Gâteau offert", description: "Un moment sur le rooftop avec un gâteau pour votre groupe.", terms: "Réservation de dix personnes minimum, sous réserve de confirmation.", image: require("../assets/images/20-Promotions-layer-00219.jpg") },
 ];
 
 const events = [
-  { id: "match", title: "Soirée Ligue des Champions Canal+", place: "Terrasse Rooftop Yansoki", description: "Diffusion grand écran et planches tapas en continu.", price: "Entrée gratuite · consommation requise", icon: "football-outline" },
-  { id: "cup", title: "Tournoi de billard ZeDuc Cup", place: "Espace Billard & Lounge", description: "Compétition amicale à 8-ball, trophée et crédits repas.", price: "Inscription indicative : 1 500 FCFA", icon: "trophy-outline" },
+  { id: "match", title: "Soirée Ligue des Champions Canal+", place: "Terrasse Rooftop Kinshasa", description: "Diffusion grand écran et planches tapas en continu.", price: "Entrée gratuite · consommation requise", icon: "football-outline" },
+  { id: "cup", title: "Tournoi de billard ZeDuc Cup", place: "Espace Billard & Lounge", description: "Compétition amicale à 8-ball, trophée et crédits repas.", price: "Inscription indicative : 1 500 CDF", icon: "trophy-outline" },
   { id: "quiz", title: "Quiz musique & Afro-Beats Night", place: "Rooftop panoramique", description: "Blind test musical, DJ invité et cocktails signature.", price: "Accès libre selon programmation", icon: "musical-notes-outline" },
 ];
 

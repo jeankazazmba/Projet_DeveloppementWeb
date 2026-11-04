@@ -1,6 +1,6 @@
 import { menuImage } from '../public/publicData.js'
 
-export const money = value => `${Math.round(value).toLocaleString('fr-FR')} FCFA`
+export const money = value => `${Math.round(value).toLocaleString('fr-FR')} CDF`
 export const orderSteps = ['Reçue', 'En préparation', 'Prête', 'Livrée']
 export const menuCategories = ['Tout', 'Plats chauds', 'Grillades & Braisés', 'Boissons fraîches', 'Desserts & Douceurs']
 
@@ -10,12 +10,12 @@ const minutesAgo = minutes => new Date(Date.now() - minutes * 60_000).toISOStrin
 export const initialOrders = [
   { id: 'MM-1051', customer: 'Carine M.', service: 'Sur place', location: 'Table 07', items: 'Riz sauté au poulet', amount: 3000, status: 'Reçue', createdAt: minutesAgo(2) },
   { id: 'MM-1050', customer: 'Éric T.', service: 'Sur place', location: 'Table 03', items: 'Burger maison ×2, Jus de gingembre', amount: 5500, status: 'Reçue', createdAt: minutesAgo(4) },
-  { id: 'MM-1049', customer: 'Linda B.', service: 'Livraison', location: 'Rés. La Terrasse', items: 'Ndolé aux crevettes', amount: 3000, status: 'Reçue', createdAt: minutesAgo(5) },
-  { id: 'MM-1048', customer: 'Arsène K.', service: 'Livraison', location: 'Rés. La Terrasse', items: 'Poulet DG Royal ×2, Poisson braisé & bobolo, Bissap', amount: 9750, status: 'En préparation', createdAt: minutesAgo(9) },
+  { id: 'MM-1049', customer: 'Linda B.', service: 'Livraison', location: 'campus de Kinshasa', items: 'Ndolé aux crevettes', amount: 3000, status: 'Reçue', createdAt: minutesAgo(5) },
+  { id: 'MM-1048', customer: 'Arsène K.', service: 'Livraison', location: 'campus de Kinshasa', items: 'Poulet DG Royal ×2, Poisson braisé & bobolo, Bissap', amount: 9750, status: 'En préparation', createdAt: minutesAgo(9) },
   { id: 'MM-1047', customer: 'Yannick S.', service: 'Sur place', location: 'Table 11', items: 'Brochettes de bœuf ×3', amount: 4500, status: 'En préparation', createdAt: minutesAgo(12) },
-  { id: 'MM-1046', customer: 'Mireille D.', service: 'Livraison', location: 'Rés. La Terrasse', items: 'Beignets-haricots ×2', amount: 1000, status: 'En préparation', createdAt: minutesAgo(14) },
+  { id: 'MM-1046', customer: 'Mireille D.', service: 'Livraison', location: 'campus de Kinshasa', items: 'Beignets-haricots ×2', amount: 1000, status: 'En préparation', createdAt: minutesAgo(14) },
   { id: 'MM-1045', customer: 'Paul N.', service: 'Sur place', location: 'Table 14', items: 'Poulet DG, Bissap', amount: 4000, status: 'Prête', createdAt: minutesAgo(18) },
-  { id: 'MM-1044', customer: 'Sandra O.', service: 'Livraison', location: 'Rés. La Terrasse', items: 'Poisson braisé & bobolo', amount: 4500, status: 'Prête', createdAt: minutesAgo(21) },
+  { id: 'MM-1044', customer: 'Sandra O.', service: 'Livraison', location: 'campus de Kinshasa', items: 'Poisson braisé & bobolo', amount: 4500, status: 'Prête', createdAt: minutesAgo(21) },
 ]
 
 export const initialMenu = [
@@ -30,9 +30,9 @@ export const initialMenu = [
 ]
 
 export const initialClaims = [
-  { id: 'RC-0031', student: 'Arsène K.', orderId: 'MM-1042', reason: 'Plat servi froid', message: 'Bonjour, ma commande MM-1042 est arrivée il y a 15 minutes mais le ndolé était complètement froid et la sauce figée. Impossible de manger tel quel.', status: 'En cours', received: 'Il y a 18 min', amount: 4400, location: 'Résidence La Terrasse · Chambre B12', attachment: 'photo_plat_froid.jpg', response: '' },
-  { id: 'RC-0030', student: 'Mireille D.', orderId: 'MM-1038', reason: 'Article manquant', message: 'La boisson commandée ne se trouvait pas dans mon sac de livraison.', status: 'Envoyée au gérant', received: 'Il y a 42 min', amount: 3200, location: 'Campus IUT', attachment: null, response: 'Nous avons vérifié la préparation et proposé un avoir pour la boisson manquante.' },
-  { id: 'RC-0029', student: 'Sandra O.', orderId: 'MM-1035', reason: 'Retard livraison', message: 'La livraison est arrivée avec plus de 30 minutes de retard.', status: 'À traiter', received: 'Il y a 1 h 10', amount: 4500, location: 'Résidence La Terrasse', attachment: null, response: '' },
+  { id: 'RC-0031', student: 'Arsène K.', orderId: 'MM-1042', reason: 'Plat servi froid', message: 'Bonjour, ma commande MM-1042 est arrivée il y a 15 minutes mais le ndolé était complètement froid et la sauce figée. Impossible de manger tel quel.', status: 'En cours', received: 'Il y a 18 min', amount: 4400, location: 'campus de Kinshasa · Chambre B12', attachment: 'photo_plat_froid.jpg', response: '' },
+  { id: 'RC-0030', student: 'Mireille D.', orderId: 'MM-1038', reason: 'Article manquant', message: 'La boisson commandée ne se trouvait pas dans mon sac de livraison.', status: 'Envoyée au gérant', received: 'Il y a 42 min', amount: 3200, location: 'Campus université', attachment: null, response: 'Nous avons vérifié la préparation et proposé un avoir pour la boisson manquante.' },
+  { id: 'RC-0029', student: 'Sandra O.', orderId: 'MM-1035', reason: 'Retard livraison', message: 'La livraison est arrivée avec plus de 30 minutes de retard.', status: 'À traiter', received: 'Il y a 1 h 10', amount: 4500, location: 'campus de Kinshasa', attachment: null, response: '' },
   { id: 'RC-0028', student: 'Yannick S.', orderId: 'MM-1029', reason: 'Erreur montant', message: 'Le montant débité ne correspond pas au total de la commande.', status: 'Résolue', received: 'Il y a 2 h 05', amount: 3000, location: 'Table 11', attachment: null, response: 'Le montant a été corrigé après vérification.' },
   { id: 'RC-0027', student: 'Éric T.', orderId: 'MM-1022', reason: 'Boisson non conforme', message: 'La boisson reçue ne correspond pas à ma commande.', status: 'Rejetée', received: 'Il y a 3 h 15', amount: 1000, location: 'Table 03', attachment: null, response: '' },
 ]

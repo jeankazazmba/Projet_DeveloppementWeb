@@ -8,8 +8,8 @@ export default function DeliveryTracking() {
     <Text style={{ color: colors.gold, lineHeight: 19, marginBottom: 10 }}>Aperçu démo · aucune position réelle de livreur.</Text>
     <View style={{ height: 260, overflow: "hidden", borderRadius: 17 }}>
       <iframe
-        title="Carte indicative de Yansoki"
-        src="https://www.openstreetmap.org/export/embed.html?bbox=9.782%2C3.962%2C9.802%2C3.978&layer=mapnik&marker=3.9732%2C9.7895"
+        title="Carte indicative de Kinshasa"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=15.310%2C-4.335%2C15.335%2C-4.315&layer=mapnik&marker=-4.3221%2C15.3187"
         style={{ width: "100%", height: "100%", border: 0 }}
         loading="lazy"
       />

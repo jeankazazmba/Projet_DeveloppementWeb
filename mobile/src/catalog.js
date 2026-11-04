@@ -126,7 +126,7 @@ export const dishes = [
   },
   {
     id: "public-crevettes",
-    name: "Brochettes de crevettes géantes de Kribi",
+    name: "Brochettes de crevettes géantes de la RDC",
     category: "Grillades",
     price: 4000,
     description: "Crevettes grillées aux herbes et beurre parfumé.",
@@ -248,4 +248,4 @@ export const dishes = [
 
 export const findDish = (id) => dishes.find((dish) => dish.id === id);
 export const money = (amount) =>
-  `${Math.round(amount).toLocaleString("fr-FR")} FCFA`;
+  `${Math.round(amount).toLocaleString("fr-FR")} CDF`;

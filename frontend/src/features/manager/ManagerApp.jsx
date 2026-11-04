@@ -55,7 +55,7 @@ function EmployeeDrawer({ employee, employees, onClose, onSave }) {
       <div className="manager-drawer-header"><div><h2 id="manager-employee-title">{isEditing ? 'Modifier un employé' : 'Nouvel employé'}</h2><p>Renseignez les informations et attribuez les permissions.</p></div><button type="button" className="manager-icon-button" onClick={onClose} aria-label="Fermer"><ManagerIcon name="close" /></button></div>
       <form onSubmit={submit} className="manager-drawer-form">
         <label>Nom complet <span>*</span><input ref={firstInput} value={name} onChange={event => setName(event.target.value)} placeholder="Patrick Mboma" required /></label>
-        <label>Adresse e-mail <span>*</span><input type="email" value={email} onChange={event => setEmail(event.target.value)} placeholder="p.mboma@zeduc-space.cm" required /></label>
+        <label>Adresse e-mail <span>*</span><input type="email" value={email} onChange={event => setEmail(event.target.value)} placeholder="p.mboma@zeduc-space.cd" required /></label>
         <label>Téléphone <span>*</span><input type="tel" value={phone} onChange={event => setPhone(event.target.value)} placeholder="699 42 18 90" required /></label>
         {!isEditing && <label>Mot de passe temporaire <div className="manager-inline-field"><input type="text" value={password} onChange={event => setPassword(event.target.value)} placeholder="Générer un mot de passe" /><button type="button" className="manager-button ghost" onClick={generatePassword}>Générer</button></div><small>En mode démo, ce mot de passe n’est ni enregistré ni transmis.</small></label>}
         {isEditing && <label>Statut<select value={status} onChange={event => setStatus(event.target.value)}><option>Actif</option><option>Suspendu</option></select></label>}
@@ -118,7 +118,7 @@ export default function ManagerApp() {
     <button type="button" className="manager-mobile-menu manager-icon-button" onClick={() => setSidebarOpen(current => !current)} aria-expanded={sidebarOpen} aria-label="Afficher la navigation"><ManagerIcon name="menu" /></button>
     {sidebarOpen && <button type="button" className="manager-sidebar-scrim" onClick={() => setSidebarOpen(false)} aria-label="Fermer la navigation" />}
     <aside className={`manager-sidebar ${sidebarOpen ? 'open' : ''}`}>
-      <Link to="/gerant" className="manager-brand" onClick={() => setSidebarOpen(false)} aria-label="Mon Miam Miam — espace gérant"><img src={logo} alt="Mon Miam Miam ZeDuc-Sp@ce" /><span>YANSOKI • DOUALA</span></Link>
+      <Link to="/gerant" className="manager-brand" onClick={() => setSidebarOpen(false)} aria-label="Mon Miam Miam — espace gérant"><img src={logo} alt="Mon Miam Miam ZeDuc-Sp@ce" /><span>KINSHASA • RDC</span></Link>
       <div className="manager-role-line"><span className="manager-role-tag">GÉRANT</span><span className="manager-live-label"><img src={liveDot} alt="" />Démo active</span></div>
       <nav aria-label="Espace gérant" className="manager-nav">{navigation.map(item => <Link key={item.key} to={item.path} className={page === item.key ? 'active' : ''} aria-current={page === item.key ? 'page' : undefined} onClick={() => setSidebarOpen(false)}>{item.icon ? <img className="manager-nav-icon" src={item.icon} alt="" /> : <ManagerIcon name="delivery" />}<span>{item.label}</span>{item.key === 'claims' && openClaims > 0 && <b>{openClaims}</b>}</Link>)}</nav>
       <div className="manager-sidebar-profile"><span className="manager-avatar">GE</span><span><strong>Gérant</strong><small>Direction.ZeDuc-Sp@ce</small></span></div>
@@ -133,7 +133,7 @@ export default function ManagerApp() {
         {page === 'statistics' && <StatisticsPage onNotice={setNotice} />}
         {page === 'claims' && <ClaimsPage claims={claims} query={query} onDecide={decideClaim} />}
       </main>
-      <footer className="manager-footer"><img src={logo} alt="" /><span>© Mon Miam Miam · ZeDuc-Sp@ce, Résidence La Terrasse, Yansoki · Douala</span><Link to="/">Site public</Link><span>Mode démo</span></footer>
+      <footer className="manager-footer"><img src={logo} alt="" /><span>© Mon Miam Miam · ZeDuc-Sp@ce, Kinshasa, RDC · adresse exacte à confirmer</span><Link to="/">Site public</Link><span>Mode démo</span></footer>
     </div>
     {drawerOpen && <EmployeeDrawer key={selectedEmployee?.id || 'new'} employee={selectedEmployee} employees={employees} onClose={closeDrawer} onSave={saveEmployee} />}
     {notice && <div className="manager-toast" role="status">{notice}<button type="button" onClick={() => setNotice('')} aria-label="Fermer">×</button></div>}

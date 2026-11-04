@@ -71,7 +71,7 @@ export default function App() {
     <a className="skip-link" href="#main">Aller au contenu</a>
     {sidebar && <button className="sidebar-shade" aria-label="Fermer la navigation" onClick={() => setSidebar(false)} />}
     <aside id="navigation" className={`sidebar ${sidebar ? 'is-open' : ''}`}>
-      <a href="#/dashboard" className="brand" aria-label="Mon Miam Miam — Tableau de bord"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="Mon Miam Miam ZeDuc-Sp@ce" /><span>YANSOKI • DOUALA</span></a>
+      <a href="#/dashboard" className="brand" aria-label="Mon Miam Miam — Tableau de bord"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="Mon Miam Miam ZeDuc-Sp@ce" /><span>KINSHASA • RDC</span></a>
       <div className="role-line"><span className="badge">ADMIN</span><span className="live-label"><img src={assets.dashboard.imgEllipse} alt="" />Démo active</span></div>
       <nav aria-label="Navigation administrateur">
         {nav.map(item => <div key={item.page}>
@@ -93,7 +93,7 @@ export default function App() {
         {page === 'settings' && <Settings settings={settings} setSettings={setSettings} notify={setNotice} />}
         {page === 'data' && <DataReadiness employees={employees.length} dishes={dishes.length} promotions={promotions.length} claims={claims.length} orders={orders.length} tables={tables.length} />}
       </main>
-      <footer className="footer"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="" /><p>© 2024 Mon Miam Miam • ZeDuc-Sp@ce, Résidence La Terrasse, Yansoki • Douala</p><button onClick={() => setInfo('Les mentions légales et conditions de vente doivent être fournies par le restaurant.')}>Mentions<br />Légales & CGV</button><button onClick={() => setInfo('La politique de confidentialité sera ajoutée avant la mise en production.')}>Politique RGPD<br />Campus</button><button onClick={() => setInfo('Le numéro WhatsApp complet du restaurant reste à renseigner.')}>WhatsApp<br />Assistance (+237)</button></footer>
+      <footer className="footer"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="" /><p>© 2026 Mon Miam Miam • ZeDuc-Sp@ce, Kinshasa • RDC</p><button onClick={() => setInfo('Les mentions légales et conditions de vente doivent être fournies par le restaurant.')}>Mentions<br />Légales & CGV</button><button onClick={() => setInfo('La politique de confidentialité sera ajoutée avant la mise en production.')}>Politique RGPD<br />Campus</button><button onClick={() => setInfo('Le numéro WhatsApp complet du restaurant reste à renseigner.')}>WhatsApp<br />Assistance (+243)</button></footer>
     </div>
     {notice && <div className="toast" role="status">{notice}<button aria-label="Fermer la notification" onClick={() => setNotice('')}>×</button></div>}
     {info && <Modal title="Information" onClose={() => setInfo('')}><p className="muted">{info}</p><div className="dialog-actions"><button className="button primary" onClick={() => setInfo('')}>Fermer</button></div></Modal>}

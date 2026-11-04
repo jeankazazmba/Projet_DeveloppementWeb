@@ -37,6 +37,7 @@ import Discover from "./Discover";
 import DeliveryTracking from "./DeliveryTracking";
 import TimePickerField from "./TimePickerField";
 import PaymentMethods, { cashPaymentLabel } from "./PaymentMethods";
+import { simulatePayment } from "./paymentSandbox";
 import {
   Button,
   colors,
@@ -178,7 +179,7 @@ function AppProvider({ children, skipOnboarding = false }) {
     (sum, item) => sum + item.dish.price * item.quantity,
     0,
   );
-  const placeOrder = ({ mode, address, arrival, usePoints }) => {
+  const placeOrder = ({ mode, address, arrival, usePoints, paymentAttempt }) => {
     if (!cartItems.length) return;
     const discount = usePoints
       ? Math.min(Math.floor(data.points / 10) * 100, subtotal)
@@ -198,8 +199,10 @@ function AppProvider({ children, skipOnboarding = false }) {
       mode,
       address,
       arrival,
-      payment: cashPaymentLabel(mode),
-      paymentStatus: "À régler",
+      payment: paymentAttempt?.methodName || cashPaymentLabel(mode),
+      paymentStatus: paymentAttempt ? "Test réussi · aucun débit" : "À régler",
+      paymentTest: paymentAttempt || null,
+      currency: "CDF",
       status: "En préparation · démo",
     };
     setData((current) => ({
@@ -1155,6 +1158,8 @@ function Checkout() {
   const [arrival, setArrival] = useState("");
   const [address, setAddress] = useState("");
   const [usePoints, setUsePoints] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState("cash");
+  const [paymentScenario, setPaymentScenario] = useState("success");
   const discount = usePoints
     ? Math.min(Math.floor(data.points / 10) * 100, subtotal)
     : 0;
@@ -1193,7 +1198,7 @@ function Checkout() {
         )}
       </Glass>
       <SectionTitle title="Paiement" />
-      <PaymentMethods mode={mode} />
+      <PaymentMethods mode={mode} selectedMethod={selectedMethod} onSelect={setSelectedMethod} scenario={paymentScenario} onScenarioChange={setPaymentScenario} />
       <SectionTitle title="Vos points" />
       <Glass style={{ padding: 16 }} onPress={() => setUsePoints(!usePoints)}>
         <View style={styles.rowBetween}>
@@ -1227,18 +1232,30 @@ function Checkout() {
         />
       </Glass>
       <Button
-        title="Confirmer · payer à la réception"
+        title={selectedMethod === "cash" ? "Confirmer · payer à la réception" : "Tester le paiement et confirmer"}
         onPress={() => {
           if (!arrival.trim() || (mode === "Livraison" && !address.trim()))
             return Alert.alert(
               "Informations manquantes",
               "Indiquez l’heure souhaitée et, en livraison, votre adresse.",
             );
+          const amount = subtotal + (mode === "Livraison" ? 1500 : 0) - discount;
+          if (selectedMethod !== "cash" && amount <= 0) {
+            return Alert.alert("Total nul", "Choisissez le paiement à la réception pour confirmer une commande sans montant à tester.");
+          }
+          const paymentAttempt = selectedMethod === "cash" ? null : simulatePayment({ methodId: selectedMethod, scenario: paymentScenario, amount });
+          if (paymentAttempt?.status === "test_failed") {
+            return Alert.alert("Paiement test refusé", `Aucun débit ni commande créée. Référence : ${paymentAttempt.reference}`);
+          }
+          if (paymentAttempt?.status === "test_pending") {
+            return Alert.alert("Paiement test en attente", `Aucun débit ni commande créée. Référence : ${paymentAttempt.reference}`);
+          }
           placeOrder({
             mode,
             arrival: arrival.trim(),
             address: address.trim(),
             usePoints,
+            paymentAttempt,
           });
         }}
         style={{ marginTop: 20 }}
@@ -1251,7 +1268,7 @@ function Checkout() {
           marginTop: 12,
         }}
       >
-        Aucun paiement n'est débité. Une commande réelle nécessitera la connexion à l'API.
+        Simulation locale : aucun paiement n'est débité et aucune commande n'est envoyée au restaurant.
       </Text>
     </Page>
   );
@@ -1325,6 +1342,7 @@ function Confirmation({ params }) {
             label="État du paiement"
             value={order.paymentStatus || "Non renseigné"}
           />
+          {order.paymentTest && <Summary label="Référence du test" value={order.paymentTest.reference} />}
           <Summary label="Total" value={money(order.total)} strong />
         </Glass>
       )}
@@ -1481,6 +1499,7 @@ function OrderDetail({ params }) {
           label="État du paiement"
           value={order.paymentStatus || "Non renseigné"}
         />
+        {order.paymentTest && <Summary label="Référence du test" value={order.paymentTest.reference} />}
         <Summary label="Réduction" value={money(order.discount)} />
         <Summary label="Total" value={money(order.total)} strong />
       </Glass>
@@ -1570,12 +1589,12 @@ function Loyalty() {
         <InfoRow
           icon="star-outline"
           title="Cumulez"
-          body="La démo crédite 10 points par tranche de 1 000 FCFA."
+          body="La démo crédite 10 points par tranche de 1 000 CDF."
         />
         <InfoRow
           icon="gift-outline"
           title="Profitez"
-          body="Échangez 10 points contre 100 FCFA lors du paiement démo."
+          body="Échangez 10 points contre 100 CDF lors du paiement démo."
         />
       </Glass>
       <Button
