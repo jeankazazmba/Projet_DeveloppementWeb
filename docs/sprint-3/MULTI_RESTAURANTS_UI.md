@@ -1,14 +1,17 @@
-# Interfaces multi-restaurants — état de la démonstration
+# Interfaces multi-restaurants — état de la démonstration et de l’API
 
-Les interfaces proposent deux établissements : ZeDuc-Sp@ce et un restaurant partenaire **fictif**. Deux articles fictifs permettent de tester le filtre de catalogue et l’interdiction de mélanger des restaurants dans un panier. Les nouveaux restaurants créés dans l’espace « Admin plateforme » sont enregistrés dans le `localStorage` de ce navigateur ; leur menu est vide.
+## Nouveau parcours
 
-- Site public : liste consultable, localisation, horaires, accès au menu filtré, restaurant affiché sur les plats, offres et événements.
-- Étudiant mobile : filtre « tous les plats » ou un restaurant, restaurant affiché sur les plats et commandes, panier limité à un restaurant avec confirmation avant sa remise à zéro.
-- Employé et gérant web : restaurant de travail visible, données locales séparées par identifiant d’établissement. Les statistiques et cartes du restaurant fictif affichent un état vide.
-- Employé mobile : choix de l’établissement en entrant dans l’espace, stockage local séparé, statistiques vides pour le restaurant fictif.
-- Administrateur restaurant : l’interface actuelle reste celle de ZeDuc-Sp@ce. L’admin plateforme dispose d’un écran distinct de création et de suivi des fiches d’établissements.
-- Tauri : choix du restaurant après le rôle et l’écran de connexion de démonstration, seulement pour les rôles ayant deux établissements dans leur profil d’exemple.
+- Étudiant mobile : répertoire des restaurants en premier, recherche, fiche d’un établissement, puis seulement ses plats, promotions, événements et jeux. Le changement de restaurant demande confirmation si le panier contient des plats d’un autre établissement.
+- Site public : le répertoire ouvre `/restaurants/:id`, avec les contenus propres à l’établissement. Le menu global reste consultable sur `/menu` avec un filtre par restaurant.
+- Avec `VITE_API_URL` et `EXPO_PUBLIC_API_URL`, le site et l’application étudiante lisent le même catalogue publié depuis Laravel. L’employé mobile doit se connecter et ne voit que les restaurants affectés à son compte ; son menu partagé est en lecture seule.
+- Les espaces web admin, gérant, employé et plateforme ouvrent `/catalogue-pro` pour gérer ou consulter les plats, promotions, événements et jeux via l’API commune. La création des restaurants et des comptes est réservée à l’admin plateforme. Un employé ne peut que lire.
+- Les requêtes professionnelles sont filtrées côté serveur par l’affectation `restaurant_user`. L’URL ou le corps d’une requête ne peuvent pas donner accès à un autre restaurant. Les contenus privés et brouillons ne sont pas visibles dans l’API publique.
 
-## Raccordement nécessaire avant un usage réel
+Les commandes, stocks, tables, livraisons, réclamations, statistiques et jeux de fidélité restent des démonstrations locales. Leur synchronisation demandera d’autres tables et routes. Le backend Laravel n’est pas encore hébergé ; la prévisualisation Vercel du frontend affiche donc la démo si `VITE_API_URL` n’est pas configurée.
 
-L’API doit fournir les restaurants, les affectations de comptes et les droits, puis filtrer côté serveur les commandes, menus, stocks, tables, livreurs, réclamations, statistiques, promotions et événements par `restaurant_id`. La création d’un restaurant, l’activation et le changement de contexte doivent être autorisés par le backend. Les interfaces actuelles ne constituent pas un contrôle d’accès. Les données `localStorage` du navigateur, du WebView Tauri et de l’application Expo ne se synchronisent pas entre elles.
+## Démonstration encore locale
+
+Sans adresse d’API, ZeDuc et un partenaire fictif sont disponibles pour prévisualiser les écrans. La plateforme locale peut créer d’autres fiches dans le navigateur, mais cela ne crée aucun restaurant sur le serveur. L’espace Tauri et les écrans historiques admin/gérant/employé utilisent encore leurs données de maquette ; seul `/catalogue-pro` est relié à l’API.
+
+L’authentification du catalogue est indépendante des écrans de démonstration historiques. Elle doit être étendue aux commandes, stocks, tables, livraisons, réclamations et statistiques avant de considérer l’ensemble du backoffice comme connecté.

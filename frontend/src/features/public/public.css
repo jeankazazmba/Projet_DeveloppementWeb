@@ -426,3 +426,14 @@ html:has(.public-site) { scroll-behavior:smooth; }
   html:has(.public-site) { scroll-behavior:auto; }
   .public-site * { transition-duration:0.01ms!important;animation-duration:0.01ms!important; }
 }
+.public-restaurant-detail { padding-top: 3rem; padding-bottom: 5rem; }
+.public-restaurant-detail > section { margin-top: 3rem; }
+.public-restaurant-detail-hero { padding: clamp(1.5rem, 4vw, 3rem); border: 1px solid color-mix(in srgb, currentColor 20%, transparent); border-radius: 1.5rem; background: color-mix(in srgb, currentColor 5%, transparent); }
+.public-restaurant-detail-hero h1 { margin: .6rem 0; }
+.public-restaurant-detail-hero dl { display: flex; flex-wrap: wrap; gap: 1.5rem; margin: 1.5rem 0; }
+.public-restaurant-detail-hero dt { opacity: .7; font-size: .8rem; }
+.public-restaurant-detail-hero dd { margin: .3rem 0 0; font-weight: 700; }
+.public-restaurant-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1.25rem; }
+.public-restaurant-detail-grid article { overflow: hidden; padding: 1rem; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 1rem; }
+.public-restaurant-detail-grid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: .75rem; }
+.public-catalog-notice { margin: 0; padding: .65rem 1rem; text-align: center; color: #24190e; background: #e8bb76; font-weight: 700; }

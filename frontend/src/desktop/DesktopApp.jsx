@@ -5,6 +5,7 @@ import ManagerApp from '../features/manager/ManagerApp.jsx'
 import EmployeeApp from '../features/employee/EmployeeApp.jsx'
 import PlatformAdminApp from '../features/platform/PlatformAdminApp.jsx'
 import PublicSite from '../features/public/PublicSite.jsx'
+import StaffCatalog from '../features/shared/StaffCatalog.jsx'
 import { getRestaurants, restaurantScopeKey } from '../data/restaurants.js'
 
 const logo = '/assets/figma/dashboard-imgMonMiamMiamZeDucSpCe.png'
@@ -25,8 +26,10 @@ function Workspace({ role, onLeave }) {
     {role.id === 'admin' ? <AdminApp /> : <MemoryRouter key={role.id} initialEntries={[role.path]}>
       <Routes>
         <Route path="/plateforme" element={<PlatformAdminApp />} />
+        <Route path="/catalogue-pro" element={<StaffCatalog />} />
         <Route path="/" element={<PublicSite page="home" />} />
         <Route path="/menu" element={<PublicSite page="menu" />} />
+        <Route path="/restaurants/:id" element={<PublicSite page="restaurant" />} />
         <Route path="/promotions" element={<PublicSite page="promotions" />} />
         <Route path="/acces" element={<PublicSite page="access" />} />
         <Route path="/gerant/*" element={<ManagerApp />} />

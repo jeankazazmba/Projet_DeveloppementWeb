@@ -14,7 +14,7 @@ export const categoryLabels = {
   Desserts: "Desserts & douceurs",
 };
 
-export const dishes = [
+export let dishes = [
   {
     id: "poulet",
     name: "Poulet braisé maison",
@@ -267,5 +267,8 @@ export const dishes = [
 ].map(dish => ({ restaurantId: 'zeduc', ...dish }));
 
 export const findDish = (id) => dishes.find((dish) => dish.id === id);
+export function setDishes(items) {
+  if (Array.isArray(items)) dishes = items;
+}
 export const money = (amount) =>
   `${Math.round(amount).toLocaleString("fr-FR")} CDF`;

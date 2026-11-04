@@ -30,6 +30,7 @@ import {
 } from "react-native-safe-area-context";
 import { categories, categoryLabels, dishes, findDish, money } from "./catalog";
 import { getRestaurant, restaurants } from "./restaurants";
+import { loadRemoteCatalog } from './remoteCatalog';
 import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
 import FloatingCart from "./FloatingCart";
@@ -64,7 +65,7 @@ const initialData = {
   onboardingDone: false,
   user: null,
   cart: {},
-  restaurantFilter: 'all',
+  restaurantFilter: null,
   orders: [],
   complaints: [],
   notificationsReadAt: null,
@@ -72,7 +73,7 @@ const initialData = {
   referralUsed: false,
   lastSpin: null,
 };
-const tabNames = ["home", "menu", "orders", "loyalty", "profile"];
+const tabNames = ["home", "restaurant", "menu", "orders", "loyalty", "profile"];
 const tabs = [
   ["home", "Accueil", "home-outline"],
   ["menu", "Menu", "restaurant-outline"],
@@ -115,6 +116,8 @@ function localNotifications(data) {
 
 function AppProvider({ children, skipOnboarding = false }) {
   const [data, setData] = useState(initialData);
+  const [catalogVersion, setCatalogVersion] = useState(0);
+  const [apiConnected, setApiConnected] = useState(false);
   const [ready, setReady] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [stack, setStack] = useState([
@@ -123,6 +126,13 @@ function AppProvider({ children, skipOnboarding = false }) {
   useEffect(() => {
     const timer = setTimeout(() => setIntroDone(true), 950);
     return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    let active = true;
+    loadRemoteCatalog().then(loaded => {
+      if (active && loaded) { setApiConnected(true); setCatalogVersion(value => value + 1); }
+    }).catch(() => {});
+    return () => { active = false; };
   }, []);
   useEffect(() => {
     AsyncStorage.getItem(KEY)
@@ -167,11 +177,14 @@ function AppProvider({ children, skipOnboarding = false }) {
         : [{ name: data.user ? "home" : "login", params: {} }];
     });
   };
-  const selectRestaurant = id => {
-    if (id !== 'all' && !restaurants.some(item => item.id === id)) return;
+  const selectRestaurant = (id, onSelected) => {
+    if (!restaurants.some(item => item.id === id)) return;
     const currentRestaurant = Object.keys(data.cart).map(findDish).find(Boolean)?.restaurantId;
-    const choose = () => setData(current => ({ ...current, cart: currentRestaurant && id !== 'all' && currentRestaurant !== id ? {} : current.cart, restaurantFilter: id }));
-    if (currentRestaurant && id !== 'all' && currentRestaurant !== id) confirmRestaurantChange('Votre panier contient des plats d’un autre restaurant. Il sera vidé pour continuer.', choose);
+    const choose = () => {
+      setData(current => ({ ...current, cart: currentRestaurant && currentRestaurant !== id ? {} : current.cart, restaurantFilter: id }));
+      onSelected?.();
+    };
+    if (currentRestaurant && currentRestaurant !== id) confirmRestaurantChange('Votre panier contient des plats d’un autre restaurant. Il sera vidé pour continuer.', choose);
     else choose();
   };
   const addToCart = (id, quantity = 1, onAdded) => {
@@ -256,6 +269,8 @@ function AppProvider({ children, skipOnboarding = false }) {
     }));
   const value = {
     data,
+    catalogVersion,
+    apiConnected,
     setData,
     screen,
     go,
@@ -287,6 +302,7 @@ function AppProvider({ children, skipOnboarding = false }) {
 
 function BottomTabs({ blurTarget }) {
   const { screen, tab } = useApp();
+  const active = screen.name === 'restaurant' ? 'home' : screen.name;
   const insets = useSafeAreaInsets();
   if (!tabNames.includes(screen.name) && screen.name !== "cart") return null;
   return (
@@ -322,7 +338,7 @@ function BottomTabs({ blurTarget }) {
           key={name}
           onPress={() => tab(name)}
           accessibilityRole="tab"
-          accessibilityState={{ selected: screen.name === name }}
+          accessibilityState={{ selected: active === name }}
           style={{
             flex: 1,
             alignItems: "center",
@@ -330,17 +346,17 @@ function BottomTabs({ blurTarget }) {
             paddingVertical: 5,
             borderRadius: 20,
             backgroundColor:
-              screen.name === name ? "rgba(220,199,156,0.15)" : "transparent",
+              active === name ? "rgba(220,199,156,0.15)" : "transparent",
           }}
         >
           <Icon
             name={icon}
-            color={screen.name === name ? colors.gold : "#8F918C"}
+            color={active === name ? colors.gold : "#8F918C"}
             size={22}
           />
           <Text
             style={{
-              color: screen.name === name ? colors.gold : "#9A9B97",
+              color: active === name ? colors.gold : "#9A9B97",
               fontSize: 10,
               fontWeight: "700",
             }}
@@ -374,6 +390,7 @@ function Router({ onOpenEmployee }) {
     register: Register,
     forgot: Forgot,
     home: Home,
+    restaurant: RestaurantHome,
     menu: Menu,
     detail: Detail,
     cart: Cart,
@@ -746,20 +763,24 @@ function Forgot() {
   );
 }
 
-function RestaurantFilter() {
-  const { data, selectRestaurant } = useApp();
-  const selected = data.restaurantFilter === 'all' ? null : getRestaurant(data.restaurantFilter);
-  return <View style={{ marginBottom: 16 }}><Text style={{ color: colors.gold, fontWeight: '800', marginBottom: 9 }}>Choisir un restaurant</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}><Pill title="Tous les plats" active={data.restaurantFilter === 'all'} onPress={() => selectRestaurant('all')} />{restaurants.map(item => <Pill key={item.id} title={item.name} active={data.restaurantFilter === item.id} onPress={() => selectRestaurant(item.id)} />)}</ScrollView><Text style={{ color: colors.muted, fontSize: 12, marginTop: 6 }}>{selected ? `${selected.location} · ${selected.hours}` : 'Tous les établissements de la démonstration'} · Un panier par restaurant.</Text></View>;
+function Home() {
+  const { data, selectRestaurant, go, apiConnected } = useApp();
+  const [query, setQuery] = useState('');
+  const visible = restaurants.filter(item => `${item.name} ${item.location}`.toLocaleLowerCase('fr').includes(query.trim().toLocaleLowerCase('fr')));
+  return <Page title={`Bonjour ${data.user?.name?.split(' ')[0] || 'étudiant'} 👋`} subtitle="Choisissez un restaurant pour découvrir sa carte et ses activités."><Field value={query} onChangeText={setQuery} placeholder="Rechercher un restaurant ou un lieu…" right={<Icon name="search-outline" color={colors.gold} />} />{visible.map(item => <Glass key={item.id} style={{ padding: 20, marginBottom: 14 }} onPress={() => selectRestaurant(item.id, () => go('restaurant'))}><Text style={{ color: colors.gold, fontSize: 11, fontWeight: '900' }}>{item.example ? 'RESTAURANT EXEMPLE' : 'RESTAURANT ACTUEL'}</Text><Text style={{ color: colors.text, fontSize: 20, fontWeight: '900', marginTop: 7 }}>{item.name}</Text><Text style={{ color: colors.muted, marginTop: 7 }}>{item.location}</Text><Text style={{ color: colors.muted, marginTop: 3 }}>{item.hours}</Text><Text style={{ color: colors.goldBright, marginTop: 14, fontWeight: '800' }}>Voir le restaurant →</Text></Glass>)}{!visible.length && <Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Aucun restaurant trouvé.</Text></Glass>}<Text style={{ color: colors.muted, fontSize: 12, marginTop: 8 }}>{apiConnected ? 'Catalogue synchronisé avec le serveur.' : 'Catalogue de démonstration local.'}</Text></Page>;
 }
 
-function Home() {
+function RestaurantHome() {
   const { data, go, addToCart, tab } = useApp();
+  const selected = restaurants.find(item => item.id === data.restaurantFilter);
+  if (!selected) return <Page title="Choisir un restaurant"><Button title="Voir les restaurants" onPress={() => tab('home')} /></Page>;
+  if (selected.id !== 'zeduc') return <Page title={selected.name} subtitle={`${selected.location} · ${selected.hours}`} onBack={() => tab('home')}><Glass style={{ padding: 19, marginBottom: 18 }}><Text style={{ color: colors.gold, fontWeight: '900' }}>{selected.example ? 'Établissement de démonstration' : 'Votre restaurant'}</Text><Text style={{ color: colors.muted, marginTop: 8 }}>Les plats, promotions, événements et jeux présentés ici sont propres à cet établissement.</Text></Glass><Button title="Voir les plats" onPress={() => tab('menu')} /><Button title="Promotions, événements et jeux" variant="secondary" onPress={() => go('discover')} style={{ marginTop: 10 }} /><SectionTitle title="La carte" />{dishes.filter(dish => dish.restaurantId === selected.id).map(dish => <FoodCard key={dish.id} dish={dish} onPress={() => go('detail', { id: dish.id })} onAdd={() => addToCart(dish.id)} />)}</Page>;
   return (
     <Page
-      title={`Bonjour ${data.user?.name?.split(" ")[0] || "étudiant"} 👋`}
-      subtitle="Qu'est-ce qui vous ferait plaisir aujourd'hui ?"
+      title={selected.name}
+      subtitle={`${selected.location} · ${selected.hours}`}
+      onBack={() => tab('home')}
     >
-      <RestaurantFilter />
       <LinearGradient
         colors={["#4D3920", "#26231D", "#171A18"]}
         style={{
@@ -839,7 +860,7 @@ function Home() {
         onAction={() => tab("menu")}
       />
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {dishes.filter(dish => data.restaurantFilter === 'all' || dish.restaurantId === data.restaurantFilter).slice(0, 4).map((dish) => (
+        {dishes.filter(dish => dish.restaurantId === data.restaurantFilter).slice(0, 4).map((dish) => (
           <FoodCard
             key={dish.id}
             compact
@@ -897,12 +918,14 @@ function Home() {
 }
 
 function DiscoverScreen({ params }) {
-  const { back, go, data } = useApp();
+  const { back, go, data, tab } = useApp();
+  if (!restaurants.some(item => item.id === data.restaurantFilter)) return <Page title="Choisir un restaurant"><Button title="Voir les restaurants" onPress={() => tab('home')} /></Page>;
   return <Discover back={back} go={go} initialTab={params?.tab} restaurantFilter={data.restaurantFilter} />;
 }
 
 function Menu({ params = {} }) {
-  const { go, addToCart, data } = useApp();
+  const { go, addToCart, data, tab } = useApp();
+  const selected = restaurants.find(item => item.id === data.restaurantFilter);
   const [category, setCategory] = useState("Tout");
   const [query, setQuery] = useState("");
   const [availableOnly, setAvailableOnly] = useState(false);
@@ -910,7 +933,7 @@ function Menu({ params = {} }) {
   const normalizedQuery = query.trim().toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const matches = dishes.filter((dish) => {
     const content = `${dish.name} ${dish.description}`.toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return (data.restaurantFilter === 'all' || dish.restaurantId === data.restaurantFilter) && (!availableOnly || dish.available !== false) && content.includes(normalizedQuery);
+    return dish.restaurantId === data.restaurantFilter && (!availableOnly || dish.available !== false) && content.includes(normalizedQuery);
   });
   const filtered = matches.filter((dish) => category === "Tout" || dish.category === category);
   const sections = (category === "Tout" ? categories.slice(1) : [category])
@@ -923,9 +946,10 @@ function Menu({ params = {} }) {
         ),
     }))
     .filter((section) => section.items.length);
+  if (!selected) return <Page title="Choisir un restaurant" subtitle="Sélectionnez un établissement avant de consulter ses plats."><Button title="Voir les restaurants" onPress={() => tab('home')} /></Page>;
   return (
-    <Page title="La carte" subtitle="Plats, grillades et douceurs à découvrir.">
-      <RestaurantFilter />
+    <Page title={`La carte · ${selected.name}`} subtitle={`${selected.location} · ${selected.hours}`}>
+      <Button title="Changer de restaurant" variant="secondary" onPress={() => tab('home')} style={{ marginBottom: 14 }} />
       <Field
         value={query}
         onChangeText={setQuery}
@@ -1933,7 +1957,10 @@ function Report({ params }) {
 
 function Games() {
   const { data, go, back } = useApp();
-  const available = data.lastSpin !== new Date().toDateString();
+  const restaurantId = data.restaurantFilter;
+  const lastSpin = typeof data.lastSpin === 'object' ? data.lastSpin?.[restaurantId] : restaurantId === 'zeduc' ? data.lastSpin : null;
+  const available = lastSpin !== new Date().toDateString();
+  if (restaurantId !== 'zeduc') return <Page title="Jeux du restaurant" subtitle={getRestaurant(restaurantId).name} onBack={back}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Aucun jeu publié pour ce restaurant.</Text></Glass></Page>;
   return (
     <Page
       title="Jouez, gagnez"
@@ -1997,10 +2024,12 @@ function Games() {
 
 function Wheel() {
   const { data, setData, back } = useApp();
+  const restaurantId = data.restaurantFilter;
   const [result, setResult] = useState(null);
   const [spinning, setSpinning] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
-  const available = data.lastSpin !== new Date().toDateString();
+  const lastSpin = typeof data.lastSpin === 'object' ? data.lastSpin?.[restaurantId] : restaurantId === 'zeduc' ? data.lastSpin : null;
+  const available = lastSpin !== new Date().toDateString();
   const rewards = [10, 20, 25, 30, 50, 75];
   const spin = () => {
     if (!available || spinning) return;
@@ -2020,7 +2049,7 @@ function Wheel() {
       setData((current) => ({
         ...current,
         points: current.points + prize,
-        lastSpin: new Date().toDateString(),
+        lastSpin: { ...(typeof current.lastSpin === 'object' && current.lastSpin ? current.lastSpin : { zeduc: current.lastSpin }), [restaurantId]: new Date().toDateString() },
       }));
     });
   };
@@ -2034,6 +2063,7 @@ function Wheel() {
       },
     ],
   };
+  if (restaurantId !== 'zeduc') return <Page title="Jeux du restaurant" subtitle={getRestaurant(restaurantId).name} onBack={back}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>La roue n’est pas publiée pour ce restaurant.</Text></Glass></Page>;
   return (
     <Page
       title="Roue de la chance"

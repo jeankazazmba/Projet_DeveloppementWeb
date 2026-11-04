@@ -10,6 +10,7 @@ import { categories, categoryLabels, dishes, money } from "./catalog";
 import { claimStages, employeeWeeks, initialEmployeeData, orderStages, topEmployeeDishes } from "./employeeData";
 import { Button, colors, Field, Glass, Icon, Page, Pill, SectionTitle, styles } from "./ui";
 import { getRestaurant, restaurants } from './restaurants';
+import { remoteApiUrl, staffRequest } from './remoteCatalog';
 const STORAGE_KEY = "mon-miam-miam-employee-v1";
 const EMPLOYEE = "MON MIAM MIAM · EMPLOYÉ";
 const tabs = [["orders", "Commandes", "receipt-outline"], ["menu", "Menu", "restaurant-outline"], ["claims", "Réclamations", "chatbubble-ellipses-outline"], ["stats", "Stats", "stats-chart-outline"], ["profile", "Profil", "person-outline"]];
@@ -556,9 +557,11 @@ function StatsScreen() {
 function ProfileScreen({
   exit,
   restaurant,
-  onChangeRestaurant
+  onChangeRestaurant,
+  connected = false,
+  employeeName = 'Marie T.'
 }) {
-  return <Page eyebrow={EMPLOYEE} title="Mon espace" subtitle="Service employé · mode démonstration."><Glass style={{
+  return <Page eyebrow={EMPLOYEE} title="Mon espace" subtitle={connected ? 'Compte employé connecté.' : 'Service employé · mode démonstration.'}><Glass style={{
       padding: 19
     }}><View style={{
         flexDirection: "row",
@@ -574,28 +577,34 @@ function ProfileScreen({
         }}><Text style={{
             color: colors.goldBright,
             fontWeight: "900"
-          }}>MT</Text></View><View><Text style={{
+          }}>{employeeName.slice(0, 2).toUpperCase()}</Text></View><View><Text style={{
             color: colors.text,
             fontSize: 18,
             fontWeight: "900"
-          }}>Marie T.</Text><Text style={{
+          }}>{employeeName}</Text><Text style={{
             color: colors.muted
           }}>Employée · Service du midi</Text></View></View><Text style={{
         color: colors.muted,
         lineHeight: 21,
         marginTop: 19
-      }}>Restaurant de travail : {restaurant.name}. Les commandes, disponibilités du menu et réponses sont enregistrées uniquement sur cet appareil. L’authentification du personnel et la synchronisation attendent l’API commune.</Text></Glass><Button title="Changer de restaurant" variant="secondary" icon="restaurant-outline" onPress={onChangeRestaurant} style={{ marginTop: 18 }} /><Button title="Revenir à l’espace étudiant" variant="secondary" icon="swap-horizontal-outline" onPress={exit} style={{
+      }}>Restaurant de travail : {restaurant.name}. {connected ? 'Le menu partagé est chargé depuis l’API. Commandes et réclamations mobiles attendent leur raccordement.' : 'Les commandes, disponibilités du menu et réponses sont enregistrées uniquement sur cet appareil.'}</Text></Glass><Button title="Changer de restaurant" variant="secondary" icon="restaurant-outline" onPress={onChangeRestaurant} style={{ marginTop: 18 }} /><Button title={connected ? 'Se déconnecter' : 'Revenir à l’espace étudiant'} variant="secondary" icon="swap-horizontal-outline" onPress={exit} style={{
       marginTop: 18
     }} /></Page>;
 }
-function RestaurantScreen({ select }) {
-  return <Page eyebrow={EMPLOYEE} title="Restaurant de travail" subtitle="Choisissez l’établissement pour cette session de démonstration.">{restaurants.map(item => <Glass key={item.id} style={{ padding: 18, marginBottom: 12 }} onPress={() => select(item.id)}><Text style={{ color: colors.text, fontSize: 17, fontWeight: '800' }}>{item.name}</Text><Text style={{ color: colors.muted, marginTop: 5 }}>{item.location}</Text><Text style={{ color: colors.gold, marginTop: 8, fontSize: 12 }}>{item.example ? 'Établissement exemple · données fictives' : 'Restaurant actuel · données de maquette'}</Text></Glass>)}<Text style={{ color: colors.muted, lineHeight: 20 }}>Les comptes réels limiteront cette liste aux établissements autorisés par l’API.</Text></Page>;
+function RestaurantScreen({ select, items = restaurants, connected = false }) {
+  return <Page eyebrow={EMPLOYEE} title="Restaurant de travail" subtitle={connected ? 'Établissements attribués à votre compte.' : 'Choisissez l’établissement pour cette session de démonstration.'}>{items.map(item => <Glass key={item.id} style={{ padding: 18, marginBottom: 12 }} onPress={() => select(item.id)}><Text style={{ color: colors.text, fontSize: 17, fontWeight: '800' }}>{item.name}</Text><Text style={{ color: colors.muted, marginTop: 5 }}>{item.location}</Text><Text style={{ color: colors.gold, marginTop: 8, fontSize: 12 }}>{connected ? 'Accès vérifié par le serveur' : item.example ? 'Établissement exemple · données fictives' : 'Restaurant actuel · données de maquette'}</Text></Glass>)}{!connected && <Text style={{ color: colors.muted, lineHeight: 20 }}>Les comptes réels limiteront cette liste aux établissements autorisés par l’API.</Text>}</Page>;
 }
 
 export default function EmployeeApp({
   onExit
 }) {
-  const [restaurantId, setRestaurantId] = useState('zeduc');
+  const [restaurantId, setRestaurantId] = useState(remoteApiUrl ? null : 'zeduc');
+  const [auth, setAuth] = useState(null);
+  const [assigned, setAssigned] = useState([]);
+  const [staffContent, setStaffContent] = useState([]);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState('');
   const [data, setData] = useState(initialEmployeeData);
   const [ready, setReady] = useState(false);
   const [screen, setScreen] = useState("restaurant");
@@ -603,8 +612,9 @@ export default function EmployeeApp({
   const [searchRequested, setSearchRequested] = useState(false);
   const blurTarget = useRef(null);
   const storeKey = restaurantId === 'zeduc' ? STORAGE_KEY : `${STORAGE_KEY}-${restaurantId}`;
-  const baseData = restaurantId === 'zeduc' ? initialEmployeeData : { orders: [], claims: [], menu: dishes.filter(dish => dish.restaurantId === restaurantId).map(dish => ({ id: dish.id, available: true, featured: false })) };
+  const baseData = !remoteApiUrl && restaurantId === 'zeduc' ? initialEmployeeData : { orders: [], claims: [], menu: dishes.filter(dish => dish.restaurantId === restaurantId).map(dish => ({ id: dish.id, available: true, featured: false })) };
   useEffect(() => {
+    if (remoteApiUrl) { setData(baseData); setReady(true); return; }
     let active = true;
     AsyncStorage.getItem(storeKey).then(raw => {
       if (active) setData(raw ? { ...baseData, ...JSON.parse(raw) } : baseData);
@@ -612,8 +622,14 @@ export default function EmployeeApp({
     return () => { active = false; };
   }, [storeKey]);
   useEffect(() => {
-    if (ready) AsyncStorage.setItem(storeKey, JSON.stringify(data)).catch(() => {});
+    if (ready && !remoteApiUrl) AsyncStorage.setItem(storeKey, JSON.stringify(data)).catch(() => {});
   }, [data, ready, storeKey]);
+  useEffect(() => {
+    if (!remoteApiUrl || !auth || !restaurantId) return;
+    let active = true;
+    staffRequest(`/staff/restaurants/${encodeURIComponent(restaurantId)}/content`, auth.token).then(items => { if (active) setStaffContent(items); }).catch(error => { if (active) setAuthError(error.message); });
+    return () => { active = false; };
+  }, [auth, restaurantId]);
   if (!ready) return <View style={{
     flex: 1
   }} onLayout={() => SplashScreen.hideAsync().catch(() => {})}><StatusBar style="light" /><View style={{
@@ -625,6 +641,22 @@ export default function EmployeeApp({
         width: 105,
         height: 105
       }} resizeMode="contain" /></View></View>;
+  const loginEmployee = async () => {
+    setAuthError('');
+    try {
+      const result = await staffRequest('/login', null, { method: 'POST', body: JSON.stringify({ email, password }) });
+      const items = (await staffRequest('/staff/restaurants', result.token)).filter(item => item.pivot?.role === 'employee');
+      if (!items.length) { await staffRequest('/logout', result.token, { method: 'POST' }); throw new Error('Ce compte n’a aucune affectation employé.'); }
+      setAuth(result); setAssigned(items); setPassword('');
+      if (items.length === 1) { setRestaurantId(items[0].id); setScreen('orders'); }
+      else { setRestaurantId(null); setScreen('restaurant'); }
+    } catch (error) { setAuthError(error.message); }
+  };
+  const exitEmployee = async () => {
+    if (auth) { try { await staffRequest('/logout', auth.token, { method: 'POST' }); } catch { /* Le jeton n’est plus conservé localement. */ } }
+    setAuth(null); onExit();
+  };
+  if (remoteApiUrl && !auth) return <Page eyebrow={EMPLOYEE} title="Connexion employé" subtitle="Connectez-vous pour voir uniquement vos restaurants."><Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" /><Field label="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry /><Button title="Se connecter" onPress={loginEmployee} />{authError ? <Text style={{ color: '#ffb3a8', marginTop: 12 }}>{authError}</Text> : null}<Button title="Retour à l’espace étudiant" variant="secondary" onPress={onExit} style={{ marginTop: 20 }} /></Page>;
   const advance = id => setData(current => ({
     ...current,
     orders: current.orders.map(order => order.id === id && nextStatus(order) ? {
@@ -649,7 +681,7 @@ export default function EmployeeApp({
     setSearchRequested(false);
   };
   const selectRestaurant = id => {
-    if (!restaurants.some(item => item.id === id)) return;
+    if (!(remoteApiUrl ? assigned : restaurants).some(item => item.id === id)) return;
     if (id === restaurantId) { setScreen('orders'); return; }
     setReady(false);
     setRestaurantId(id);
@@ -662,28 +694,28 @@ export default function EmployeeApp({
   return <View style={{
     flex: 1,
     backgroundColor: colors.bg
-  }} onLayout={() => SplashScreen.hideAsync().catch(() => {})}><StatusBar style="light" /><AppTopBar blurTarget={blurTarget} unreadCount={pendingClaims} restaurantName={getRestaurant(restaurantId).name} onRestaurant={() => setScreen('restaurant')} onHome={() => selectTab("orders")} searchLabel="Rechercher dans le service" onSearch={() => {
+  }} onLayout={() => SplashScreen.hideAsync().catch(() => {})}><StatusBar style="light" /><AppTopBar blurTarget={blurTarget} unreadCount={pendingClaims} restaurantName={(remoteApiUrl ? assigned.find(item => item.id === restaurantId) : getRestaurant(restaurantId))?.name || 'Restaurant'} onRestaurant={() => setScreen('restaurant')} onHome={() => selectTab("orders")} searchLabel="Rechercher dans le service" onSearch={() => {
       setScreen("orders");
       setSearchRequested(true);
     }} onNotifications={() => selectTab("claims")} /><BlurTargetView ref={blurTarget} collapsable={false} style={{
       flex: 1
     }}>
-    {screen === 'restaurant' && <RestaurantScreen select={selectRestaurant} />}
+    {screen === 'restaurant' && <RestaurantScreen select={selectRestaurant} items={remoteApiUrl ? assigned : restaurants} connected={Boolean(remoteApiUrl)} />}
     {screen === "orders" && <OrdersScreen key={`orders-${searchRequested}`} data={data} openOrder={id => {
         setSelectedId(id);
         setScreen("order-detail");
       }} advance={advance} searchRequested={searchRequested} />}
     {screen === "order-detail" && <OrderDetailScreen order={selectedOrder} back={back} advance={advance} />}
-    {screen === "menu" && <MenuScreen data={data} save={menu => setData(current => ({
+    {screen === "menu" && (remoteApiUrl ? <Page eyebrow={EMPLOYEE} title="Menu partagé" subtitle={(assigned.find(item => item.id === restaurantId))?.name || 'Restaurant'}>{staffContent.filter(item => item.kind === 'dish').map(item => <Glass key={item.id} style={{ padding: 16, marginBottom: 12 }}><Text style={{ color: colors.text, fontWeight: '800', fontSize: 17 }}>{item.title}</Text><Text style={{ color: colors.muted, marginTop: 6 }}>{item.description}</Text><Text style={{ color: colors.gold, marginTop: 6 }}>{item.price_cdf ? money(item.price_cdf) : ''} · {item.is_published ? 'Publié' : 'Brouillon'}</Text></Glass>)}{!staffContent.some(item => item.kind === 'dish') && <Text style={{ color: colors.muted }}>Aucun plat pour cet établissement.</Text>}</Page> : <MenuScreen data={data} save={menu => setData(current => ({
         ...current,
         menu
-      }))} searchRequested={searchRequested} restaurantId={restaurantId} />}
+      }))} searchRequested={searchRequested} restaurantId={restaurantId} />)}
     {screen === "claims" && <ClaimsScreen data={data} openClaim={id => {
         setSelectedId(id);
         setScreen("claim-detail");
       }} />}
     {screen === "claim-detail" && <ClaimDetailScreen claim={selectedClaim} back={back} update={updateClaim} />}
-    {screen === "stats" && (restaurantId === 'zeduc' ? <StatsScreen /> : <Page eyebrow={EMPLOYEE} title="Statistiques" subtitle={getRestaurant(restaurantId).name}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Aucune statistique publiée pour cet établissement exemple. Les données arriveront avec l’API.</Text></Glass></Page>)}
-    {screen === "profile" && <ProfileScreen exit={onExit} restaurant={getRestaurant(restaurantId)} onChangeRestaurant={() => setScreen('restaurant')} />}
+    {screen === "stats" && (!remoteApiUrl && restaurantId === 'zeduc' ? <StatsScreen /> : <Page eyebrow={EMPLOYEE} title="Statistiques" subtitle={(remoteApiUrl ? assigned.find(item => item.id === restaurantId) : getRestaurant(restaurantId))?.name}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Les statistiques de cet établissement seront disponibles avec l’API des commandes.</Text></Glass></Page>)}
+    {screen === "profile" && <ProfileScreen exit={exitEmployee} restaurant={(remoteApiUrl ? assigned.find(item => item.id === restaurantId) : getRestaurant(restaurantId)) || { name: 'Restaurant' }} connected={Boolean(remoteApiUrl)} employeeName={auth?.user?.name || 'Marie T.'} onChangeRestaurant={() => setScreen('restaurant')} />}
   </BlurTargetView><TabBar active={screen} onSelect={selectTab} blurTarget={blurTarget} /></View>;
 }
