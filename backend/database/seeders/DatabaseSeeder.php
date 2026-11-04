@@ -29,7 +29,16 @@ class DatabaseSeeder extends Seeder
             ['kind' => 'dish', 'title' => 'Poisson braisé', 'description' => 'Poisson grillé et bobolo.', 'price_cdf' => 4500, 'details' => ['category' => 'Grillades']],
             ['kind' => 'promotion', 'title' => 'Offre Duo Grillades', 'description' => 'Grillades à partager et boissons.', 'details' => ['badge' => '−15 %', 'terms' => 'Offre indicative à confirmer.']],
             ['kind' => 'event', 'title' => 'Tournoi de billard ZeDuc Cup', 'description' => 'Compétition amicale.', 'details' => ['place' => 'Espace Billard & Lounge', 'day' => '07', 'month' => 'NOV', 'time' => '16h00']],
-            ['kind' => 'game', 'title' => 'Roue gourmande', 'description' => 'Jeu informatif. Récompenses réelles à confirmer.'],
+            ['kind' => 'game', 'title' => 'Roue gourmande', 'description' => 'Une tentative quotidienne et des points de démonstration.', 'details' => ['type' => 'wheel']],
+            ['kind' => 'game', 'title' => 'Quiz gourmand', 'description' => 'Trois questions sur le restaurant.', 'details' => [
+                'type' => 'quiz',
+                'questions' => [
+                    ['question' => 'Quel plat associe poulet et plantains ?', 'options' => ['Poulet DG', 'Bissap', 'Beignets'], 'answer' => 0],
+                    ['question' => 'Quel jeu est proposé ?', 'options' => ['Roue gourmande', 'Bowling', 'Course automobile'], 'answer' => 0],
+                    ['question' => 'Quel service propose l’application ?', 'options' => ['Commander un repas', 'Réserver un vol', 'Acheter un billet de train'], 'answer' => 0],
+                ],
+            ]],
+            ['kind' => 'game', 'title' => 'Paires gourmandes', 'description' => 'Retrouvez les paires de plats.', 'details' => ['type' => 'memory', 'pairs' => ['Poulet DG', 'Ndolé', 'Poisson braisé']]],
         ] as $item) {
             $zeduc->contents()->updateOrCreate(['kind' => $item['kind'], 'title' => $item['title']], [...$item, 'is_published' => true]);
         }

@@ -3,6 +3,7 @@ import { Alert, Image, Pressable, Text, View } from "react-native";
 import { Button, colors, Glass, Icon, Page, Pill, SectionTitle } from "./ui";
 import { getRestaurant } from './restaurants';
 import { getRemoteContent } from './remoteCatalog';
+import { getGamesForRestaurant, playable } from './games';
 
 // Informational content adapted from the public website's Figma export.
 // Publishing dates and availability will come from the backend later.
@@ -32,7 +33,7 @@ export default function Discover({ back, go, initialTab = "promotions", restaura
   const [tab, setTab] = useState(tabs.some(item => item.id === initialTab) ? initialTab : "promotions");
   const remotePromotions = getRemoteContent(restaurantFilter, 'promotion');
   const remoteEvents = getRemoteContent(restaurantFilter, 'event');
-  const remoteGames = getRemoteContent(restaurantFilter, 'game');
+  const restaurantGames = getGamesForRestaurant(restaurantFilter);
   const visiblePromotions = remotePromotions === null ? promotions.filter(item => item.restaurantId === restaurantFilter) : remotePromotions.map(item => ({ id: item.id, title: item.title, badge: item.details?.badge || 'Offre', description: item.description, terms: item.details?.terms || 'Conditions à confirmer auprès du restaurant.', image: item.image_url ? { uri: item.image_url } : require('../assets/images/20-Promotions-layer-00024.jpg'), restaurantId: item.restaurant_id }));
   const visibleEvents = remoteEvents === null ? events.filter(item => item.restaurantId === restaurantFilter) : remoteEvents.map(item => ({ id: item.id, title: item.title, place: item.details?.place || getRestaurant(restaurantFilter).location, description: item.description, price: item.details?.price || '', icon: 'calendar-outline', restaurantId: item.restaurant_id }));
   return (
@@ -79,20 +80,9 @@ export default function Discover({ back, go, initialTab = "promotions", restaura
         {!visibleEvents.length && <Text style={{ color: colors.muted }}>Aucun événement publié pour ce restaurant.</Text>}
       </>}
       {tab === "games" && <>
-        {remoteGames !== null ? (remoteGames.length ? remoteGames.map(game => <Glass key={game.id} style={{ padding: 18, marginBottom: 12 }}><Icon name="gift-outline" size={32} /><Text style={{ color: colors.text, fontSize: 18, fontWeight: '800', marginTop: 9 }}>{game.title}</Text><Text style={{ color: colors.muted, marginTop: 7 }}>{game.description}</Text></Glass>) : <Text style={{ color: colors.muted }}>Aucun jeu publié pour ce restaurant.</Text>) : restaurantFilter !== 'zeduc' ? <Text style={{ color: colors.muted }}>Aucun jeu publié pour ce restaurant.</Text> : <>
-        <SectionTitle title="Jouez pour des points MIAM" />
-        <Glass style={{ padding: 18, marginBottom: 12 }}>
-          <Icon name="gift-outline" size={32} />
-          <Text style={{ color: colors.text, fontSize: 18, fontWeight: "800", marginTop: 11 }}>La roue gourmande</Text>
-          <Text style={{ color: colors.muted, lineHeight: 20, marginVertical: 10 }}>Une tentative quotidienne dans la démonstration mobile pour gagner des points locaux.</Text>
-          <Button title="Accéder à la roue" onPress={() => go("games")} />
-        </Glass>
-        <Glass style={{ padding: 18 }}>
-          <Icon name="help-circle-outline" size={31} />
-          <Text style={{ color: colors.text, fontSize: 18, fontWeight: "800", marginTop: 11 }}>Quiz hebdomadaire</Text>
-          <Text style={{ color: colors.muted, lineHeight: 20, marginTop: 9 }}>Présenté sur le site public. Les questions et récompenses seront affichées après publication par le restaurant.</Text>
-        </Glass>
-        </>}
+        <SectionTitle title={`Jeux de ${getRestaurant(restaurantFilter).name}`} />
+        {restaurantGames.map(game => <Glass key={game.id} style={{ padding: 18, marginBottom: 12 }}><Icon name={game.type === 'quiz' ? 'help-circle-outline' : game.type === 'memory' ? 'apps-outline' : 'gift-outline'} size={31} /><Text style={{ color: colors.text, fontSize: 18, fontWeight: '800', marginTop: 11 }}>{game.title}</Text><Text style={{ color: colors.muted, lineHeight: 20, marginVertical: 9 }}>{game.description}</Text>{playable(game) ? <Button title="Voir le jeu" onPress={() => go('games')} /> : <Text style={{ color: colors.muted }}>Informations uniquement</Text>}</Glass>)}
+        {!restaurantGames.length && <Text style={{ color: colors.muted }}>Aucun jeu publié pour ce restaurant.</Text>}
       </>}
     </Page>
   );

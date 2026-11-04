@@ -3,7 +3,11 @@ import { getPublicRestaurants } from './restaurants.js'
 
 export const demoCatalog = () => ({
   restaurants: getPublicRestaurants(), dishes: demoDishes, offers: demoOffers, events: demoEvents,
-  games: [{ id: 'demo-wheel', restaurantId: 'zeduc', title: 'Roue gourmande', description: 'Démonstration disponible dans l’application étudiante.' }],
+  games: [
+    { id: 'demo-wheel', restaurantId: 'zeduc', title: 'Roue gourmande', description: 'Une tentative quotidienne dans l’application étudiante.' },
+    { id: 'demo-quiz', restaurantId: 'zeduc', title: 'Quiz gourmand', description: 'Trois questions sur le restaurant.' },
+    { id: 'demo-memory', restaurantId: 'zeduc', title: 'Paires gourmandes', description: 'Retrouvez les paires de plats.' },
+  ],
   connected: false,
 })
 

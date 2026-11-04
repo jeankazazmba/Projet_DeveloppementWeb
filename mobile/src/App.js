@@ -31,6 +31,7 @@ import {
 import { categories, categoryLabels, dishes, findDish, money } from "./catalog";
 import { getRestaurant, restaurants } from "./restaurants";
 import { loadRemoteCatalog } from './remoteCatalog';
+import { getGamesForRestaurant, playable } from './games';
 import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
 import FloatingCart from "./FloatingCart";
@@ -72,6 +73,7 @@ const initialData = {
   points: 120,
   referralUsed: false,
   lastSpin: null,
+  gameResults: {},
 };
 const tabNames = ["home", "restaurant", "menu", "orders", "loyalty", "profile"];
 const tabs = [
@@ -403,6 +405,8 @@ function Router({ onOpenEmployee }) {
     complaints: Complaints,
     report: Report,
     games: Games,
+    quiz: QuizGame,
+    memory: MemoryGame,
     discover: DiscoverScreen,
     wheel: Wheel,
     leaderboard: Leaderboard,
@@ -892,7 +896,7 @@ function RestaurantHome() {
               Jouez, gagnez
             </Text>
             <Text style={{ color: colors.muted, marginTop: 4 }}>
-              Tournez la roue et gagnez des points.
+              Explorez la roue, le quiz et les paires gourmandes.
             </Text>
           </View>
           <Icon name="gift-outline" size={28} />
@@ -1958,73 +1962,101 @@ function Report({ params }) {
 function Games() {
   const { data, go, back } = useApp();
   const restaurantId = data.restaurantFilter;
+  const restaurant = restaurants.find(item => item.id === restaurantId);
+  const games = getGamesForRestaurant(restaurantId);
   const lastSpin = typeof data.lastSpin === 'object' ? data.lastSpin?.[restaurantId] : restaurantId === 'zeduc' ? data.lastSpin : null;
   const available = lastSpin !== new Date().toDateString();
-  if (restaurantId !== 'zeduc') return <Page title="Jeux du restaurant" subtitle={getRestaurant(restaurantId).name} onBack={back}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Aucun jeu publié pour ce restaurant.</Text></Glass></Page>;
-  return (
-    <Page
-      title="Jouez, gagnez"
-      subtitle="Des jeux et avantages pour les étudiants."
-      onBack={back}
-    >
-      <LinearGradient
-        colors={["#53401F", "#24231E", "#161817"]}
-        style={{
-          padding: 23,
-          borderRadius: 23,
-          borderWidth: 1,
-          borderColor: "#8F7652",
-        }}
-      >
-        <Icon name="gift-outline" size={36} />
-        <Text
-          style={{
-            color: colors.text,
-            fontSize: 25,
-            fontWeight: "900",
-            marginTop: 15,
-          }}
-        >
-          La roue de la chance
-        </Text>
-        <Text
-          style={{ color: colors.muted, lineHeight: 21, marginVertical: 12 }}
-        >
-          Une tentative par jour pour gagner des points de fidélité dans la
-          démo.
-        </Text>
-        <Button
-          title={available ? "Tenter ma chance" : "Revenir demain"}
-          onPress={() => go("wheel")}
-          disabled={!available}
-        />
-      </LinearGradient>
-      <SectionTitle title="Vos avantages" />
-      <Glass style={{ padding: 17 }}>
-        <InfoRow
-          icon="star-outline"
-          title={`${data.points} points disponibles`}
-          body="Utilisables lors de votre prochaine commande démo."
-        />
-        <InfoRow
-          icon="trophy-outline"
-          title="Classement étudiant"
-          body="Découvrez le tableau des meilleurs étudiants."
-        />
-      </Glass>
-      <Button
-        title="Voir le classement"
-        variant="secondary"
-        onPress={() => go("leaderboard")}
-        style={{ marginTop: 16 }}
-      />
-    </Page>
-  );
+  if (!restaurant) return <Page title="Choisir un restaurant" onBack={back}><Button title="Voir les restaurants" onPress={() => go('home')} /></Page>;
+  return <Page title={`Jeux · ${restaurant.name}`} subtitle="Les jeux de cet établissement uniquement." onBack={back}>
+    {games.map(game => {
+      const result = data.gameResults?.[restaurantId]?.[game.id];
+      const enabled = playable(game);
+      const icon = game.type === 'quiz' ? 'help-circle-outline' : game.type === 'memory' ? 'apps-outline' : 'gift-outline';
+      return <Glass key={game.id} style={{ padding: 20, marginBottom: 13 }}><Icon name={icon} size={32} /><Text style={{ color: colors.text, fontSize: 20, fontWeight: '900', marginTop: 10 }}>{game.title}</Text><Text style={{ color: colors.muted, marginVertical: 9, lineHeight: 20 }}>{game.description}</Text>{result && <Text style={{ color: colors.gold, marginBottom: 10 }}>Meilleur résultat : {game.type === 'memory' ? `${result.best} essais` : `${result.best}/${game.questions?.length || 0}`}</Text>}<Button title={game.type === 'wheel' && !available ? 'Revenir demain' : enabled ? 'Jouer' : 'Disponible prochainement'} disabled={!enabled || game.type === 'wheel' && !available} onPress={() => go(game.type === 'wheel' ? 'wheel' : game.type, { id: game.id })} /></Glass>;
+    })}
+    {!games.length && <Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Aucun jeu publié pour ce restaurant.</Text></Glass>}
+    <Text style={{ color: colors.muted, fontSize: 12, marginTop: 8 }}>Quiz et paires : scores conservés sur cet appareil, sans récompense réelle. La roue utilise des points de démonstration.</Text>
+  </Page>;
+}
+
+function QuizGame({ params }) {
+  const { data, setData, back } = useApp();
+  const restaurantId = data.restaurantFilter;
+  const game = getGamesForRestaurant(restaurantId).find(item => item.id === params?.id && item.type === 'quiz');
+  const [index, setIndex] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const answerLock = useRef(false);
+  useEffect(() => { answerLock.current = false; }, [index]);
+  const question = playable(game) ? game.questions[index] : null;
+  const answer = () => {
+    if (selected === null || !question || answerLock.current) return;
+    answerLock.current = true;
+    const nextScore = score + Number(selected === question.answer);
+    setScore(nextScore);
+    if (index + 1 === game.questions.length) {
+      setFinished(true);
+      setData(current => {
+        const scoped = current.gameResults?.[restaurantId] || {};
+        const previous = scoped[game.id];
+        return { ...current, gameResults: { ...current.gameResults, [restaurantId]: { ...scoped, [game.id]: { best: Math.max(previous?.best || 0, nextScore), plays: (previous?.plays || 0) + 1 } } } };
+      });
+    } else { setIndex(index + 1); setSelected(null); }
+  };
+  if (!question) return <Page title="Jeu indisponible" onBack={back}><Text style={{ color: colors.muted }}>Ce quiz n’est pas publié pour le restaurant sélectionné.</Text></Page>;
+  return <Page title={game.title} subtitle={`${getRestaurant(restaurantId).name} · question ${index + 1}/${game.questions.length}`} onBack={back}>
+    {finished ? <Glass style={{ padding: 22 }}><Icon name="trophy-outline" size={36} /><Text style={{ color: colors.text, fontSize: 24, fontWeight: '900', marginVertical: 12 }}>Score : {score}/{game.questions.length}</Text><Text style={{ color: colors.muted, marginBottom: 17 }}>Ce résultat est enregistré uniquement sur cet appareil.</Text><Button title="Rejouer" onPress={() => { answerLock.current = false; setIndex(0); setScore(0); setSelected(null); setFinished(false); }} /></Glass> : <Glass style={{ padding: 20 }}><Text style={{ color: colors.gold, fontWeight: '800' }}>QUIZ GOURMAND</Text><Text style={{ color: colors.text, fontSize: 20, fontWeight: '900', marginVertical: 17 }}>{question.question}</Text>{question.options.map((option, optionIndex) => <Pressable key={`${optionIndex}-${option}`} accessibilityRole="radio" accessibilityState={{ selected: selected === optionIndex }} onPress={() => setSelected(optionIndex)} style={{ padding: 15, marginBottom: 9, borderWidth: 1, borderColor: selected === optionIndex ? colors.gold : '#5b5648', borderRadius: 14, backgroundColor: selected === optionIndex ? '#4b3d28' : '#242623' }}><Text style={{ color: colors.text }}>{option}</Text></Pressable>)}<Button title={index + 1 === game.questions.length ? 'Voir mon score' : 'Valider et continuer'} disabled={selected === null} onPress={answer} style={{ marginTop: 9 }} /></Glass>}
+  </Page>;
+}
+
+const shufflePairs = pairs => [...pairs.flatMap((pair, index) => [{ id: `${index}-a`, pair }, { id: `${index}-b`, pair }])].sort(() => Math.random() - .5);
+
+function MemoryGame({ params }) {
+  const { data, setData, back } = useApp();
+  const restaurantId = data.restaurantFilter;
+  const game = getGamesForRestaurant(restaurantId).find(item => item.id === params?.id && item.type === 'memory');
+  const pairs = playable(game) ? game.pairs : [];
+  const [cards, setCards] = useState(() => shufflePairs(pairs));
+  const [opened, setOpened] = useState([]);
+  const [matched, setMatched] = useState([]);
+  const [moves, setMoves] = useState(0);
+  const saved = useRef(false);
+  useEffect(() => {
+    if (opened.length !== 2) return undefined;
+    const first = cards.find(card => card.id === opened[0]);
+    const second = cards.find(card => card.id === opened[1]);
+    if (first?.pair === second?.pair) { setMatched(current => [...current, first.pair]); setOpened([]); return undefined; }
+    const timer = setTimeout(() => setOpened([]), 850);
+    return () => clearTimeout(timer);
+  }, [opened, cards]);
+  useEffect(() => {
+    if (!pairs.length || matched.length !== pairs.length || saved.current) return;
+    saved.current = true;
+    setData(current => {
+      const scoped = current.gameResults?.[restaurantId] || {};
+      const previous = scoped[game.id];
+      return { ...current, gameResults: { ...current.gameResults, [restaurantId]: { ...scoped, [game.id]: { best: previous ? Math.min(previous.best, moves) : moves, plays: (previous?.plays || 0) + 1 } } } };
+    });
+  }, [matched.length, pairs.length, moves, restaurantId, game?.id, setData]);
+  const pick = card => {
+    if (opened.length >= 2 || opened.includes(card.id) || matched.includes(card.pair)) return;
+    const next = [...opened, card.id];
+    setOpened(next);
+    if (next.length === 2) setMoves(value => value + 1);
+  };
+  if (!pairs.length) return <Page title="Jeu indisponible" onBack={back}><Text style={{ color: colors.muted }}>Ce jeu de mémoire n’est pas publié pour le restaurant sélectionné.</Text></Page>;
+  const finished = matched.length === pairs.length;
+  return <Page title={game.title} subtitle={`${getRestaurant(restaurantId).name} · ${moves} essai${moves > 1 ? 's' : ''}`} onBack={back}>
+    <Glass style={{ padding: 19 }}><Text style={{ color: colors.muted, marginBottom: 15 }}>Retournez deux cartes pour retrouver les plats identiques.</Text><View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 9, justifyContent: 'center' }}>{cards.map(card => { const shown = opened.includes(card.id) || matched.includes(card.pair); return <Pressable key={card.id} accessibilityRole="button" accessibilityLabel={shown ? card.pair : 'Carte cachée'} onPress={() => pick(card)} style={{ width: '30%', minHeight: 82, justifyContent: 'center', alignItems: 'center', padding: 8, borderWidth: 1, borderColor: shown ? colors.gold : '#5b5648', borderRadius: 14, backgroundColor: shown ? '#4b3d28' : '#242623' }}><Text style={{ color: colors.text, textAlign: 'center', fontWeight: '800' }}>{shown ? card.pair : '✦'}</Text></Pressable>; })}</View>{finished && <><Text style={{ color: colors.gold, fontSize: 18, fontWeight: '900', marginVertical: 15 }}>Bravo ! Toutes les paires trouvées en {moves} essais.</Text><Button title="Rejouer" onPress={() => { saved.current = false; setCards(shufflePairs(pairs)); setOpened([]); setMatched([]); setMoves(0); }} /></>}</Glass>
+    <Text style={{ color: colors.muted, fontSize: 12, marginTop: 13 }}>Votre meilleur résultat reste sur cet appareil et ne donne pas de points réels.</Text>
+  </Page>;
 }
 
 function Wheel() {
   const { data, setData, back } = useApp();
   const restaurantId = data.restaurantFilter;
+  const wheelPublished = getGamesForRestaurant(restaurantId).some(game => game.type === 'wheel');
   const [result, setResult] = useState(null);
   const [spinning, setSpinning] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
@@ -2063,7 +2095,7 @@ function Wheel() {
       },
     ],
   };
-  if (restaurantId !== 'zeduc') return <Page title="Jeux du restaurant" subtitle={getRestaurant(restaurantId).name} onBack={back}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>La roue n’est pas publiée pour ce restaurant.</Text></Glass></Page>;
+  if (!wheelPublished) return <Page title="Jeux du restaurant" subtitle={getRestaurant(restaurantId).name} onBack={back}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>La roue n’est pas publiée pour ce restaurant.</Text></Glass></Page>;
   return (
     <Page
       title="Roue de la chance"
