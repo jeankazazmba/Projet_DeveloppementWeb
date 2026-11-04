@@ -3,12 +3,16 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import AdminApp from '../features/admin/AdminApp.jsx'
 import ManagerApp from '../features/manager/ManagerApp.jsx'
 import EmployeeApp from '../features/employee/EmployeeApp.jsx'
+import PlatformAdminApp from '../features/platform/PlatformAdminApp.jsx'
+import PublicSite from '../features/public/PublicSite.jsx'
+import { getRestaurants, restaurantScopeKey } from '../data/restaurants.js'
 
 const logo = '/assets/figma/dashboard-imgMonMiamMiamZeDucSpCe.png'
 const roles = [
-  { id: 'admin', name: 'Administrateur', short: 'AD', description: 'Piloter les commandes, le catalogue, les équipes et les rapports.', path: '/admin' },
-  { id: 'manager', name: 'Gérant', short: 'GE', description: 'Suivre le service, les livreurs, les tables et les stocks.', path: '/gerant' },
-  { id: 'employee', name: 'Employé', short: 'EM', description: 'Traiter les commandes, le menu et les réclamations.', path: '/employe' },
+  { id: 'admin', name: 'Admin restaurant', short: 'AD', description: 'Piloter les commandes, le catalogue, les équipes et les rapports de ZeDuc.', path: '/admin', restaurantIds: ['zeduc'] },
+  { id: 'manager', name: 'Gérant', short: 'GE', description: 'Suivre le service, les livreurs, les tables et les stocks.', path: '/gerant', restaurantIds: ['zeduc', 'partenaire-demo'] },
+  { id: 'employee', name: 'Employé', short: 'EM', description: 'Traiter les commandes, le menu et les réclamations.', path: '/employe', restaurantIds: ['zeduc', 'partenaire-demo'] },
+  { id: 'platform', name: 'Admin plateforme', short: 'AP', description: 'Gérer les établissements et leur mise en service.', path: '/plateforme', restaurantIds: [] },
 ]
 
 function Workspace({ role, onLeave }) {
@@ -20,6 +24,11 @@ function Workspace({ role, onLeave }) {
   return <div className="desktop-workspace">
     {role.id === 'admin' ? <AdminApp /> : <MemoryRouter key={role.id} initialEntries={[role.path]}>
       <Routes>
+        <Route path="/plateforme" element={<PlatformAdminApp />} />
+        <Route path="/" element={<PublicSite page="home" />} />
+        <Route path="/menu" element={<PublicSite page="menu" />} />
+        <Route path="/promotions" element={<PublicSite page="promotions" />} />
+        <Route path="/acces" element={<PublicSite page="access" />} />
         <Route path="/gerant/*" element={<ManagerApp />} />
         <Route path="/employe/*" element={<EmployeeApp />} />
         <Route path="*" element={<div className="desktop-route-return"><p>Cette page appartient au site web.</p><button onClick={onLeave}>Revenir aux espaces</button></div>} />
@@ -61,6 +70,18 @@ export default function DesktopApp() {
     setPassword('')
     setStage('roles')
   }
+  const enterDemo = () => {
+    if (role.restaurantIds.length > 1) setStage('restaurants')
+    else {
+      if (role.restaurantIds.length === 1) localStorage.setItem(restaurantScopeKey(role.id), role.restaurantIds[0])
+      setStage('workspace')
+    }
+  }
+  const selectRestaurant = id => {
+    if (!role.restaurantIds.includes(id)) return
+    localStorage.setItem(restaurantScopeKey(role.id), id)
+    setStage('workspace')
+  }
 
   if (stage === 'workspace' && role) return <Workspace role={role} onLeave={leave} />
 
@@ -86,6 +107,12 @@ export default function DesktopApp() {
           <span className="desktop-role-arrow" aria-hidden="true">→</span>
         </button>)}</div>
         <p className="desktop-note">L’espace étudiant est disponible dans l’application mobile.</p>
+      </section> : stage === 'restaurants' ? <section className="desktop-panel" aria-labelledby="desktop-title">
+        <button className="desktop-back" type="button" onClick={() => setStage('login')}>← Revenir à la connexion</button>
+        <span className="desktop-kicker">ESPACE {role.name.toUpperCase()} · DÉMO</span>
+        <h1 id="desktop-title">Choisissez un restaurant</h1>
+        <p>Ce profil de démonstration a accès aux établissements ci-dessous. Les comptes réels détermineront cette liste via l’API.</p>
+        <div className="desktop-roles">{getRestaurants().filter(item => role.restaurantIds.includes(item.id)).map(item => <button key={item.id} className="desktop-role" type="button" onClick={() => selectRestaurant(item.id)}><span className="desktop-role-icon" aria-hidden="true">⌂</span><span className="desktop-role-copy"><strong>{item.name}</strong><small>{item.location}{item.example ? ' · fiche exemple' : ''}</small></span><span className="desktop-role-arrow" aria-hidden="true">→</span></button>)}</div>
       </section> : <section className="desktop-panel desktop-login" aria-labelledby="desktop-title">
         <button className="desktop-back" type="button" onClick={leave}>← Choisir un autre rôle</button>
         <span className="desktop-role-icon desktop-login-icon" aria-hidden="true">{role.short}</span>
@@ -100,7 +127,7 @@ export default function DesktopApp() {
           <button className="desktop-primary" type="submit" disabled title="Connexion réelle en attente de l’API d’authentification">Se connecter</button>
         </form>
         <p className="desktop-auth-note" role="status">La connexion réelle sera activée avec l’API d’authentification. Aucun identifiant n’est encore vérifié.</p>
-        <button className="desktop-demo" type="button" onClick={() => setStage('workspace')}>Explorer la démo {role.name.toLowerCase()} <span aria-hidden="true">→</span></button>
+        <button className="desktop-demo" type="button" onClick={enterDemo}>Explorer la démo {role.name.toLowerCase()} <span aria-hidden="true">→</span></button>
       </section>}
       <footer className="desktop-gateway-footer">© Mon Miam Miam · Kinshasa, RDC <span>Version bureau · Mode démo</span></footer>
     </main>}

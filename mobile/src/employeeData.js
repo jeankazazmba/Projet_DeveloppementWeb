@@ -17,7 +17,7 @@ export const initialEmployeeData = {
     { id: "MM-1045", customer: "Paul N.", service: "Sur place", location: "Table 14", items: "Poulet DG, Bissap", amount: 4000, status: "Prête", createdAt: minutesAgo(18) },
     { id: "MM-1044", customer: "Sandra O.", service: "Livraison", location: "campus de Kinshasa", items: "Poisson braisé & bobolo", amount: 4500, status: "Prête", createdAt: minutesAgo(21) },
   ],
-  menu: dishes.map((dish) => ({
+  menu: dishes.filter(dish => dish.restaurantId === 'zeduc').map((dish) => ({
     id: dish.id,
     available: dish.available !== false,
     featured: dish.id === "public-poulet",

@@ -22,9 +22,15 @@ const profiles = [
   },
   {
     id: 'admin', number: '04', icon: 'admin', title: 'Administrateur',
-    subtitle: 'Piloter l’ensemble de la plateforme',
-    description: 'Ouvrez le back-office pour consulter les tableaux de bord et administrer les modules disponibles.',
+    subtitle: 'Administrer un restaurant',
+    description: 'Gérez le menu, l’équipe, les commandes et les rapports de votre établissement.',
     platform: 'Application web', state: 'Démo disponible', to: '/admin',
+  },
+  {
+    id: 'platform', number: '05', icon: 'admin', title: 'Admin plateforme',
+    subtitle: 'Superviser les établissements',
+    description: 'Créez les fiches des restaurants et consultez la vue globale de démonstration.',
+    platform: 'Application web', state: 'Démo disponible', to: '/plateforme',
   },
 ]
 
@@ -52,7 +58,7 @@ export default function AccessPortal() {
 
     <section className="public-container public-access-profiles" aria-label="Choix de l’espace utilisateur">
       {profiles.map(profile => <button type="button" key={profile.id} className={`public-profile-card ${selectedId === profile.id ? 'is-selected' : ''}`} onClick={() => setSelectedId(profile.id)} aria-pressed={selectedId === profile.id} aria-controls="public-profile-detail">
-        <span className="public-profile-card-top"><span className="public-profile-icon"><ProfileIcon name={profile.icon} /></span><span className="public-profile-number">{profile.number} / 04</span></span>
+        <span className="public-profile-card-top"><span className="public-profile-icon"><ProfileIcon name={profile.icon} /></span><span className="public-profile-number">{profile.number} / {String(profiles.length).padStart(2, '0')}</span></span>
         <strong>{profile.title}</strong><span className="public-profile-subtitle">{profile.subtitle}</span>
         <span className="public-profile-card-bottom"><span>{profile.platform}</span><span aria-hidden="true">→</span></span>
       </button>)}

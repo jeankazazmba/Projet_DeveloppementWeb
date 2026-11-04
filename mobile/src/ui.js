@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getRestaurant } from './restaurants';
 
 export const colors = {
   bg: "#0B0C0D",
@@ -235,7 +236,7 @@ export function FoodCard({ dish, onPress, onAdd, compact = false }) {
             accessibilityRole="button"
             accessibilityLabel={`Détails de ${dish.name}`}
           >
-            <Text style={styles.foodCategory}>{dish.category.toUpperCase()}</Text>
+            <Text style={styles.foodCategory}>{dish.category.toUpperCase()} · {getRestaurant(dish.restaurantId).name}{dish.example ? ' · EXEMPLE' : ''}</Text>
             <Text style={styles.foodName} numberOfLines={2}>{dish.name}</Text>
             {!compact && (
               <Text style={styles.foodDescription} numberOfLines={2}>

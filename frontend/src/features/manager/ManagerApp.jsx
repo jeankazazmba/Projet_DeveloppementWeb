@@ -6,6 +6,8 @@ import ManagerIcon from './ManagerIcon.jsx'
 import { ClaimsPage, DashboardPage, StatisticsPage, TeamPage } from './ManagerPages.jsx'
 import { MenuStockPage, TablesPage } from './ManagerOperations.jsx'
 import ManagerDeliveryMap from './ManagerDeliveryMap.jsx'
+import { RestaurantEmpty, RestaurantScopeControl } from '../shared/RestaurantScope.jsx'
+import { useRestaurantScope } from '../shared/useRestaurantScope.js'
 import './manager.css'
 import './manager-admin-theme.css'
 
@@ -68,15 +70,22 @@ function EmployeeDrawer({ employee, employees, onClose, onSave }) {
 }
 
 export default function ManagerApp() {
+  const scope = useRestaurantScope('manager')
+  return <ManagerWorkspace key={scope.restaurantId} {...scope} />
+}
+
+function ManagerWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRestaurants }) {
   const location = useLocation()
   const navigate = useNavigate()
   const pathname = location.pathname
   const page = pathname.startsWith('/gerant/equipe') ? 'team' : pathname.startsWith('/gerant/tables') ? 'tables' : pathname.startsWith('/gerant/livraisons') ? 'delivery' : pathname.startsWith('/gerant/menu') ? 'menu' : pathname.startsWith('/gerant/statistiques') ? 'statistics' : pathname.startsWith('/gerant/reclamations') ? 'claims' : 'dashboard'
-  const [employees, setEmployees] = useState(() => readSaved('mmm-manager-employees-v1', initialEmployees))
-  const [claims, setClaims] = useState(() => readSaved('mmm-manager-claims-v1', initialClaims))
-  const [orders] = useState(initialOrders)
-  const [tables, setTables] = useState(() => readSaved('mmm-manager-tables-v1', initialTables))
-  const [dishes, setDishes] = useState(() => readSaved('mmm-manager-dishes-v1', initialDishes))
+  const sample = restaurantId === 'zeduc'
+  const storagePrefix = sample ? 'mmm-manager' : `mmm-manager-${restaurantId}`
+  const [employees, setEmployees] = useState(() => readSaved(`${storagePrefix}-employees-v1`, sample ? initialEmployees : []))
+  const [claims, setClaims] = useState(() => readSaved(`${storagePrefix}-claims-v1`, sample ? initialClaims : []))
+  const [orders] = useState(sample ? initialOrders : [])
+  const [tables, setTables] = useState(() => readSaved(`${storagePrefix}-tables-v1`, sample ? initialTables : []))
+  const [dishes, setDishes] = useState(() => readSaved(`${storagePrefix}-dishes-v1`, sample ? initialDishes : []))
   const [query, setQuery] = useState('')
   const [editor, setEditor] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -86,10 +95,10 @@ export default function ManagerApp() {
   })
   const drawerOpen = pathname === '/gerant/equipe/nouveau' || editor !== null
   const selectedEmployee = editor && editor !== 'new' ? employees.find(item => item.id === editor) : null
-  useEffect(() => { localStorage.setItem('mmm-manager-employees-v1', JSON.stringify(employees)) }, [employees])
-  useEffect(() => { localStorage.setItem('mmm-manager-claims-v1', JSON.stringify(claims)) }, [claims])
-  useEffect(() => { localStorage.setItem('mmm-manager-tables-v1', JSON.stringify(tables)) }, [tables])
-  useEffect(() => { localStorage.setItem('mmm-manager-dishes-v1', JSON.stringify(dishes)) }, [dishes])
+  useEffect(() => { localStorage.setItem(`${storagePrefix}-employees-v1`, JSON.stringify(employees)) }, [employees, storagePrefix])
+  useEffect(() => { localStorage.setItem(`${storagePrefix}-claims-v1`, JSON.stringify(claims)) }, [claims, storagePrefix])
+  useEffect(() => { localStorage.setItem(`${storagePrefix}-tables-v1`, JSON.stringify(tables)) }, [tables, storagePrefix])
+  useEffect(() => { localStorage.setItem(`${storagePrefix}-dishes-v1`, JSON.stringify(dishes)) }, [dishes, storagePrefix])
   useEffect(() => { if (!notice) return; const timer = window.setTimeout(() => setNotice(''), 4500); return () => window.clearTimeout(timer) }, [notice])
   useEffect(() => { try { localStorage.setItem('mon-miam-miam-theme', theme) } catch { /* Le thème reste actif pendant cette visite. */ } }, [theme])
   useEffect(() => { document.title = `${navigation.find(item => item.key === page)?.label} · Mon Miam Miam` }, [page])
@@ -123,14 +132,14 @@ export default function ManagerApp() {
       <nav aria-label="Espace gérant" className="manager-nav">{navigation.map(item => <Link key={item.key} to={item.path} className={page === item.key ? 'active' : ''} aria-current={page === item.key ? 'page' : undefined} onClick={() => setSidebarOpen(false)}>{item.icon ? <img className="manager-nav-icon" src={item.icon} alt="" /> : <ManagerIcon name="delivery" />}<span>{item.label}</span>{item.key === 'claims' && openClaims > 0 && <b>{openClaims}</b>}</Link>)}</nav>
       <div className="manager-sidebar-profile"><span className="manager-avatar">GE</span><span><strong>Gérant</strong><small>Direction.ZeDuc-Sp@ce</small></span></div>
     </aside>
-    <div className="manager-shell"><header className="manager-topbar"><form onSubmit={event => { event.preventDefault(); if (page === 'statistics') go('/gerant') }} className="manager-global-search"><img src="/assets/figma/dashboard-imgIconSearch.svg" alt="" /><input value={query} onChange={event => setQuery(event.target.value)} aria-label="Rechercher" placeholder="Commande, employé, réclamation..." /></form><div className="manager-topbar-actions"><span className="manager-demo-chip" title="Données locales de démonstration">Démo</span><span className="manager-service-chip"><img src={liveDot} alt="" /> Service démo</span><button type="button" className="manager-theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button type="button" className="manager-icon-button manager-notification-button" onClick={() => go('/gerant/reclamations')} aria-label={`${openClaims} réclamations à valider`}><img src="/assets/figma/dashboard-imgIconBell.svg" alt="" />{openClaims > 0 && <b>{openClaims}</b>}</button><span className="manager-top-profile"><span className="manager-avatar">GE</span><span>Gérant</span></span></div></header>
+    <div className="manager-shell"><header className="manager-topbar"><form onSubmit={event => { event.preventDefault(); if (page === 'statistics') go('/gerant') }} className="manager-global-search"><img src="/assets/figma/dashboard-imgIconSearch.svg" alt="" /><input value={query} onChange={event => setQuery(event.target.value)} aria-label="Rechercher" placeholder="Commande, employé, réclamation..." /></form><RestaurantScopeControl restaurant={restaurant} restaurants={allowedRestaurants} onChange={setRestaurantId} /><div className="manager-topbar-actions"><span className="manager-demo-chip" title="Données locales de démonstration">Démo</span><span className="manager-service-chip"><img src={liveDot} alt="" /> Service démo</span><button type="button" className="manager-theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button type="button" className="manager-icon-button manager-notification-button" onClick={() => go('/gerant/reclamations')} aria-label={`${openClaims} réclamations à valider`}><img src="/assets/figma/dashboard-imgIconBell.svg" alt="" />{openClaims > 0 && <b>{openClaims}</b>}</button><span className="manager-top-profile"><span className="manager-avatar">GE</span><span>Gérant</span></span></div></header>
       <main id="manager-main" className="manager-main">
-        {page === 'dashboard' && <DashboardPage orders={orders} claims={claims} query={query} onNotice={setNotice} onNavigate={go} />}
+        {page === 'dashboard' && (sample ? <DashboardPage orders={orders} claims={claims} query={query} onNotice={setNotice} onNavigate={go} /> : <RestaurantEmpty restaurant={restaurant} topic="Supervision" />)}
         {page === 'team' && <TeamPage employees={employees} query={query} onAdd={() => go('/gerant/equipe/nouveau')} onEdit={employee => setEditor(employee.id)} />}
         {page === 'tables' && <TablesPage tables={tables} orders={orders} query={query} onSave={saveTable} />}
-        {page === 'delivery' && <ManagerDeliveryMap />}
+        {page === 'delivery' && (sample ? <ManagerDeliveryMap /> : <RestaurantEmpty restaurant={restaurant} topic="Suivi des livreurs" />)}
         {page === 'menu' && <MenuStockPage dishes={dishes} query={query} onUpdate={updateDish} />}
-        {page === 'statistics' && <StatisticsPage onNotice={setNotice} />}
+        {page === 'statistics' && (sample ? <StatisticsPage onNotice={setNotice} /> : <RestaurantEmpty restaurant={restaurant} topic="Statistiques" />)}
         {page === 'claims' && <ClaimsPage claims={claims} query={query} onDecide={decideClaim} />}
       </main>
       <footer className="manager-footer"><img src={logo} alt="" /><span>© Mon Miam Miam · ZeDuc-Sp@ce, Kinshasa, RDC · adresse exacte à confirmer</span><Link to="/">Site public</Link><span>Mode démo</span></footer>

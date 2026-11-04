@@ -1,3 +1,5 @@
+import { PRIMARY_RESTAURANT_ID } from '../../data/restaurants.js'
+
 const image = (screen, layer) => `/figma-public/${screen}/assets/layer-${String(layer).padStart(5, '0')}.svg`
 
 export const homeImage = layer => image('13-accueil--Public', layer)
@@ -14,7 +16,9 @@ export const dishes = [
   { id: 'beignets', name: 'Beignets-haricots chauds', description: 'Beignets dorés, haricots rouges et piment maison.', price: 500, category: 'Plats', rating: '4,9', image: menuImage(228) },
   { id: 'gingembre', name: 'Jus de gingembre frais et menthe', description: 'Gingembre pressé à froid et menthe fraîche.', price: 1000, category: 'Boissons', rating: '4,8', image: menuImage(253) },
   { id: 'bissap', name: 'Jus de bissap glacé à la vanille', description: 'Fleurs d’hibiscus, vanille et glaçons pilés.', price: 1000, category: 'Boissons', rating: '4,9', image: menuImage(279) },
-]
+  { id: 'demo-assiette', restaurantId: 'partenaire-demo', example: true, name: 'Assiette du partenaire (exemple)', description: 'Article fictif pour tester le parcours multi-restaurants.', price: 4500, category: 'Plats', image: menuImage(75) },
+  { id: 'demo-boisson', restaurantId: 'partenaire-demo', example: true, name: 'Boisson du partenaire (exemple)', description: 'Article fictif pour tester le changement de restaurant.', price: 2000, category: 'Boissons', image: menuImage(253) },
+].map(dish => ({ restaurantId: PRIMARY_RESTAURANT_ID, ...dish }))
 
 export const offers = [
   { title: 'Offre Duo Grillades', image: promoImage(74), badge: '−15 %', tag: 'Formule Midi', description: 'Un assortiment de grillades à partager, accompagné de bobolo et de deux bissaps.', terms: 'Offre valable le midi sur place, selon les disponibilités.' },
@@ -23,12 +27,12 @@ export const offers = [
   { title: 'Formule Étudiant Recharger', image: promoImage(161), badge: '2 800 CDF', tag: 'Campus', description: 'Plat du jour Poulet DG et boisson fraîche.', terms: 'Sur présentation d’une carte étudiante valide.' },
   { title: 'Plateau Apéro Billard', image: promoImage(190), badge: '−25 %', tag: 'Lounge & Billard', description: 'Beignets, brochettes et trio de sauces pour les soirées matchs.', terms: 'Offre valable lors des soirées matchs, sur réservation.' },
   { title: 'Pack Anniversaire & Chill', image: promoImage(219), badge: 'Gâteau offert', tag: 'Réservation', description: 'Un moment sur le rooftop avec un gâteau offert pour votre groupe.', terms: 'Réservation de dix personnes minimum, sous réserve de confirmation.' },
-]
+].map(offer => ({ ...offer, restaurantId: PRIMARY_RESTAURANT_ID }))
 
 export const events = [
   { day: '29', month: 'OCT', title: 'Soirée Ligue des Champions Canal+', time: '20h30', place: 'Terrasse Rooftop Kinshasa', description: 'Diffusion grand écran et planches tapas en continu.', price: 'Entrée gratuite · Conso requise' },
   { day: '01', month: 'NOV', title: 'Tournoi de billard ZeDuc Cup', time: '16h00', place: 'Espace Billard & Lounge', description: 'Compétition amicale à 8-ball, trophée et crédits repas.', price: '1 500 CDF / inscription' },
   { day: '07', month: 'NOV', title: 'Quiz musique & Afro-Beats Night', time: '19h00', place: 'Rooftop Panoramique', description: 'Blind test musical, DJ invité et cocktails signature.', price: 'Accès libre' },
-]
+].map(event => ({ ...event, restaurantId: PRIMARY_RESTAURANT_ID }))
 
 export const formatPrice = price => `${new Intl.NumberFormat('fr-FR').format(price)} CDF`

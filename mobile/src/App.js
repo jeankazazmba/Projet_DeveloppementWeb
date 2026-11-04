@@ -10,6 +10,7 @@ import {
   Animated,
   Easing,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -28,6 +29,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { categories, categoryLabels, dishes, findDish, money } from "./catalog";
+import { getRestaurant, restaurants } from "./restaurants";
 import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
 import FloatingCart from "./FloatingCart";
@@ -62,6 +64,7 @@ const initialData = {
   onboardingDone: false,
   user: null,
   cart: {},
+  restaurantFilter: 'all',
   orders: [],
   complaints: [],
   notificationsReadAt: null,
@@ -77,6 +80,17 @@ const tabs = [
   ["loyalty", "Fidélité", "star-outline"],
   ["profile", "Profil", "person-outline"],
 ];
+
+function confirmRestaurantChange(message, onConfirm) {
+  if (Platform.OS === 'web') {
+    if (window.confirm(message)) onConfirm();
+    return;
+  }
+  Alert.alert('Changer de restaurant', message, [
+    { text: 'Garder le panier', style: 'cancel' },
+    { text: 'Vider et continuer', style: 'destructive', onPress: onConfirm },
+  ]);
+}
 
 function localNotifications(data) {
   return [
@@ -153,17 +167,24 @@ function AppProvider({ children, skipOnboarding = false }) {
         : [{ name: data.user ? "home" : "login", params: {} }];
     });
   };
-  const addToCart = (id, quantity = 1) => {
+  const selectRestaurant = id => {
+    if (id !== 'all' && !restaurants.some(item => item.id === id)) return;
+    const currentRestaurant = Object.keys(data.cart).map(findDish).find(Boolean)?.restaurantId;
+    const choose = () => setData(current => ({ ...current, cart: currentRestaurant && id !== 'all' && currentRestaurant !== id ? {} : current.cart, restaurantFilter: id }));
+    if (currentRestaurant && id !== 'all' && currentRestaurant !== id) confirmRestaurantChange('Votre panier contient des plats d’un autre restaurant. Il sera vidé pour continuer.', choose);
+    else choose();
+  };
+  const addToCart = (id, quantity = 1, onAdded) => {
     const dish = findDish(id);
     if (!dish || dish.available === false) return;
-    setData((current) => ({
-      ...current,
-      cart: { ...current.cart, [id]: (current.cart[id] || 0) + quantity },
-    }));
-    Alert.alert(
-      "Ajouté au panier",
-      `${dish.name} · ${quantity} article${quantity > 1 ? "s" : ""}`,
-    );
+    const currentRestaurant = Object.keys(data.cart).map(findDish).find(Boolean)?.restaurantId;
+    const add = () => {
+      setData(current => ({ ...current, cart: currentRestaurant && currentRestaurant !== dish.restaurantId ? { [id]: quantity } : { ...current.cart, [id]: (current.cart[id] || 0) + quantity } }));
+      if (onAdded) onAdded();
+      else Alert.alert('Ajouté au panier', `${dish.name} · ${quantity} article${quantity > 1 ? 's' : ''}`);
+    };
+    if (currentRestaurant && currentRestaurant !== dish.restaurantId) confirmRestaurantChange('Une commande ne peut contenir les plats que d’un seul restaurant. Vider le panier actuel et ajouter ce plat ?', add);
+    else add();
   };
   const setQuantity = (id, quantity) =>
     setData((current) => {
@@ -181,14 +202,21 @@ function AppProvider({ children, skipOnboarding = false }) {
   );
   const placeOrder = ({ mode, address, arrival, usePoints, paymentAttempt }) => {
     if (!cartItems.length) return;
+    const restaurantId = cartItems[0].dish.restaurantId;
+    if (cartItems.some(item => item.dish.restaurantId !== restaurantId)) {
+      Alert.alert('Panier à vérifier', 'Une commande ne peut concerner qu’un seul restaurant.');
+      return;
+    }
     const discount = usePoints
       ? Math.min(Math.floor(data.points / 10) * 100, subtotal)
       : 0;
     const order = {
       id: `MMM-${Date.now().toString().slice(-6)}`,
+      restaurantId,
       date: new Date().toISOString(),
       items: cartItems.map(({ dish, quantity }) => ({
         id: dish.id,
+        restaurantId: dish.restaurantId,
         name: dish.name,
         price: dish.price,
         quantity,
@@ -237,6 +265,7 @@ function AppProvider({ children, skipOnboarding = false }) {
     logout,
     finishOnboarding,
     addToCart,
+    selectRestaurant,
     setQuantity,
     cartItems,
     subtotal,
@@ -717,6 +746,12 @@ function Forgot() {
   );
 }
 
+function RestaurantFilter() {
+  const { data, selectRestaurant } = useApp();
+  const selected = data.restaurantFilter === 'all' ? null : getRestaurant(data.restaurantFilter);
+  return <View style={{ marginBottom: 16 }}><Text style={{ color: colors.gold, fontWeight: '800', marginBottom: 9 }}>Choisir un restaurant</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}><Pill title="Tous les plats" active={data.restaurantFilter === 'all'} onPress={() => selectRestaurant('all')} />{restaurants.map(item => <Pill key={item.id} title={item.name} active={data.restaurantFilter === item.id} onPress={() => selectRestaurant(item.id)} />)}</ScrollView><Text style={{ color: colors.muted, fontSize: 12, marginTop: 6 }}>{selected ? `${selected.location} · ${selected.hours}` : 'Tous les établissements de la démonstration'} · Un panier par restaurant.</Text></View>;
+}
+
 function Home() {
   const { data, go, addToCart, tab } = useApp();
   return (
@@ -724,6 +759,7 @@ function Home() {
       title={`Bonjour ${data.user?.name?.split(" ")[0] || "étudiant"} 👋`}
       subtitle="Qu'est-ce qui vous ferait plaisir aujourd'hui ?"
     >
+      <RestaurantFilter />
       <LinearGradient
         colors={["#4D3920", "#26231D", "#171A18"]}
         style={{
@@ -803,7 +839,7 @@ function Home() {
         onAction={() => tab("menu")}
       />
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {dishes.slice(0, 4).map((dish) => (
+        {dishes.filter(dish => data.restaurantFilter === 'all' || dish.restaurantId === data.restaurantFilter).slice(0, 4).map((dish) => (
           <FoodCard
             key={dish.id}
             compact
@@ -861,12 +897,12 @@ function Home() {
 }
 
 function DiscoverScreen({ params }) {
-  const { back, go } = useApp();
-  return <Discover back={back} go={go} initialTab={params?.tab} />;
+  const { back, go, data } = useApp();
+  return <Discover back={back} go={go} initialTab={params?.tab} restaurantFilter={data.restaurantFilter} />;
 }
 
 function Menu({ params = {} }) {
-  const { go, addToCart } = useApp();
+  const { go, addToCart, data } = useApp();
   const [category, setCategory] = useState("Tout");
   const [query, setQuery] = useState("");
   const [availableOnly, setAvailableOnly] = useState(false);
@@ -874,7 +910,7 @@ function Menu({ params = {} }) {
   const normalizedQuery = query.trim().toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const matches = dishes.filter((dish) => {
     const content = `${dish.name} ${dish.description}`.toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return (!availableOnly || dish.available !== false) && content.includes(normalizedQuery);
+    return (data.restaurantFilter === 'all' || dish.restaurantId === data.restaurantFilter) && (!availableOnly || dish.available !== false) && content.includes(normalizedQuery);
   });
   const filtered = matches.filter((dish) => category === "Tout" || dish.category === category);
   const sections = (category === "Tout" ? categories.slice(1) : [category])
@@ -889,6 +925,7 @@ function Menu({ params = {} }) {
     .filter((section) => section.items.length);
   return (
     <Page title="La carte" subtitle="Plats, grillades et douceurs à découvrir.">
+      <RestaurantFilter />
       <Field
         value={query}
         onChangeText={setQuery}
@@ -967,6 +1004,7 @@ function Detail({ params }) {
       <Glass>
         <Image source={dish.image} style={{ width: "100%", height: 235 }} />
         <View style={{ padding: 19 }}>
+          <Text style={{ color: colors.gold, fontWeight: '800', marginBottom: 5 }}>{getRestaurant(dish.restaurantId).name}{dish.example ? ' · article fictif' : ''}</Text>
           <Text
             style={{ color: colors.gold, letterSpacing: 1, fontWeight: "800" }}
           >
@@ -1025,8 +1063,7 @@ function Detail({ params }) {
             title={dish.available === false ? "Momentanément indisponible" : `Ajouter · ${money(dish.price * quantity)}`}
             disabled={dish.available === false}
             onPress={() => {
-              addToCart(dish.id, quantity);
-              go("cart");
+              addToCart(dish.id, quantity, () => go("cart"));
             }}
           />
         </View>
@@ -1037,6 +1074,7 @@ function Detail({ params }) {
 
 function Cart() {
   const { back, cartItems, subtotal, setQuantity, go, tab } = useApp();
+  const cartRestaurant = cartItems.length ? getRestaurant(cartItems[0].dish.restaurantId) : null;
   return (
     <Page
       title="Mon panier"
@@ -1045,6 +1083,7 @@ function Cart() {
     >
       {cartItems.length ? (
         <>
+          <Glass style={{ padding: 15, marginBottom: 14 }}><Text style={{ color: colors.gold, fontWeight: '800' }}>Restaurant : {cartRestaurant.name}</Text><Text style={{ color: colors.muted, fontSize: 12, marginTop: 5 }}>Une commande ne peut contenir les plats que d’un seul restaurant. Choisir un autre restaurant videra ce panier après confirmation.</Text></Glass>
           {cartItems.map(({ dish, quantity }) => (
             <Glass key={dish.id} style={{ padding: 12, marginBottom: 10 }}>
               <View style={{ flexDirection: "row", gap: 13 }}>
@@ -1062,6 +1101,7 @@ function Cart() {
                   >
                     {dish.name}
                   </Text>
+                  <Text style={{ color: colors.muted, fontSize: 11 }}>{getRestaurant(dish.restaurantId).name}</Text>
                   <Text
                     style={{
                       color: colors.gold,
@@ -1153,7 +1193,8 @@ function Cart() {
 }
 
 function Checkout() {
-  const { back, subtotal, data, placeOrder } = useApp();
+  const { back, subtotal, data, cartItems, placeOrder } = useApp();
+  const cartRestaurant = cartItems.length ? getRestaurant(cartItems[0].dish.restaurantId) : null;
   const [mode, setMode] = useState("Retrait");
   const [arrival, setArrival] = useState("");
   const [address, setAddress] = useState("");
@@ -1169,6 +1210,7 @@ function Checkout() {
       subtitle="Préparez votre commande étudiante."
       onBack={back}
     >
+      {cartRestaurant && <Glass style={{ padding: 14, marginBottom: 12 }}><Text style={{ color: colors.gold, fontWeight: '800' }}>Commande pour {cartRestaurant.name}</Text><Text style={{ color: colors.muted, fontSize: 12 }}>Paiement et livraison de démonstration, sans transmission au restaurant.</Text></Glass>}
       <SectionTitle title="Mode de réception" />
       <View style={{ flexDirection: "row" }}>
         <Pill
@@ -1335,6 +1377,7 @@ function Confirmation({ params }) {
       </Glass>
       {order && (
         <Glass style={{ padding: 18, marginTop: 15 }}>
+          <Summary label="Restaurant" value={getRestaurant(order.restaurantId).name} />
           <Summary label="Réception" value={order.mode} />
           <Summary label="Heure souhaitée" value={order.arrival} />
           <Summary label="Paiement" value={order.payment} />
@@ -1404,6 +1447,7 @@ function Orders() {
               {order.items.length} plat{order.items.length > 1 ? "s" : ""} ·{" "}
               {order.mode}
             </Text>
+            <Text style={{ color: colors.gold, marginTop: 4, fontWeight: '700' }}>{getRestaurant(order.restaurantId).name}</Text>
             {order.mode === "Livraison" && (
               <Text style={{ color: colors.gold, marginTop: 7, fontSize: 12 }}>
                 Voir la carte de suivi →
@@ -1461,6 +1505,7 @@ function OrderDetail({ params }) {
       onBack={back}
     >
       <Glass style={{ padding: 18 }}>
+        <Text style={{ color: colors.gold, fontWeight: '800', marginBottom: 6 }}>Restaurant : {getRestaurant(order.restaurantId).name}</Text>
         <Text style={{ color: colors.gold, fontSize: 13, fontWeight: "800" }}>
           ● {order.status}
         </Text>

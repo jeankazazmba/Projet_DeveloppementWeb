@@ -35,6 +35,20 @@
 .public-menu-toggle { display:none; border:0; background:transparent; color:var(--gold); font-size:1.6rem!important; }
 .public-kicker { display:block; margin-bottom:12px; color:var(--gold); text-transform:uppercase; letter-spacing:.08em; font-size:.77rem; font-weight:700; }
 .public-actions { display:flex; gap:18px; flex-wrap:wrap; margin-top:38px; }
+.public-restaurants{padding-block:50px 110px;scroll-margin-top:105px}
+.public-restaurant-search,.public-restaurant-filter{display:grid;gap:8px;max-width:440px;margin:25px 0;color:var(--gold);font-size:.85rem;font-weight:700}
+.public-restaurant-search input,.public-restaurant-filter select{width:100%;padding:13px 15px;border:1px solid #cfbd9770;border-radius:12px;background:#171717;color:var(--text);font:inherit}
+.public-restaurant-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px}
+.public-restaurant-card{padding:28px;border:1px solid #cfbd9750;border-radius:18px;background:#171717}
+.public-restaurant-card h3{margin:10px 0;font-size:1.45rem}
+.public-restaurant-card p{min-height:48px}
+.public-restaurant-card dl{margin:23px 0;display:grid;gap:12px}
+.public-restaurant-card dt{font-size:.73rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold)}
+.public-restaurant-card dd{margin:3px 0 0}
+.public-restaurant-card .public-pill{display:inline-block}
+.public-restaurant-name{display:block;margin-bottom:5px;color:var(--gold);font-size:.76rem;font-weight:800}
+.public-site[data-theme='light'] .public-restaurant-card{background:#fff;border-color:#e8ddca;color:#20221e}
+.public-site[data-theme='light'] .public-restaurant-search input,.public-site[data-theme='light'] .public-restaurant-filter select{background:#fff;color:#20221e;border-color:#d2c4ac}
 .public-hero { display:grid; grid-template-columns:1.15fr .85fr; align-items:center; gap:42px; min-height:585px; padding-block:48px 72px; }
 .public-hero-copy h1 { font-size:clamp(3.1rem,5.4vw,5.5rem); }
 .public-hero-copy p { max-width:570px; margin-top:26px; font-size:1.14rem; }
@@ -218,7 +232,7 @@
 .public-access-steps span { display:inline-flex;align-items:center;gap:8px; }
 .public-access-steps b { display:grid;place-items:center;width:23px;height:23px;border:1px solid #b99d69;border-radius:50%;color:var(--gold);font-size:.7rem; }
 .public-access-steps i { width:40px;height:1px;background:#615541; }
-.public-access-profiles { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px; }
+.public-access-profiles { display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:16px; }
 .public-profile-card { min-height:260px;padding:22px;display:flex;flex-direction:column;text-align:left;color:#eee9de;background:linear-gradient(145deg,#1b1b19,#111210);border:1px solid #3d3a32;border-radius:20px;transition:transform .2s,border-color .2s,background .2s,box-shadow .2s; }
 .public-profile-card:hover,.public-profile-card.is-selected { transform:translateY(-4px);border-color:#cbb586;background:linear-gradient(145deg,#2b281f,#161714);box-shadow:0 15px 35px #0008; }
 .public-profile-card-top,.public-profile-card-bottom { display:flex;align-items:center;justify-content:space-between;gap:10px; }

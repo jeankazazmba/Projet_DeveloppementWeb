@@ -55,6 +55,8 @@
 .desktop-demo { display: flex; justify-content: center; align-items: center; gap: 9px; width: 100%; margin-top: 22px; color: #221a12; background: linear-gradient(110deg, #f4d7a7, #d7a367); cursor: pointer; }
 .desktop-demo:hover { filter: brightness(1.08); }
 .desktop-workspace { min-height: 100vh; }
+.desktop-workspace .admin-platform-link{display:none}
+.desktop-workspace .platform-header a{display:none}
 .desktop-switch { position: fixed; z-index: 9999; right: 22px; bottom: 18px; border: 1px solid #ffffff55; border-radius: 999px; padding: 11px 17px; color: #fff; background: #1c3037ed; box-shadow: 0 10px 32px #0007; cursor: pointer; font: 700 .82rem system-ui, sans-serif; backdrop-filter: blur(16px); }
 .desktop-switch:hover { background: #37525a; }
 .desktop-route-return { display: grid; place-content: center; min-height: 70vh; text-align: center; gap: 15px; }

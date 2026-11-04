@@ -1,0 +1,27 @@
+.platform-app{min-height:100vh;background:#0b0c0b;color:#f2f0e9;font:15px/1.5 Poppins,system-ui,sans-serif}
+.platform-app *{box-sizing:border-box}
+.platform-header{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:35px max(24px,calc((100vw - 1200px)/2));background:#151614;border-bottom:1px solid #3b382f}
+.platform-kicker{color:#cfbd97;font-size:11px;font-weight:800;letter-spacing:.15em}
+.platform-header h1{margin:5px 0;font-size:clamp(1.6rem,3vw,2.5rem)}
+.platform-header p,.platform-panel>p,.platform-footnote{color:#aaa79e}
+.platform-header a,.platform-list a{color:#cfbd97;text-decoration:none}
+.platform-main{max-width:1240px;margin:auto;padding:30px 24px}
+.platform-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:23px}
+.platform-metrics>div,.platform-panel{padding:22px;border:1px solid #3b382f;border-radius:16px;background:#171816}
+.platform-metrics strong{display:block;color:#cfbd97;font-size:2rem}
+.platform-metrics span{color:#aaa79e;font-size:13px}
+.platform-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:start}
+.platform-panel h2{margin:0 0 5px;font-size:1.25rem}
+.platform-panel>p{margin:0 0 20px}
+.platform-list{display:grid;gap:12px}
+.platform-list article{display:flex;justify-content:space-between;gap:16px;padding:17px;border:1px solid #393a33;border-radius:12px;background:#20221f}
+.platform-list article>div{display:grid;gap:4px}
+.platform-list strong{font-size:1.05rem}
+.platform-list small{color:#aaa79e}
+.platform-list span{color:#cfbd97;font-size:12px}
+.platform-list select,.platform-panel input{width:100%;padding:11px;border:1px solid #625841;border-radius:9px;background:#101210;color:#f2f0e9;font:inherit}
+.platform-panel form{display:grid;gap:14px}
+.platform-panel label{display:grid;gap:6px;font-weight:700;font-size:13px}
+.platform-panel button{border:0;border-radius:10px;background:#cfbd97;color:#16130d;padding:12px 15px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.platform-notice{padding:12px;border-radius:9px;background:#cfbd9724;color:#ead8b1}
+@media(max-width:850px){.platform-header{display:block}.platform-header a{display:inline-block;margin-top:15px}.platform-grid{grid-template-columns:1fr}.platform-metrics{grid-template-columns:1fr}}

@@ -244,7 +244,27 @@ export const dishes = [
     available: false,
     image: require("../assets/images/admin-menu-7.jpg"),
   },
-];
+  {
+    id: "demo-assiette",
+    restaurantId: "partenaire-demo",
+    example: true,
+    name: "Assiette du partenaire (exemple)",
+    category: "Plats",
+    price: 4500,
+    description: "Article fictif pour tester le parcours multi-restaurants.",
+    image: require("../assets/images/admin-menu-0.jpg"),
+  },
+  {
+    id: "demo-boisson",
+    restaurantId: "partenaire-demo",
+    example: true,
+    name: "Boisson du partenaire (exemple)",
+    category: "Boissons",
+    price: 2000,
+    description: "Article fictif pour tester le changement de restaurant.",
+    image: require("../assets/images/admin-menu-6.jpg"),
+  },
+].map(dish => ({ restaurantId: 'zeduc', ...dish }));
 
 export const findDish = (id) => dishes.find((dish) => dish.id === id);
 export const money = (amount) =>

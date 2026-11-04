@@ -26,6 +26,7 @@ Le serveur Vite affiche son adresse dans le terminal, normalement `http://localh
 | Promotions, événements et jeux publics | http://localhost:5173/promotions |
 | Choix d’espace / accès | http://localhost:5173/acces |
 | Administration | http://localhost:5173/admin |
+| Administration de la plateforme | http://localhost:5173/plateforme |
 | Gérant | http://localhost:5173/gerant |
 | Employé | http://localhost:5173/employe |
 
@@ -50,13 +51,13 @@ npx expo start
 
 Scanner le code QR affiché avec Expo Go. Pour demander directement Android, utiliser `npm run android` ; pour la prévisualisation dans un navigateur, `npm run web`. La prévisualisation web ne reproduit pas nécessairement les composants natifs, notamment la carte.
 
-L’application mobile contient les espaces **étudiant** et **employé** dans le même projet. Le passage à l’espace employé se fait dans l’interface de démonstration ; il n’y a pas de deuxième serveur Expo à lancer. Les données des deux espaces sont locales et ne se synchronisent pas encore avec le site ou le backend.
+L’application mobile contient les espaces **étudiant** et **employé** dans le même projet. Le passage à l’espace employé se fait dans l’interface de démonstration ; il n’y a pas de deuxième serveur Expo à lancer. L’étudiant peut filtrer le catalogue par restaurant ; l’employé choisit son restaurant de travail en entrant dans son espace. Les données des deux espaces sont locales et ne se synchronisent pas encore avec le site ou le backend.
 
 Pour arrêter Expo : `Ctrl + C`.
 
 ## 3. Application bureau Tauri (admin, gérant, employé)
 
-Prérequis Windows : Node.js/npm, Rust, Microsoft C++ Build Tools et WebView2. Tauri réutilise `frontend/`, mais démarre sur son entrée dédiée `desktop.html` : splash screen → choix du rôle → écran de connexion → accès explicite à la démo.
+Prérequis Windows : Node.js/npm, Rust, Microsoft C++ Build Tools et WebView2. Tauri réutilise `frontend/`, mais démarre sur son entrée dédiée `desktop.html` : splash screen → choix du rôle → écran de connexion → choix du restaurant si le rôle y est affecté dans la démo → accès explicite à la démo.
 
 À la première installation, depuis la racine du dépôt :
 

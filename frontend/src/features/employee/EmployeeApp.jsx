@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom'
 import EmployeeIcon from './EmployeeIcon.jsx'
 import { initialClaims, initialMenu, initialOrders, orderSteps } from './employeeData.js'
 import { ClaimsPage, MenuPage, OrdersPage, StatisticsPage } from './EmployeePages.jsx'
+import { RestaurantEmpty, RestaurantScopeControl } from '../shared/RestaurantScope.jsx'
+import { useRestaurantScope } from '../shared/useRestaurantScope.js'
 import './employee.css'
 
 const logo = '/assets/figma/dashboard-imgMonMiamMiamZeDucSpCe.png'
@@ -25,11 +27,18 @@ function useStoredState(key, initial) {
 }
 
 export default function EmployeeApp() {
+  const scope = useRestaurantScope('employee')
+  return <EmployeeWorkspace key={scope.restaurantId} {...scope} />
+}
+
+function EmployeeWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRestaurants }) {
   const location = useLocation()
   const page = location.pathname.startsWith('/employe/menu') ? 'menu' : location.pathname.startsWith('/employe/reclamations') ? 'claims' : location.pathname.startsWith('/employe/statistiques') ? 'stats' : 'orders'
-  const [orders, setOrders] = useStoredState('mmm-employee-orders-v1', initialOrders)
-  const [menu, setMenu] = useStoredState('mmm-employee-menu-v1', initialMenu)
-  const [claims, setClaims] = useStoredState('mmm-employee-claims-v1', initialClaims)
+  const sample = restaurantId === 'zeduc'
+  const prefix = sample ? 'mmm-employee' : `mmm-employee-${restaurantId}`
+  const [orders, setOrders] = useStoredState(`${prefix}-orders-v1`, sample ? initialOrders : [])
+  const [menu, setMenu] = useStoredState(`${prefix}-menu-v1`, sample ? initialMenu : [])
+  const [claims, setClaims] = useStoredState(`${prefix}-claims-v1`, sample ? initialClaims : [])
   const [query, setQuery] = useState('')
   const [notice, setNotice] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -55,8 +64,8 @@ export default function EmployeeApp() {
     <a className="employee-skip" href="#employee-main">Aller au contenu</a>
     {sidebarOpen && <button className="employee-sidebar-scrim" aria-label="Fermer la navigation" onClick={() => setSidebarOpen(false)} />}
     <aside className={`employee-sidebar ${sidebarOpen ? 'open' : ''}`}><Link to="/employe" className="employee-brand" onClick={() => setSidebarOpen(false)}><img src={logo} alt="Mon Miam Miam" /><span>KINSHASA · RDC</span></Link><div className="employee-role"><strong>EMPLOYÉ</strong><small><i /> Démo locale</small></div><nav aria-label="Navigation employé">{renderLinks()}</nav><div className="employee-sidebar-bottom"><div className="employee-profile"><span>MT</span><div><strong>Marie T.</strong><small>Service du midi · Démo</small></div></div><Link to="/acces">Changer d’espace →</Link><Link to="/">Site public →</Link></div></aside>
-    <div className="employee-shell"><header className="employee-topbar"><button className="employee-mobile-menu employee-icon-button" aria-label="Ouvrir la navigation" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(current => !current)}><EmployeeIcon name="hamburger" size={21} /></button><Link to="/employe" className="employee-mobile-brand"><img src={logo} alt="Mon Miam Miam" /><span>Espace employé</span></Link>{page !== 'stats' && <label className="employee-global-search"><EmployeeIcon name="search" /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder={page === 'orders' ? 'Commande, client, plat…' : page === 'claims' ? 'Réclamation, étudiant…' : 'Rechercher un plat…'} aria-label="Rechercher dans cette page" /></label>}<div className="employee-top-actions"><span className="employee-service-chip"><i /> Service en cours</span><span className="employee-demo-chip">Démo</span><Link to="/employe/reclamations" className="employee-icon-button employee-alert" aria-label={`${pending} réclamations à traiter`} onClick={() => setQuery('')}><EmployeeIcon name="bell" />{pending > 0 && <b>{pending}</b>}</Link><span className="employee-top-profile"><b>MT</b><span>Marie T.<small>Employée</small></span></span></div></header>
-      <main id="employee-main" className="employee-main">{page === 'orders' && <OrdersPage orders={orders} onAdvance={advanceOrder} query={query} onNotice={setNotice} />}{page === 'menu' && <MenuPage menu={menu} onSave={saveMenu} query={query} />}{page === 'claims' && <ClaimsPage claims={claims} onUpdate={updateClaim} query={query} onNotice={setNotice} />}{page === 'stats' && <StatisticsPage />}</main>
+    <div className="employee-shell"><header className="employee-topbar"><button className="employee-mobile-menu employee-icon-button" aria-label="Ouvrir la navigation" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(current => !current)}><EmployeeIcon name="hamburger" size={21} /></button><Link to="/employe" className="employee-mobile-brand"><img src={logo} alt="Mon Miam Miam" /><span>Espace employé</span></Link>{page !== 'stats' && <label className="employee-global-search"><EmployeeIcon name="search" /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder={page === 'orders' ? 'Commande, client, plat…' : page === 'claims' ? 'Réclamation, étudiant…' : 'Rechercher un plat…'} aria-label="Rechercher dans cette page" /></label>}<RestaurantScopeControl restaurant={restaurant} restaurants={allowedRestaurants} onChange={setRestaurantId} /><div className="employee-top-actions"><span className="employee-service-chip"><i /> Service en cours</span><span className="employee-demo-chip">Démo</span><Link to="/employe/reclamations" className="employee-icon-button employee-alert" aria-label={`${pending} réclamations à traiter`} onClick={() => setQuery('')}><EmployeeIcon name="bell" />{pending > 0 && <b>{pending}</b>}</Link><span className="employee-top-profile"><b>MT</b><span>Marie T.<small>Employée</small></span></span></div></header>
+      <main id="employee-main" className="employee-main">{page === 'orders' && <OrdersPage orders={orders} onAdvance={advanceOrder} query={query} onNotice={setNotice} />}{page === 'menu' && <MenuPage menu={menu} onSave={saveMenu} query={query} />}{page === 'claims' && <ClaimsPage claims={claims} onUpdate={updateClaim} query={query} onNotice={setNotice} />}{page === 'stats' && (sample ? <StatisticsPage /> : <RestaurantEmpty restaurant={restaurant} topic="Statistiques" />)}</main>
       <footer className="employee-footer"><span>Mon Miam Miam · ZeDuc-Sp@ce · Démo employé</span><Link to="/">Site public</Link></footer>
     </div>
     <nav className="employee-bottom-nav" aria-label="Navigation employé mobile">{renderLinks()}</nav>

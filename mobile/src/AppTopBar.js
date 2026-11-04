@@ -9,6 +9,8 @@ export default function AppTopBar({
   onHome,
   onSearch,
   onNotifications,
+  restaurantName,
+  onRestaurant,
   blurTarget,
   searchLabel = "Rechercher un plat",
 }) {
@@ -85,10 +87,9 @@ export default function AppTopBar({
           }}
         >
           <Icon name="search-outline" size={18} color={colors.gold} />
-          <Text numberOfLines={1} style={{ color: colors.muted, fontSize: 13 }}>
-            {searchLabel}
-          </Text>
+          <View style={{ flex: 1 }}><Text numberOfLines={1} style={{ color: colors.muted, fontSize: 13 }}>{searchLabel}</Text>{restaurantName && <Text numberOfLines={1} style={{ color: colors.gold, fontSize: 10, fontWeight: '800' }}>{restaurantName}</Text>}</View>
         </Pressable>
+        {onRestaurant && <Pressable accessibilityRole="button" accessibilityLabel={`Changer de restaurant, actuel : ${restaurantName}`} onPress={onRestaurant} style={{ width: 32, height: 43, alignItems: 'center', justifyContent: 'center' }}><Icon name="swap-horizontal-outline" size={21} color={colors.gold} /></Pressable>}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Notifications, ${unreadCount} non lues`}

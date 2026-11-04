@@ -9,6 +9,7 @@ import AppTopBar from "./AppTopBar";
 import { categories, categoryLabels, dishes, money } from "./catalog";
 import { claimStages, employeeWeeks, initialEmployeeData, orderStages, topEmployeeDishes } from "./employeeData";
 import { Button, colors, Field, Glass, Icon, Page, Pill, SectionTitle, styles } from "./ui";
+import { getRestaurant, restaurants } from './restaurants';
 const STORAGE_KEY = "mon-miam-miam-employee-v1";
 const EMPLOYEE = "MON MIAM MIAM · EMPLOYÉ";
 const tabs = [["orders", "Commandes", "receipt-outline"], ["menu", "Menu", "restaurant-outline"], ["claims", "Réclamations", "chatbubble-ellipses-outline"], ["stats", "Stats", "stats-chart-outline"], ["profile", "Profil", "person-outline"]];
@@ -216,13 +217,14 @@ function OrderDetailScreen({
 function MenuScreen({
   data,
   save,
-  searchRequested
+  searchRequested,
+  restaurantId
 }) {
   const [draft, setDraft] = useState(data.menu);
   const [category, setCategory] = useState("Tout");
   const [query, setQuery] = useState("");
   const changed = JSON.stringify(draft) !== JSON.stringify(data.menu);
-  const merged = dishes.map(dish => ({
+  const merged = dishes.filter(dish => dish.restaurantId === restaurantId).map(dish => ({
     ...dish,
     ...draft.find(item => item.id === dish.id)
   }));
@@ -552,7 +554,9 @@ function StatsScreen() {
     }}>Ces statistiques sont des exemples. Leurs chiffres viendront de l’API après intégration.</Text></Page>;
 }
 function ProfileScreen({
-  exit
+  exit,
+  restaurant,
+  onChangeRestaurant
 }) {
   return <Page eyebrow={EMPLOYEE} title="Mon espace" subtitle="Service employé · mode démonstration."><Glass style={{
       padding: 19
@@ -580,30 +584,36 @@ function ProfileScreen({
         color: colors.muted,
         lineHeight: 21,
         marginTop: 19
-      }}>Les commandes, disponibilités du menu et réponses sont enregistrées uniquement sur cet appareil. L’authentification du personnel et la synchronisation attendent l’API commune.</Text></Glass><Button title="Revenir à l’espace étudiant" variant="secondary" icon="swap-horizontal-outline" onPress={exit} style={{
+      }}>Restaurant de travail : {restaurant.name}. Les commandes, disponibilités du menu et réponses sont enregistrées uniquement sur cet appareil. L’authentification du personnel et la synchronisation attendent l’API commune.</Text></Glass><Button title="Changer de restaurant" variant="secondary" icon="restaurant-outline" onPress={onChangeRestaurant} style={{ marginTop: 18 }} /><Button title="Revenir à l’espace étudiant" variant="secondary" icon="swap-horizontal-outline" onPress={exit} style={{
       marginTop: 18
     }} /></Page>;
 }
+function RestaurantScreen({ select }) {
+  return <Page eyebrow={EMPLOYEE} title="Restaurant de travail" subtitle="Choisissez l’établissement pour cette session de démonstration.">{restaurants.map(item => <Glass key={item.id} style={{ padding: 18, marginBottom: 12 }} onPress={() => select(item.id)}><Text style={{ color: colors.text, fontSize: 17, fontWeight: '800' }}>{item.name}</Text><Text style={{ color: colors.muted, marginTop: 5 }}>{item.location}</Text><Text style={{ color: colors.gold, marginTop: 8, fontSize: 12 }}>{item.example ? 'Établissement exemple · données fictives' : 'Restaurant actuel · données de maquette'}</Text></Glass>)}<Text style={{ color: colors.muted, lineHeight: 20 }}>Les comptes réels limiteront cette liste aux établissements autorisés par l’API.</Text></Page>;
+}
+
 export default function EmployeeApp({
   onExit
 }) {
+  const [restaurantId, setRestaurantId] = useState('zeduc');
   const [data, setData] = useState(initialEmployeeData);
   const [ready, setReady] = useState(false);
-  const [screen, setScreen] = useState("orders");
+  const [screen, setScreen] = useState("restaurant");
   const [selectedId, setSelectedId] = useState(null);
   const [searchRequested, setSearchRequested] = useState(false);
   const blurTarget = useRef(null);
+  const storeKey = restaurantId === 'zeduc' ? STORAGE_KEY : `${STORAGE_KEY}-${restaurantId}`;
+  const baseData = restaurantId === 'zeduc' ? initialEmployeeData : { orders: [], claims: [], menu: dishes.filter(dish => dish.restaurantId === restaurantId).map(dish => ({ id: dish.id, available: true, featured: false })) };
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then(raw => {
-      if (raw) setData({
-        ...initialEmployeeData,
-        ...JSON.parse(raw)
-      });
-    }).catch(() => {}).finally(() => setReady(true));
-  }, []);
+    let active = true;
+    AsyncStorage.getItem(storeKey).then(raw => {
+      if (active) setData(raw ? { ...baseData, ...JSON.parse(raw) } : baseData);
+    }).catch(() => { if (active) setData(baseData); }).finally(() => { if (active) setReady(true); });
+    return () => { active = false; };
+  }, [storeKey]);
   useEffect(() => {
-    if (ready) AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(() => {});
-  }, [data, ready]);
+    if (ready) AsyncStorage.setItem(storeKey, JSON.stringify(data)).catch(() => {});
+  }, [data, ready, storeKey]);
   if (!ready) return <View style={{
     flex: 1
   }} onLayout={() => SplashScreen.hideAsync().catch(() => {})}><StatusBar style="light" /><View style={{
@@ -638,18 +648,27 @@ export default function EmployeeApp({
     setSelectedId(null);
     setSearchRequested(false);
   };
+  const selectRestaurant = id => {
+    if (!restaurants.some(item => item.id === id)) return;
+    if (id === restaurantId) { setScreen('orders'); return; }
+    setReady(false);
+    setRestaurantId(id);
+    setSelectedId(null);
+    setScreen('orders');
+  };
   const selectedOrder = data.orders.find(order => order.id === selectedId);
   const selectedClaim = data.claims.find(claim => claim.id === selectedId);
   const pendingClaims = data.claims.filter(claim => claim.status === "À traiter" || claim.status === "En cours").length;
   return <View style={{
     flex: 1,
     backgroundColor: colors.bg
-  }} onLayout={() => SplashScreen.hideAsync().catch(() => {})}><StatusBar style="light" /><AppTopBar blurTarget={blurTarget} unreadCount={pendingClaims} onHome={() => selectTab("orders")} searchLabel="Rechercher dans le service" onSearch={() => {
+  }} onLayout={() => SplashScreen.hideAsync().catch(() => {})}><StatusBar style="light" /><AppTopBar blurTarget={blurTarget} unreadCount={pendingClaims} restaurantName={getRestaurant(restaurantId).name} onRestaurant={() => setScreen('restaurant')} onHome={() => selectTab("orders")} searchLabel="Rechercher dans le service" onSearch={() => {
       setScreen("orders");
       setSearchRequested(true);
     }} onNotifications={() => selectTab("claims")} /><BlurTargetView ref={blurTarget} collapsable={false} style={{
       flex: 1
     }}>
+    {screen === 'restaurant' && <RestaurantScreen select={selectRestaurant} />}
     {screen === "orders" && <OrdersScreen key={`orders-${searchRequested}`} data={data} openOrder={id => {
         setSelectedId(id);
         setScreen("order-detail");
@@ -658,13 +677,13 @@ export default function EmployeeApp({
     {screen === "menu" && <MenuScreen data={data} save={menu => setData(current => ({
         ...current,
         menu
-      }))} searchRequested={searchRequested} />}
+      }))} searchRequested={searchRequested} restaurantId={restaurantId} />}
     {screen === "claims" && <ClaimsScreen data={data} openClaim={id => {
         setSelectedId(id);
         setScreen("claim-detail");
       }} />}
     {screen === "claim-detail" && <ClaimDetailScreen claim={selectedClaim} back={back} update={updateClaim} />}
-    {screen === "stats" && <StatsScreen />}
-    {screen === "profile" && <ProfileScreen exit={onExit} />}
+    {screen === "stats" && (restaurantId === 'zeduc' ? <StatsScreen /> : <Page eyebrow={EMPLOYEE} title="Statistiques" subtitle={getRestaurant(restaurantId).name}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Aucune statistique publiée pour cet établissement exemple. Les données arriveront avec l’API.</Text></Glass></Page>)}
+    {screen === "profile" && <ProfileScreen exit={onExit} restaurant={getRestaurant(restaurantId)} onChangeRestaurant={() => setScreen('restaurant')} />}
   </BlurTargetView><TabBar active={screen} onSelect={selectTab} blurTarget={blurTarget} /></View>;
 }
