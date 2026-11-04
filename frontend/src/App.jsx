@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AdminApp from './features/admin/AdminApp.jsx'
 import ManagerApp from './features/manager/ManagerApp.jsx'
+import EmployeeApp from './features/employee/EmployeeApp.jsx'
 import PublicSite from './features/public/PublicSite.jsx'
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
     <Route path="/acces" element={<PublicSite page="access" />} />
     <Route path="/admin" element={<AdminApp />} />
     <Route path="/gerant/*" element={<ManagerApp />} />
+    <Route path="/employe/*" element={<EmployeeApp />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 }
