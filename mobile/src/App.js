@@ -32,6 +32,7 @@ import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
 import FloatingCart from "./FloatingCart";
 import AppTopBar from "./AppTopBar";
+import EmployeeApp from "./EmployeeApp";
 import Discover from "./Discover";
 import DeliveryTracking from "./DeliveryTracking";
 import TimePickerField from "./TimePickerField";
@@ -53,6 +54,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 SplashScreen.setOptions({ duration: 450, fade: true });
 
 const KEY = "mon-miam-miam-student-v1";
+const ACTIVE_SPACE_KEY = "mon-miam-miam-active-space-v1";
 const Context = createContext(null);
 const useApp = () => useContext(Context);
 const initialData = {
@@ -96,11 +98,13 @@ function localNotifications(data) {
   ].sort((first, second) => second.date.localeCompare(first.date));
 }
 
-function AppProvider({ children }) {
+function AppProvider({ children, skipOnboarding = false }) {
   const [data, setData] = useState(initialData);
   const [ready, setReady] = useState(false);
   const [introDone, setIntroDone] = useState(false);
-  const [stack, setStack] = useState([{ name: "onboarding", params: {} }]);
+  const [stack, setStack] = useState([
+    { name: skipOnboarding ? "login" : "onboarding", params: {} },
+  ]);
   useEffect(() => {
     const timer = setTimeout(() => setIntroDone(true), 950);
     return () => clearTimeout(timer);
@@ -111,6 +115,8 @@ function AppProvider({ children }) {
         if (raw) {
           const saved = JSON.parse(raw);
           setData({ ...initialData, ...saved });
+          if (skipOnboarding)
+            setStack([{ name: saved.user ? "home" : "login", params: {} }]);
         }
       })
       .catch(() => {})
@@ -315,7 +321,7 @@ function BottomTabs({ blurTarget }) {
   );
 }
 
-function Router() {
+function Router({ onOpenEmployee }) {
   const { screen, finishOnboarding, cartItems, data, go, tab } = useApp();
   const blurTarget = useRef(null);
   if (screen.name === "onboarding")
@@ -383,6 +389,7 @@ function Router() {
         <Component
           key={`${screen.name}-${screen.params?.id || ""}-${screen.params?.searchAt || ""}`}
           params={screen.params}
+          onOpenEmployee={onOpenEmployee}
         />
       </BlurTargetView>
       <BottomTabs blurTarget={blurTarget} />
@@ -479,11 +486,29 @@ function Notifications() {
 }
 
 export default function App() {
+  const [space, setSpace] = useState(null);
+  const [studentReentry, setStudentReentry] = useState(false);
+  useEffect(() => {
+    AsyncStorage.getItem(ACTIVE_SPACE_KEY)
+      .then((saved) => setSpace(saved === "employee" ? "employee" : "student"))
+      .catch(() => setSpace("student"));
+  }, []);
+  const switchSpace = (next) => {
+    if (space === "student" && next === "employee") setStudentReentry(true);
+    setSpace(next);
+    AsyncStorage.setItem(ACTIVE_SPACE_KEY, next).catch(() => {});
+  };
   return (
     <SafeAreaProvider>
-      <AppProvider>
-        <Router />
-      </AppProvider>
+      {space === "employee" ? (
+        <EmployeeApp onExit={() => switchSpace("student")} />
+      ) : space === "student" ? (
+        <AppProvider skipOnboarding={studentReentry}>
+          <Router onOpenEmployee={() => switchSpace("employee")} />
+        </AppProvider>
+      ) : (
+        <SplashIntro onLayout={() => SplashScreen.hideAsync().catch(() => {})} />
+      )}
     </SafeAreaProvider>
   );
 }
@@ -544,7 +569,7 @@ function AuthShell({ title, subtitle, children }) {
   );
 }
 
-function Login() {
+function Login({ onOpenEmployee }) {
   const { login, go } = useApp();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -589,6 +614,13 @@ function Login() {
         title="Explorer la démo"
         variant="secondary"
         onPress={() => login({ name: "Armand", email: "demo@monmiammiam.cd" })}
+        style={{ marginTop: 11 }}
+      />
+      <Button
+        title="Espace employé · démo"
+        variant="secondary"
+        icon="briefcase-outline"
+        onPress={onOpenEmployee}
         style={{ marginTop: 11 }}
       />
       <Pressable onPress={() => go("register")} style={{ marginTop: 20 }}>
@@ -2110,7 +2142,7 @@ function Leaderboard() {
   );
 }
 
-function Profile() {
+function Profile({ onOpenEmployee }) {
   const { data, setData, go, logout } = useApp();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(data.user?.name || "");
@@ -2203,6 +2235,13 @@ function Profile() {
         />
       </Glass>
       <SectionTitle title="À propos" />
+      <Button
+        title="Ouvrir l’espace employé · démo"
+        variant="secondary"
+        icon="briefcase-outline"
+        onPress={onOpenEmployee}
+        style={{ marginTop: 18 }}
+      />
       <Glass style={{ padding: 17 }}>
         <Text style={{ color: colors.text, fontWeight: "800" }}>
           Mon Miam Miam · Étudiant

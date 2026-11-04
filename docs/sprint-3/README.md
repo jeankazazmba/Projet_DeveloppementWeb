@@ -3,7 +3,7 @@
 ## Objectif
 Construire les fonctionnalités métier complètes et intégrer les applications web React et mobile React Native/Expo avec l'API Laravel, en réutilisant le socle du Sprint 2.
 
-**Important :** ce dossier rassemble les livrables, contrats, preuves de tests et suivis du Sprint 3. Le code exécutable reste dans `frontend/`, `backend/` et, lorsqu'elle sera créée, l'application mobile dans `mobile/`. Ne pas recopier le code dans `docs/sprint-3/`.
+**Important :** ce dossier rassemble les livrables, contrats, preuves de tests et suivis du Sprint 3. Le code exécutable reste dans `frontend/`, `backend/` et `mobile/`. Ne pas recopier le code dans `docs/sprint-3/`.
 
 ## Répartition et traçabilité
 
@@ -24,7 +24,7 @@ Le paiement mobile est un **bonus optionnel** : définir fournisseur, environnem
 - `01-web-etudiant/` : captures, critères de recette, documentation des parcours étudiant.
 - `02-employe-gerant/` : captures et scénarios métier employé/gérant.
 - `03-administration/` : parcours admin, règles de gestion et preuves de tests.
-- `04-mobile/` : configuration Expo, instructions de lancement et captures.
+- `04-mobile/` : configuration Expo, instructions de lancement, captures et [interactions entre applications avec user stories](04-mobile/INTERACTIONS_APPS_ET_USER_STORIES.md).
 - `05-donnees/` : schémas métier, décisions de migrations et jeux de données anonymisés.
 - `06-auth-rbac/` : matrice de permissions et tests d'autorisation.
 - `07-api-commandes/` : contrats d'API et exemples anonymisés.

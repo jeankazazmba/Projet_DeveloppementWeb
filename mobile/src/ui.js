@@ -153,6 +153,7 @@ export function Page({
   onBack,
   right,
   noHeader = false,
+  eyebrow = "MON MIAM MIAM · ÉTUDIANT",
 }) {
   const insets = useSafeAreaInsets();
   return (
@@ -185,7 +186,7 @@ export function Page({
                 </Pressable>
               )}
               <View style={{ flex: 1 }}>
-                <Text style={styles.eyebrow}>MON MIAM MIAM · ÉTUDIANT</Text>
+                <Text style={styles.eyebrow}>{eyebrow}</Text>
                 <Text style={styles.title}>{title}</Text>
                 {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
               </View>

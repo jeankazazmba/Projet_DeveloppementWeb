@@ -10,6 +10,7 @@ export default function AppTopBar({
   onSearch,
   onNotifications,
   blurTarget,
+  searchLabel = "Rechercher un plat",
 }) {
   const insets = useSafeAreaInsets();
   return (
@@ -67,7 +68,7 @@ export default function AppTopBar({
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Rechercher un plat"
+          accessibilityLabel={searchLabel}
           onPress={onSearch}
           style={{
             flex: 1,
@@ -85,7 +86,7 @@ export default function AppTopBar({
         >
           <Icon name="search-outline" size={18} color={colors.gold} />
           <Text numberOfLines={1} style={{ color: colors.muted, fontSize: 13 }}>
-            Rechercher un plat
+            {searchLabel}
           </Text>
         </Pressable>
         <Pressable
