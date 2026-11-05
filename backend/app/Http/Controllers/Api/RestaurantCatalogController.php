@@ -33,8 +33,21 @@ class RestaurantCatalogController extends Controller
     {
         abort_unless($restaurant->status === 'active' && $restaurant->is_public, 404);
         $kind = $request->validate(['kind' => ['sometimes', 'in:dish,promotion,event,game']])['kind'] ?? null;
-        $query = $restaurant->contents()->where('is_published', true);
+        $query = $restaurant->contents()->publicActive()->with(['category:id,name', 'options' => fn ($q) => $q->where('is_available', true)->where(fn ($stock) => $stock->whereNull('stock_quantity')->orWhere('stock_quantity', '>', 0))->select('id', 'content_id', 'kind', 'name', 'price_delta_cdf'), 'allergens:id,name']);
         if ($kind) $query->where('kind', $kind);
-        return $query->orderBy('id')->get();
+        return $query->orderBy('id')->get()->each->makeHidden('stock_quantity');
+    }
+
+    public function menu(Restaurant $restaurant)
+    {
+        abort_unless($restaurant->status === 'active' && $restaurant->is_public, 404);
+        return response()->json([
+            'restaurant_id' => $restaurant->id,
+            'currency' => 'CDF',
+            'categories' => $restaurant->categories()->where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'sort_order']),
+            'dishes' => $restaurant->contents()->publicActive()->where('kind', 'dish')
+                ->with(['options' => fn ($q) => $q->where('is_available', true)->where(fn ($stock) => $stock->whereNull('stock_quantity')->orWhere('stock_quantity', '>', 0))->select('id', 'content_id', 'kind', 'name', 'price_delta_cdf'), 'allergens:id,name'])
+                ->orderBy('title')->get()->each->makeHidden('stock_quantity'),
+        ]);
     }
 }

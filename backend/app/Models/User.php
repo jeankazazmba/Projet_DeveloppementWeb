@@ -10,7 +10,7 @@ class User extends Authenticatable
     use HasApiTokens;
 
     /** Tout compte nouvellement créé est actif jusqu’à une suspension explicite. */
-    protected $attributes = ['is_active' => true, 'is_platform_admin' => false];
+    protected $attributes = ['is_active' => true, 'is_platform_admin' => false, 'version' => 1];
 
     protected $fillable = ['name', 'email', 'password', 'is_platform_admin', 'is_active', 'version'];
 

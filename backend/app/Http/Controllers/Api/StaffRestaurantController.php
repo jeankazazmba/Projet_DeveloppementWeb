@@ -8,6 +8,8 @@ use App\Models\RestaurantContent;
 use App\Support\RestaurantAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class StaffRestaurantController extends Controller
 {
@@ -20,8 +22,8 @@ class StaffRestaurantController extends Controller
     public function content(Request $request, Restaurant $restaurant)
     {
         $role = RestaurantAccess::role($request, $restaurant);
-        if ($role === 'admin') return $restaurant->contents()->orderByDesc('updated_at')->get();
-        return $restaurant->contents()->where('kind', 'dish')->where('is_published', true)
+        if ($role === 'admin') return $restaurant->contents()->with(['category', 'options', 'allergens'])->orderByDesc('updated_at')->get();
+        return $restaurant->contents()->where('kind', 'dish')->publicActive()
             ->orderBy('title')->get(['id', 'restaurant_id', 'kind', 'title', 'price_cdf', 'image_url', 'is_published', 'is_available', 'is_featured', 'version']);
     }
 
@@ -29,6 +31,8 @@ class StaffRestaurantController extends Controller
     {
         RestaurantAccess::require($request, $restaurant, ['admin']);
         $data = $this->validatedContent($request);
+        $this->validateMenuFields($restaurant, $data);
+        if ($data['kind'] === 'dish' && !isset($data['price_cdf'])) throw ValidationException::withMessages(['price_cdf' => 'Prix obligatoire pour un plat.']);
         return response()->json($restaurant->contents()->create($data), 201);
     }
 
@@ -37,8 +41,10 @@ class StaffRestaurantController extends Controller
         RestaurantAccess::require($request, $restaurant, ['admin']);
         abort_unless($content->restaurant_id === $restaurant->id, 404);
         $data = $this->validatedContent($request, true);
+        $this->validateMenuFields($restaurant, $data, $content);
         $expectedVersion = $data['expected_version'] ?? null;
         unset($data['expected_version']);
+        abort_if(!$data, 422, 'Aucune modification fournie.');
         DB::transaction(function () use ($content, $data, $expectedVersion) {
             $locked = RestaurantContent::whereKey($content->id)->lockForUpdate()->firstOrFail();
             abort_if($expectedVersion !== null && $locked->version !== $expectedVersion, 409, 'Ce contenu a été modifié. Rechargez-le avant de réessayer.');
@@ -51,7 +57,12 @@ class StaffRestaurantController extends Controller
     {
         RestaurantAccess::require($request, $restaurant, ['admin']);
         abort_unless($content->restaurant_id === $restaurant->id, 404);
-        $content->delete();
+        $data = $request->validate(['expected_version' => ['nullable', 'integer', 'min:1']]);
+        DB::transaction(function () use ($content, $data) {
+            $locked = RestaurantContent::whereKey($content->id)->lockForUpdate()->firstOrFail();
+            abort_if(isset($data['expected_version']) && $locked->version !== $data['expected_version'], 409, 'Ce contenu a été modifié. Rechargez-le avant de réessayer.');
+            $locked->delete();
+        });
         return response()->noContent();
     }
 
@@ -64,7 +75,7 @@ class StaffRestaurantController extends Controller
             'is_featured' => ['sometimes', 'required', 'boolean'],
             'expected_version' => ['nullable', 'integer', 'min:1'],
         ]);
-        abort_if(!$data, 422, 'Indiquez une disponibilité ou un plat du jour.');
+        abort_if(!array_key_exists('is_available', $data) && !array_key_exists('is_featured', $data), 422, 'Indiquez une disponibilité ou un plat du jour.');
         DB::transaction(function () use ($restaurant, $content, $data) {
             Restaurant::whereKey($restaurant->id)->lockForUpdate()->firstOrFail();
             $content = RestaurantContent::whereKey($content->id)->lockForUpdate()->firstOrFail();
@@ -86,14 +97,37 @@ class StaffRestaurantController extends Controller
     {
         $required = $partial ? 'sometimes' : 'required';
         return $request->validate([
-            'kind' => [$required, 'in:dish,promotion,event,game'],
+            'kind' => [$partial ? 'prohibited' : 'required', 'in:dish,promotion,event,game'],
             'title' => [$required, 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'price_cdf' => ['nullable', 'integer', 'min:0'],
+            'price_cdf' => ['nullable', 'integer', 'min:0', 'max:1000000000'],
             'image_url' => ['nullable', 'url', 'max:2048'],
             'details' => ['nullable', 'array'],
             'is_published' => ['sometimes', 'boolean'],
+            'is_available' => ['sometimes', 'boolean'],
+            'category_id' => ['nullable', 'integer'],
+            'stock_quantity' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'published_from' => ['nullable', 'date'],
+            'published_until' => ['nullable', 'date'],
             'expected_version' => [$partial ? 'sometimes' : 'prohibited', 'integer', 'min:1'],
         ]);
+    }
+
+    private function validateMenuFields(Restaurant $restaurant, array $data, ?RestaurantContent $existing = null): void
+    {
+        $kind = $existing?->kind ?? $data['kind'];
+        if (isset($data['category_id'])) {
+            if ($kind !== 'dish' || !$restaurant->categories()->whereKey($data['category_id'])->exists()) {
+                throw ValidationException::withMessages(['category_id' => 'Catégorie invalide pour ce restaurant.']);
+            }
+        }
+        if ($kind !== 'dish' && array_key_exists('stock_quantity', $data) && $data['stock_quantity'] !== null) {
+            throw ValidationException::withMessages(['stock_quantity' => 'Stock réservé aux plats.']);
+        }
+        $from = array_key_exists('published_from', $data) ? $data['published_from'] : $existing?->published_from;
+        $until = array_key_exists('published_until', $data) ? $data['published_until'] : $existing?->published_until;
+        if ($from && $until && \Illuminate\Support\Carbon::parse($until)->lessThanOrEqualTo(\Illuminate\Support\Carbon::parse($from))) {
+            throw ValidationException::withMessages(['published_until' => 'La fin doit suivre le début de publication.']);
+        }
     }
 }

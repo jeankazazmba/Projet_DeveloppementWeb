@@ -38,7 +38,7 @@ class RestaurantIsolationTest extends TestCase
         $this->postJson('/api/staff/restaurants/b/content', ['kind' => 'dish', 'title' => 'Intrus'])->assertNotFound();
         $this->patchJson("/api/staff/restaurants/a/content/{$secret->id}", ['title' => 'Intrus'])->assertNotFound();
         $this->deleteJson("/api/staff/restaurants/a/content/{$secret->id}")->assertNotFound();
-        $this->postJson('/api/staff/restaurants/a/content', ['kind' => 'dish', 'title' => 'Autorisé', 'restaurant_id' => 'b'])->assertCreated()->assertJsonFragment(['restaurant_id' => 'a']);
+        $this->postJson('/api/staff/restaurants/a/content', ['kind' => 'dish', 'title' => 'Autorisé', 'price_cdf' => 3000, 'restaurant_id' => 'b'])->assertCreated()->assertJsonFragment(['restaurant_id' => 'a']);
     }
 
     public function test_manager_sees_only_published_dishes_and_cannot_edit_catalog_or_service(): void
