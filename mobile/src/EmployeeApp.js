@@ -11,17 +11,20 @@ import { claimStages, employeeWeeks, initialEmployeeData, orderStages, topEmploy
 import { Button, colors, Field, Glass, Icon, Page, Pill, SectionTitle, styles } from "./ui";
 import { getRestaurant, restaurants } from './restaurants';
 import { remoteApiUrl, staffRequest } from './remoteCatalog';
+import { mapEmployeeOrder, mapEmployeeClaim, nextOrderStatus } from './employeeApi';
 const STORAGE_KEY = "mon-miam-miam-employee-v2";
 const EMPLOYEE = "MON MIAM MIAM · EMPLOYÉ";
 const tabs = [["orders", "Commandes", "receipt-outline"], ["menu", "Menu", "restaurant-outline"], ["claims", "Réclamations", "chatbubble-ellipses-outline"], ["stats", "Stats", "stats-chart-outline"], ["profile", "Profil", "person-outline"]];
 const mainScreens = tabs.map(([name]) => name);
 const nextOrder = {
-  Reçue: "En préparation",
+  Reçue: "Acceptée",
+  Acceptée: "En préparation",
   "En préparation": "Prête"
 };
 const nextStatus = order => order.status === "Prête" ? order.service === "Livraison" ? "Remise au livreur" : "Servie" : nextOrder[order.status];
 const nextAction = {
-  Reçue: "Démarrer la préparation",
+  Reçue: "Accepter",
+  Acceptée: "Démarrer la préparation",
   "En préparation": "Marquer prête"
 };
 const actionLabel = order => order.status === "Prête" ? order.service === "Livraison" ? "Remettre au livreur" : "Marquer servie" : nextAction[order.status];
@@ -185,7 +188,7 @@ function OrdersScreen({
       color: colors.muted,
       fontSize: 12,
       marginTop: 10
-    }}>Données de démonstration enregistrées sur cet appareil.</Text>
+    }}>{remoteApiUrl ? 'Commandes reçues du serveur.' : 'Données de démonstration enregistrées sur cet appareil.'}</Text>
   </Page>;
 }
 function OrderDetailScreen({
@@ -394,15 +397,17 @@ function ClaimDetailScreen({
   const [response, setResponse] = useState(claim?.response || "");
   const editable = claim?.status === "À traiter" || claim?.status === "En cours";
   if (!claim) return <Page eyebrow={EMPLOYEE} title="Réclamation introuvable" onBack={back} />;
-  const send = () => {
+  const send = async () => {
     if (claim.status !== "En cours") return Alert.alert("Prise en charge requise", "Prenez d’abord la réclamation en charge.");
     if (!response.trim()) return Alert.alert("Réponse requise", "Rédigez une réponse pour le gérant.");
-    update(claim.id, {
+    const saved = await update(claim.id, {
       status: "Envoyée au gérant",
       response: response.trim()
     });
-    Alert.alert("Réponse enregistrée", "La réponse est conservée localement. La liaison avec l’espace gérant reste à connecter.");
-    back();
+    if (saved) {
+      Alert.alert('Réponse enregistrée', claim.rawStatus ? 'Proposition reçue par le serveur pour validation du gérant.' : 'Réponse conservée dans la démonstration locale.');
+      back();
+    }
   };
   return <Page eyebrow={EMPLOYEE} title={claim.id} subtitle="Traitement de la réclamation" onBack={back}><Glass style={{
       padding: 17
@@ -587,7 +592,7 @@ function ProfileScreen({
         color: colors.muted,
         lineHeight: 21,
         marginTop: 19
-      }}>Restaurant de travail : {restaurant.name}. {connected ? 'Le menu partagé est chargé depuis l’API. Commandes et réclamations mobiles attendent leur raccordement.' : 'Les commandes, disponibilités du menu et réponses sont enregistrées uniquement sur cet appareil.'}</Text></Glass><Button title="Changer de restaurant" variant="secondary" icon="restaurant-outline" onPress={onChangeRestaurant} style={{ marginTop: 18 }} /><Button title={connected ? 'Se déconnecter' : 'Revenir à l’espace étudiant'} variant="secondary" icon="swap-horizontal-outline" onPress={exit} style={{
+      }}>Restaurant de travail : {restaurant.name}. {connected ? 'Le menu, les commandes et les réclamations sont synchronisés avec votre restaurant.' : 'Les commandes, disponibilités du menu et réponses sont enregistrées uniquement sur cet appareil.'}</Text></Glass><Button title="Changer de restaurant" variant="secondary" icon="restaurant-outline" onPress={onChangeRestaurant} style={{ marginTop: 18 }} /><Button title={connected ? 'Se déconnecter' : 'Revenir à l’espace étudiant'} variant="secondary" icon="swap-horizontal-outline" onPress={exit} style={{
       marginTop: 18
     }} /></Page>;
 }
@@ -605,6 +610,7 @@ export default function EmployeeApp({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
+  const [sync, setSync] = useState({ loading: false, error: '', lastSync: null });
   const [data, setData] = useState(initialEmployeeData);
   const [ready, setReady] = useState(false);
   const [screen, setScreen] = useState("restaurant");
@@ -627,8 +633,24 @@ export default function EmployeeApp({
   useEffect(() => {
     if (!remoteApiUrl || !auth || !restaurantId) return;
     let active = true;
-    staffRequest(`/staff/restaurants/${encodeURIComponent(restaurantId)}/content`, auth.token).then(items => { if (active) setStaffContent(items); }).catch(error => { if (active) setAuthError(error.message); });
-    return () => { active = false; };
+    const refresh = async () => {
+      setSync(current => ({ ...current, loading: true, error: '' }));
+      try {
+        const base = `/staff/restaurants/${encodeURIComponent(restaurantId)}`;
+        const [content, orders, claims] = await Promise.all([
+          staffRequest(`${base}/content`, auth.token),
+          staffRequest(`${base}/orders?per_page=100`, auth.token),
+          staffRequest(`${base}/complaints?per_page=100`, auth.token),
+        ]);
+        if (!active) return;
+        setStaffContent(content);
+        setData({ orders: (orders.data || []).map(mapEmployeeOrder), claims: (claims.data || []).map(mapEmployeeClaim), menu: [] });
+        setSync({ loading: false, error: '', lastSync: new Date().toISOString() });
+      } catch (error) { if (active) setSync(current => ({ ...current, loading: false, error: error.message })); }
+    };
+    refresh();
+    const timer = setInterval(refresh, 30000);
+    return () => { active = false; clearInterval(timer); };
   }, [auth, restaurantId]);
   if (!ready) return <View style={{
     flex: 1
@@ -657,20 +679,44 @@ export default function EmployeeApp({
     setAuth(null); onExit();
   };
   if (remoteApiUrl && !auth) return <Page eyebrow={EMPLOYEE} title="Connexion employé" subtitle="Connectez-vous pour voir uniquement vos restaurants."><Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" /><Field label="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry /><Button title="Se connecter" onPress={loginEmployee} />{authError ? <Text style={{ color: '#ffb3a8', marginTop: 12 }}>{authError}</Text> : null}<Button title="Retour à l’espace étudiant" variant="secondary" onPress={onExit} style={{ marginTop: 20 }} /></Page>;
-  const advance = id => setData(current => ({
-    ...current,
-    orders: current.orders.map(order => order.id === id && nextStatus(order) ? {
-      ...order,
-      status: nextStatus(order)
-    } : order)
-  }));
-  const updateClaim = (id, fields) => setData(current => ({
-    ...current,
-    claims: current.claims.map(claim => claim.id === id ? {
-      ...claim,
-      ...fields
-    } : claim)
-  }));
+  const advance = async id => {
+    const order = data.orders.find(item => item.id === id);
+    if (!order) return;
+    if (!remoteApiUrl) return setData(current => ({ ...current, orders: current.orders.map(item => item.id === id && nextStatus(item) ? { ...item, status: nextStatus(item) } : item) }));
+    const status = order.rawStatus === 'ready' && order.service === 'Livraison' ? 'delivering' : nextOrderStatus[order.rawStatus];
+    if (!status) return;
+    setSync(current => ({ ...current, loading: true, error: '' }));
+    try {
+      const result = await staffRequest(`/staff/orders/${encodeURIComponent(id)}/status`, auth.token,
+        { method: 'PATCH', body: JSON.stringify({ status, expected_version: order.version }) });
+      setData(current => ({ ...current, orders: current.orders.map(item => item.id === id ? mapEmployeeOrder(result) : item) }));
+      setSync({ loading: false, error: '', lastSync: new Date().toISOString() });
+    } catch (error) { setSync(current => ({ ...current, loading: false, error: error.message })); }
+  };
+  const updateClaim = async (id, fields) => {
+    const claim = data.claims.find(item => item.id === id);
+    if (!claim) return;
+    if (!remoteApiUrl) { setData(current => ({ ...current, claims: current.claims.map(item => item.id === id ? { ...item, ...fields } : item) })); return true; }
+    const status = fields.status === 'En cours' ? 'prise_en_charge' : fields.status === 'Envoyée au gérant' ? 'proposition_employe' : null;
+    if (!status) return false;
+    setSync(current => ({ ...current, loading: true, error: '' }));
+    try {
+      const result = await staffRequest(`/staff/complaints/${encodeURIComponent(id)}/status`, auth.token,
+        { method: 'PATCH', body: JSON.stringify({ status, expected_version: claim.version, ...(fields.response ? { body: fields.response } : {}) }) });
+      setData(current => ({ ...current, claims: current.claims.map(item => item.id === id ? mapEmployeeClaim(result) : item) }));
+      setSync({ loading: false, error: '', lastSync: new Date().toISOString() });
+      return true;
+    } catch (error) { setSync(current => ({ ...current, loading: false, error: error.message })); return false; }
+  };
+  const updateService = async (item, fields) => {
+    setSync(current => ({ ...current, loading: true, error: '' }));
+    try {
+      const changed = await staffRequest(`/staff/restaurants/${encodeURIComponent(restaurantId)}/content/${item.id}/service`, auth.token,
+        { method: 'PATCH', body: JSON.stringify({ ...fields, expected_version: item.version }) });
+      setStaffContent(current => current.map(entry => entry.id === item.id ? { ...entry, ...changed } : fields.is_featured ? { ...entry, is_featured: false } : entry));
+      setSync({ loading: false, error: '', lastSync: new Date().toISOString() });
+    } catch (error) { setSync(current => ({ ...current, loading: false, error: error.message })); }
+  };
   const back = () => {
     setScreen(screen === "order-detail" ? "orders" : "claims");
     setSelectedId(null);
@@ -700,13 +746,14 @@ export default function EmployeeApp({
     }} onNotifications={() => selectTab("claims")} /><BlurTargetView ref={blurTarget} collapsable={false} style={{
       flex: 1
     }}>
+    {remoteApiUrl && <Text style={{ color: sync.error ? '#ffb3a8' : colors.muted, fontSize: 11, marginHorizontal: 20, marginTop: 6 }}>{sync.loading ? 'Synchronisation en cours…' : sync.error ? `API : ${sync.error}` : `Dernière synchronisation : ${sync.lastSync ? new Date(sync.lastSync).toLocaleTimeString('fr-CD') : 'en attente'}`}</Text>}
     {screen === 'restaurant' && <RestaurantScreen select={selectRestaurant} items={remoteApiUrl ? assigned : restaurants} connected={Boolean(remoteApiUrl)} />}
     {screen === "orders" && <OrdersScreen key={`orders-${searchRequested}`} data={data} openOrder={id => {
         setSelectedId(id);
         setScreen("order-detail");
       }} advance={advance} searchRequested={searchRequested} />}
     {screen === "order-detail" && <OrderDetailScreen order={selectedOrder} back={back} advance={advance} />}
-    {screen === "menu" && (remoteApiUrl ? <Page eyebrow={EMPLOYEE} title="Menu partagé" subtitle={(assigned.find(item => item.id === restaurantId))?.name || 'Restaurant'}>{staffContent.filter(item => item.kind === 'dish').map(item => <Glass key={item.id} style={{ padding: 16, marginBottom: 12 }}><Text style={{ color: colors.text, fontWeight: '800', fontSize: 17 }}>{item.title}</Text><Text style={{ color: colors.muted, marginTop: 6 }}>{item.description}</Text><Text style={{ color: colors.gold, marginTop: 6 }}>{item.price_cdf ? money(item.price_cdf) : ''} · {item.is_published ? 'Publié' : 'Brouillon'}</Text></Glass>)}{!staffContent.some(item => item.kind === 'dish') && <Text style={{ color: colors.muted }}>Aucun plat pour cet établissement.</Text>}</Page> : <MenuScreen data={data} save={menu => setData(current => ({
+    {screen === "menu" && (remoteApiUrl ? <Page eyebrow={EMPLOYEE} title="Menu partagé" subtitle={(assigned.find(item => item.id === restaurantId))?.name || 'Restaurant'}>{staffContent.filter(item => item.kind === 'dish').map(item => <Glass key={item.id} style={{ padding: 16, marginBottom: 12 }}><Text style={{ color: colors.text, fontWeight: '800', fontSize: 17 }}>{item.title}</Text><Text style={{ color: colors.muted, marginTop: 6 }}>{item.description}</Text><Text style={{ color: colors.gold, marginTop: 6 }}>{item.price_cdf ? money(item.price_cdf) : ''} · {item.is_published ? 'Publié' : 'Brouillon'}</Text><View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}><Text style={{ color: colors.text }}>Disponible</Text><Switch value={Boolean(item.is_available)} disabled={!item.is_published} onValueChange={value => updateService(item, { is_available: value })} /></View><Button title={item.is_featured ? 'Plat du jour' : 'Définir plat du jour'} variant="secondary" disabled={!item.is_available || !item.is_published} onPress={() => updateService(item, { is_featured: true })} /></Glass>)}{!staffContent.some(item => item.kind === 'dish') && <Text style={{ color: colors.muted }}>Aucun plat pour cet établissement.</Text>}</Page> : <MenuScreen data={data} save={menu => setData(current => ({
         ...current,
         menu
       }))} searchRequested={searchRequested} restaurantId={restaurantId} />)}
@@ -715,7 +762,7 @@ export default function EmployeeApp({
         setScreen("claim-detail");
       }} />}
     {screen === "claim-detail" && <ClaimDetailScreen claim={selectedClaim} back={back} update={updateClaim} />}
-    {screen === "stats" && (!remoteApiUrl ? <StatsScreen weeks={restaurantId === 'sleepy-hollow' ? sleepyEmployeeWeeks : employeeWeeks} topDishes={restaurantId === 'sleepy-hollow' ? sleepyTopEmployeeDishes : topEmployeeDishes} /> : <Page eyebrow={EMPLOYEE} title="Statistiques" subtitle={(remoteApiUrl ? assigned.find(item => item.id === restaurantId) : getRestaurant(restaurantId))?.name}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Les statistiques de cet établissement seront disponibles avec l’API des commandes.</Text></Glass></Page>)}
+    {screen === "stats" && (!remoteApiUrl ? <StatsScreen weeks={restaurantId === 'sleepy-hollow' ? sleepyEmployeeWeeks : employeeWeeks} topDishes={restaurantId === 'sleepy-hollow' ? sleepyTopEmployeeDishes : topEmployeeDishes} /> : <Page eyebrow={EMPLOYEE} title="Statistiques" subtitle={(remoteApiUrl ? assigned.find(item => item.id === restaurantId) : getRestaurant(restaurantId))?.name}><Glass style={{ padding: 20 }}><Text style={{ color: colors.muted }}>Les statistiques détaillées sont réservées au gérant et à l’administrateur de ce restaurant.</Text></Glass></Page>)}
     {screen === "profile" && <ProfileScreen exit={exitEmployee} restaurant={(remoteApiUrl ? assigned.find(item => item.id === restaurantId) : getRestaurant(restaurantId)) || { name: 'Restaurant' }} connected={Boolean(remoteApiUrl)} employeeName={auth?.user?.name || 'Marie T.'} onChangeRestaurant={() => setScreen('restaurant')} />}
   </BlurTargetView><TabBar active={screen} onSelect={selectTab} blurTarget={blurTarget} /></View>;
 }

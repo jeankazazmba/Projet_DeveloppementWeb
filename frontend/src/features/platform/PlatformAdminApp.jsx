@@ -47,6 +47,7 @@ export default function PlatformAdminApp() {
   const [invitationLink, setInvitationLink] = useState('')
   const [insights, setInsights] = useState(emptyInsights)
   const [loading, setLoading] = useState(false)
+  const [lastSync, setLastSync] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -84,7 +85,7 @@ export default function PlatformAdminApp() {
         platformRequest(`/platform/audit${auditQuery}`, session.token),
         platformRequest('/platform/invitations', session.token),
       ])
-      setRestaurants(list); setUsers(accounts); setInsights(report); setAudit(log); setInvitations(pendingInvitations)
+      setRestaurants(list); setUsers(accounts); setInsights(report); setAudit(log); setInvitations(pendingInvitations); setLastSync(new Date().toISOString())
     } catch (reason) {
       setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([]); setInvitations([])
       if (reason.status === 401 || reason.status === 403) { setSession(null); setMode(null) }
@@ -96,6 +97,11 @@ export default function PlatformAdminApp() {
     const timer = window.setTimeout(() => { if (mode === 'demo') refreshDemo(); else if (mode === 'connected') void refreshConnected() }, 0)
     return () => window.clearTimeout(timer)
   }, [mode, refreshDemo, refreshConnected])
+  useEffect(() => {
+    if (mode !== 'connected') return
+    const timer = window.setInterval(() => void refreshConnected(), 30000)
+    return () => window.clearInterval(timer)
+  }, [mode, refreshConnected])
 
   const login = async event => {
     event.preventDefault(); setBusy(true); setError('')
@@ -241,7 +247,7 @@ export default function PlatformAdminApp() {
     </header>
       <main id="platform-main" className="platform-main" tabIndex={-1}>
         <div className="platform-page-heading"><div><span className="platform-kicker">ZEDUC-SP@CE · {currentPage.group.toUpperCase()}</span><h1>{currentPage.label}</h1><p>{currentPage.description}</p></div>{tab === 'overview' && <button type="button" className="platform-primary" onClick={() => setTab('restaurants')}><PlatformIcon name="restaurant" size={18} /> Gérer les restaurants</button>}</div>
-        <div className="platform-intro"><p>{mode === 'demo' ? 'Aperçu local : les comptes, commandes et chiffres ci-dessous ne sont pas synchronisés avec le serveur.' : insights.has_demo_rows ? 'Données serveur incluant des lignes de démonstration clairement marquées.' : 'Données serveur · accès réservé à l’administration plateforme.'}</p>{loading && <span>Actualisation…</span>}</div>{['overview', 'orders', 'complaints', 'loyalty'].includes(tab) && <div className="platform-period"><label>Du <input type="date" value={from} max={to || undefined} onChange={event => setFrom(event.target.value)} /></label><label>Au <input type="date" value={to} min={from || undefined} onChange={event => setTo(event.target.value)} /></label>{(from || to) && <button onClick={() => { setFrom(''); setTo('') }}>Effacer les dates</button>}</div>}
+        <div className="platform-intro"><span role="status">{mode === "connected" ? loading ? "Synchronisation en cours…" : error ? `Erreur API : ${error}` : `Dernière synchronisation : ${lastSync ? new Date(lastSync).toLocaleString("fr-CD") : "en attente"}` : "Démonstration locale"}</span><p>{mode === 'demo' ? 'Aperçu local : les comptes, commandes et chiffres ci-dessous ne sont pas synchronisés avec le serveur.' : insights.has_demo_rows ? 'Données serveur incluant des lignes de démonstration clairement marquées.' : 'Données serveur · accès réservé à l’administration plateforme.'}</p>{loading && <span>Actualisation…</span>}</div>{['overview', 'orders', 'complaints', 'loyalty'].includes(tab) && <div className="platform-period"><label>Du <input type="date" value={from} max={to || undefined} onChange={event => setFrom(event.target.value)} /></label><label>Au <input type="date" value={to} min={from || undefined} onChange={event => setTo(event.target.value)} /></label>{(from || to) && <button onClick={() => { setFrom(''); setTo('') }}>Effacer les dates</button>}</div>}
         {error && <p className="platform-error" role="alert">{error}</p>}{notice && <p className="platform-notice" role="status">{notice}</p>}
         {tab === 'overview' && <OverviewPanel {...context} />}
         {tab === 'restaurants' && <RestaurantsPanel {...context} />}

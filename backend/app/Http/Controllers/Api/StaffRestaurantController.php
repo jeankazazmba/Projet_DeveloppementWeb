@@ -23,6 +23,8 @@ class StaffRestaurantController extends Controller
     {
         $role = RestaurantAccess::role($request, $restaurant);
         if ($role === 'admin') return $restaurant->contents()->with(['category', 'options', 'allergens'])->orderByDesc('updated_at')->get();
+        if ($role === 'employee') return $restaurant->contents()->where('kind', 'dish')->where('is_published', true)
+            ->orderBy('title')->get(['id', 'restaurant_id', 'kind', 'title', 'price_cdf', 'image_url', 'is_published', 'is_available', 'is_featured', 'version']);
         return $restaurant->contents()->where('kind', 'dish')->publicActive()
             ->orderBy('title')->get(['id', 'restaurant_id', 'kind', 'title', 'price_cdf', 'image_url', 'is_published', 'is_available', 'is_featured', 'version']);
     }

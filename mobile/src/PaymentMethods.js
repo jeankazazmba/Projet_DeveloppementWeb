@@ -17,7 +17,7 @@ const methodDetails = {
   ethereum: "ETH · simulation sans portefeuille",
 };
 
-export default function PaymentMethods({ mode, selectedMethod, onSelect, scenario, onScenarioChange }) {
+export default function PaymentMethods({ mode, selectedMethod, onSelect, scenario, onScenarioChange, connected = false }) {
   const cashSelected = selectedMethod === "cash";
   return (
     <View>
@@ -29,7 +29,7 @@ export default function PaymentMethods({ mode, selectedMethod, onSelect, scenari
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: colors.text, fontWeight: "800", fontSize: 15 }}>{cashPaymentLabel(mode)}</Text>
-              <Text style={{ color: colors.muted, marginTop: 4, lineHeight: 19 }}>Commande locale · aucun encaissement dans l'application.</Text>
+              <Text style={{ color: colors.muted, marginTop: 4, lineHeight: 19 }}>{connected ? 'Intention espèces à régler créée par le serveur après la commande.' : "Commande locale · aucun encaissement dans l'application."}</Text>
             </View>
             <Icon name={cashSelected ? "checkmark-circle" : "ellipse-outline"} color={cashSelected ? colors.green : colors.muted} size={23} />
           </View>
@@ -41,7 +41,7 @@ export default function PaymentMethods({ mode, selectedMethod, onSelect, scenari
           {paymentMethods.filter((method) => method.group === group).map((method) => {
             const selected = selectedMethod === method.id;
             return (
-              <Pressable key={method.id} accessibilityRole="radio" accessibilityState={{ selected }} accessibilityLabel={`${method.name}, test local sans débit`} onPress={() => onSelect(method.id)} style={{ marginBottom: 9 }}>
+              <Pressable key={method.id} accessibilityRole="radio" accessibilityState={{ selected, disabled: connected }} accessibilityLabel={`${method.name}, ${connected ? 'indisponible avec le serveur' : 'test local sans débit'}`} disabled={connected} onPress={() => onSelect(method.id)} style={{ marginBottom: 9, opacity: connected ? 0.55 : 1 }}>
                 <Glass style={{ padding: 13, borderColor: selected ? colors.gold : "#484035", borderWidth: 1 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                     <View style={{ width: 48, height: 42, borderRadius: 11, backgroundColor: "#F6F3EB", alignItems: "center", justifyContent: "center" }}>
@@ -59,7 +59,7 @@ export default function PaymentMethods({ mode, selectedMethod, onSelect, scenari
           })}
         </View>
       ))}
-      {!cashSelected && (
+      {!connected && !cashSelected && (
         <Glass style={{ padding: 16, marginTop: 8 }}>
           <Text style={{ color: colors.gold, fontWeight: "800", marginBottom: 5 }}>Simulation locale · aucun débit</Text>
           <Text style={{ color: colors.muted, lineHeight: 19, marginBottom: 12 }}>Choisissez le résultat à tester. Aucun compte, carte ou portefeuille réel n'est demandé.</Text>
@@ -73,7 +73,7 @@ export default function PaymentMethods({ mode, selectedMethod, onSelect, scenari
         </Glass>
       )}
       <Text style={{ color: colors.muted, lineHeight: 19, marginTop: 12, marginHorizontal: 2 }}>
-        Les commandes et les paiements restent sur cet appareil. La connexion aux sandboxes des prestataires et la vérification côté serveur seront ajoutées séparément.
+        {connected ? 'Les autres moyens restent indisponibles jusqu’à validation de leurs sandboxes. Aucun paiement électronique n’est confirmé ici.' : "Les commandes et les paiements restent sur cet appareil. La connexion aux sandboxes des prestataires et la vérification côté serveur seront ajoutées séparément."}
       </Text>
     </View>
   );

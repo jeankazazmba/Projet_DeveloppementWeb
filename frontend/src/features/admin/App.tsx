@@ -18,6 +18,8 @@ import { sleepyClaims, sleepyDishes, sleepyEmployees, sleepyOrders, sleepyPromot
 import { useRestaurantScope } from '../shared/useRestaurantScope.js'
 import { RestaurantScopeControl } from '../shared/RestaurantScope.jsx'
 import { RestaurantNameContext } from './restaurantContext'
+import { StaffLogin, SyncBanner, useStaffConnection } from '../shared/staffApi.jsx'
+import ConnectedAdminPage from './pages/ConnectedAdminPage'
 
 const nav: { page: Page; label: string; icon: string }[] = [
   { page: 'dashboard', label: 'Tableau de bord', icon: assets.dashboard.imgIcon },
@@ -38,9 +40,14 @@ function readPage(): Page {
 }
 export default function App() {
   const scope = useRestaurantScope('admin')
-  return <AdminWorkspace key={scope.restaurantId} {...scope} />
+  const connection = useStaffConnection('admin')
+  if (connection.mode === 'login') return <StaffLogin role="admin" connection={connection} />
+  const connected = connection.mode === 'connected'
+  const selected = connected ? connection.restaurants.find((item: { id: string; name: string }) => item.id === connection.restaurantId) || connection.restaurants[0] : scope.restaurant
+  return <AdminWorkspace key={`${connected ? 'api' : 'demo'}-${selected?.id}`} {...scope} restaurant={selected} restaurantId={selected?.id} setRestaurantId={connected ? connection.setRestaurantId : scope.setRestaurantId} allowedRestaurants={connected ? connection.restaurants : scope.allowedRestaurants} connection={connection} />
 }
-function AdminWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRestaurants }: { restaurant: { id: string; name: string }; restaurantId: string; setRestaurantId: (id: string) => void; allowedRestaurants: { id: string; name: string }[] }) {
+function AdminWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRestaurants, connection }: { restaurant: { id: string; name: string }; restaurantId: string; setRestaurantId: (id: string) => void; allowedRestaurants: { id: string; name: string }[]; connection: any }) {
+  const connected = connection.mode === 'connected'
   const sleepy = restaurantId === 'sleepy-hollow'
   const [page, setPage] = useState<Page>(readPage)
   const [theme, setTheme] = useState<Theme>(() => {
@@ -81,17 +88,19 @@ function AdminWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRest
     {sidebar && <button className="sidebar-shade" aria-label="Fermer la navigation" onClick={() => setSidebar(false)} />}
     <aside id="navigation" className={`sidebar ${sidebar ? 'is-open' : ''}`}>
       <a href="#/dashboard" className="brand" aria-label="Mon Miam Miam — Tableau de bord"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="Mon Miam Miam ZeDuc-Sp@ce" /><span>KINSHASA • RDC</span></a>
-      <div className="role-line"><span className="badge">ADMIN RESTAURANT</span><span className="live-label"><img src={assets.dashboard.imgEllipse} alt="" />Démo active</span></div>
+      <div className="role-line"><span className="badge">ADMIN RESTAURANT</span><span className="live-label"><img src={assets.dashboard.imgEllipse} alt="" />{connected ? 'Connecté' : 'Démo active'}</span></div>
       <p className="admin-restaurant-scope">Restaurant : <strong>{restaurant.name}</strong></p>
       <nav aria-label="Navigation administrateur">
         {nav.map(item => <div key={item.page}>
           <a href={`#/${item.page}`} onClick={() => setSidebar(false)} className={`nav-link ${page === item.page ? 'active' : ''}`} aria-current={page === item.page ? 'page' : undefined}><Icon src={item.icon} /><span>{item.label}</span>{item.page === 'claims' && openClaims > 0 && <span className="nav-count">{openClaims}</span>}</a>
         </div>)}
       </nav>
-      <div className="sidebar-bottom"><a className="admin-platform-link" href="/catalogue-pro">Catalogue partagé →</a><a className="admin-platform-link" href="/plateforme">Vue admin plateforme →</a><div className="user-card"><span className="avatar">AD</span><div><strong>Admin</strong><small>{restaurant.name}</small></div></div><div className="support-links"><button onClick={() => setInfo('Les coordonnées du support technique seront configurées avec le backend.')}><Icon src={assets.dashboard.imgContainer1} />Support<br />Technique</button><button disabled title="Authentification à connecter au backend"><Icon src={assets.dashboard.imgContainer2} />Déconnexion</button></div></div>
+      <div className="sidebar-bottom"><a className="admin-platform-link" href="/catalogue-pro">Catalogue partagé →</a><a className="admin-platform-link" href="/plateforme">Vue admin plateforme →</a><div className="user-card"><span className="avatar">AD</span><div><strong>{connected ? connection.profile?.name : 'Admin'}</strong><small>{restaurant.name}</small></div></div><div className="support-links"><button onClick={() => setInfo('Les coordonnées du support technique seront configurées avec le backend.')}><Icon src={assets.dashboard.imgContainer1} />Support<br />Technique</button><button disabled={!connected} onClick={connection.logout}><Icon src={assets.dashboard.imgContainer2} />Déconnexion</button></div></div>
     </aside>
-    <div className="workspace"><header className="topbar"><button type="button" className="icon-button mobile-menu" aria-label="Ouvrir la navigation" aria-expanded={sidebar} aria-controls="navigation" onClick={() => setSidebar(!sidebar)}>☰</button><form onSubmit={e => { e.preventDefault(); navigate('menu') }}><SearchInput value={query} onChange={setQuery} placeholder="Rechercher un plat..." /></form><div className="topbar-right"><RestaurantScopeControl restaurant={restaurant} restaurants={allowedRestaurants} onChange={setRestaurantId} /><span className="demo-label" title="Données locales issues des maquettes, réinitialisées au rechargement">Démo</span><span className="service-chip"><img src={assets.dashboard.imgEllipse} alt="" />Service démo</span><button type="button" className="theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button className="notification-button" aria-label={`Voir les ${openClaims} réclamations ouvertes`} onClick={() => navigate('claims')}><Icon src={assets.dashboard.imgIconBell} /></button><button className="profile-button" onClick={() => navigate('settings')}><span className="avatar">AD</span><span>Admin</span></button></div></header>
+    <div className="workspace"><header className="topbar"><button type="button" className="icon-button mobile-menu" aria-label="Ouvrir la navigation" aria-expanded={sidebar} aria-controls="navigation" onClick={() => setSidebar(!sidebar)}>☰</button><form onSubmit={e => { e.preventDefault(); navigate('menu') }}><SearchInput value={query} onChange={setQuery} placeholder="Rechercher un plat..." /></form><div className="topbar-right"><RestaurantScopeControl restaurant={restaurant} restaurants={allowedRestaurants} onChange={setRestaurantId} /><span className="demo-label">{connected ? 'API' : 'Démo'}</span><span className="service-chip"><img src={assets.dashboard.imgEllipse} alt="" />{connected ? 'Service connecté' : 'Service démo'}</span><button type="button" className="theme-toggle" aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'} onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button className="notification-button" aria-label={`Voir les ${openClaims} réclamations ouvertes`} onClick={() => navigate('claims')}><Icon src={assets.dashboard.imgIconBell} /></button><button className="profile-button" onClick={() => navigate('settings')}><span className="avatar">AD</span><span>Admin</span></button></div></header>
       <main id="main" tabIndex={-1} className={`main-content page-${page}`}>
+        {connected && <ConnectedAdminPage key={restaurantId} page={page} restaurant={restaurant} token={connection.token} query={query} />}
+        {!connected && <>
         {page === 'dashboard' && <Dashboard navigate={navigate} openClaims={openClaims} orders={orders} />}
         {page === 'orders' && <Orders orders={orders} setOrders={setOrders} notify={setNotice} />}
         {page === 'tables' && <Tables tables={tables} setTables={setTables} orders={orders} notify={setNotice} />}
@@ -102,6 +111,7 @@ function AdminWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRest
         {page === 'claims' && <Claims claims={claims} setClaims={setClaims} notify={setNotice} />}
         {page === 'settings' && <Settings settings={settings} setSettings={setSettings} notify={setNotice} />}
         {page === 'data' && <DataReadiness employees={employees.length} dishes={dishes.length} promotions={promotions.length} claims={claims.length} orders={orders.length} tables={tables.length} />}
+        </>}
       </main>
       <footer className="footer"><img src={assets.dashboard.imgMonMiamMiamZeDucSpCe} alt="" /><p>© 2026 Mon Miam Miam • ZeDuc-Sp@ce, Kinshasa • RDC</p><button onClick={() => setInfo('Les mentions légales et conditions de vente doivent être fournies par le restaurant.')}>Mentions<br />Légales & CGV</button><button onClick={() => setInfo('La politique de confidentialité sera ajoutée avant la mise en production.')}>Politique RGPD<br />Campus</button><button onClick={() => setInfo('Le numéro WhatsApp complet du restaurant reste à renseigner.')}>WhatsApp<br />Assistance (+243)</button></footer>
     </div>

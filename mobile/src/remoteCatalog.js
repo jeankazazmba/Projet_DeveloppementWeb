@@ -4,11 +4,23 @@ import { setRestaurants } from './restaurants';
 const apiUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '').replace(/\/api$/, '');
 export const remoteApiUrl = apiUrl;
 export async function staffRequest(path, token, options = {}) {
-  const response = await fetch(`${apiUrl}/api${path}`, { ...options, headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
+  if (!apiUrl) throw new Error('API non configurée. Utilisez la démonstration.');
+  let response;
+  try {
+    response = await fetch(`${apiUrl}/api${path}`, { ...options, headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers } });
+  } catch {
+    throw new Error('Réseau indisponible. Vérifiez la connexion à l’API.');
+  }
   const body = response.status === 204 ? null : await response.json().catch(() => null);
-  if (!response.ok) throw new Error(body?.message || 'Connexion au serveur impossible.');
+  if (!response.ok) {
+    const error = new Error(body?.message || `Requête refusée (${response.status}).`);
+    error.status = response.status;
+    error.details = body?.error?.details;
+    throw error;
+  }
   return body;
 }
+export const studentRequest = staffRequest;
 let remoteContent = null;
 
 export function getRemoteContent(restaurantId, kind) {

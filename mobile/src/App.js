@@ -30,7 +30,8 @@ import {
 } from "react-native-safe-area-context";
 import { categories, categoryLabels, dishes, findDish, money } from "./catalog";
 import { getRestaurant, restaurants, normalizeRestaurantId, PRIMARY_RESTAURANT_ID } from "./restaurants";
-import { loadRemoteCatalog } from './remoteCatalog';
+import { loadRemoteCatalog, remoteApiUrl, studentRequest } from './remoteCatalog';
+import { buildOrderRequest, contentId, mapOrder, orderItems } from './studentApi';
 import { getGamesForRestaurant, playable } from './games';
 import Onboarding from "./Onboarding";
 import SplashIntro from "./SplashIntro";
@@ -127,6 +128,11 @@ function localNotifications(data) {
 
 function AppProvider({ children, skipOnboarding = false }) {
   const [data, setData] = useState(initialData);
+  const [sessionToken, setSessionToken] = useState(null);
+  const [cartHydrated, setCartHydrated] = useState(false);
+  const [sync, setSync] = useState({ loading: false, error: '', lastSync: null });
+  const cartVersion = useRef(null);
+  const skipCartWrite = useRef(false);
   const [catalogVersion, setCatalogVersion] = useState(0);
   const [apiConnected, setApiConnected] = useState(false);
   const [ready, setReady] = useState(false);
@@ -140,9 +146,11 @@ function AppProvider({ children, skipOnboarding = false }) {
   }, []);
   useEffect(() => {
     let active = true;
+    if (remoteApiUrl) setSync(current => ({ ...current, loading: true }));
     loadRemoteCatalog().then(loaded => {
-      if (active && loaded) { setApiConnected(true); setCatalogVersion(value => value + 1); }
-    }).catch(() => {});
+      if (active && loaded) { setApiConnected(true); setCatalogVersion(value => value + 1); setSync({ loading: false, error: '', lastSync: new Date().toISOString() }); }
+      else if (active) setSync(current => ({ ...current, loading: false, error: remoteApiUrl ? 'Catalogue API vide. Démonstration affichée.' : '', lastSync: null }));
+    }).catch(error => { if (active) setSync(current => ({ ...current, loading: false, error: error.message, lastSync: null })); });
     return () => { active = false; };
   }, []);
   useEffect(() => {
@@ -150,18 +158,31 @@ function AppProvider({ children, skipOnboarding = false }) {
       .then((raw) => {
         if (raw) {
           const saved = JSON.parse(raw);
-          setData({ ...initialData, ...migrateStudentDemo(saved) });
+          const migrated = migrateStudentDemo(saved);
+          if (migrated.source === 'server') { migrated.user = null; migrated.orders = []; migrated.cart = {}; }
+          setData({ ...initialData, ...migrated });
           if (skipOnboarding)
-            setStack([{ name: saved.user ? "home" : "login", params: {} }]);
+            setStack([{ name: migrated.user ? "home" : "login", params: {} }]);
         }
       })
       .catch(() => {})
       .finally(() => setReady(true));
   }, []);
   useEffect(() => {
-    if (ready) AsyncStorage.setItem(KEY, JSON.stringify(data)).catch(() => {});
+    if (ready) AsyncStorage.setItem(KEY, JSON.stringify(data.source === 'server' ? { ...data, user: null, orders: [], cart: {} } : data)).catch(() => {});
   }, [data, ready]);
   const screen = stack[stack.length - 1];
+  useEffect(() => {
+    if (!sessionToken || !['orders', 'order'].includes(screen.name)) return;
+    let active = true;
+    setSync(current => ({ ...current, loading: true }));
+    studentRequest('/me/orders?per_page=100', sessionToken).then(result => {
+      if (!active) return;
+      setData(current => ({ ...current, orders: (result.data || []).map(mapOrder) }));
+      setSync({ loading: false, error: '', lastSync: new Date().toISOString() });
+    }).catch(error => { if (active) setSync(current => ({ ...current, loading: false, error: error.message })); });
+    return () => { active = false; };
+  }, [sessionToken, screen.name]);
   const go = (name, params = {}) =>
     setStack((current) => [...current, { name, params }]);
   const tab = (name) => setStack([{ name, params: {} }]);
@@ -171,14 +192,62 @@ function AppProvider({ children, skipOnboarding = false }) {
         ? current.slice(0, -1)
         : [{ name: "home", params: {} }],
     );
-  const login = (user) => {
-    setData((current) => ({ ...current, user }));
+  const login = (user, token = null) => {
+    setSessionToken(token);
+    setCartHydrated(false);
+    setData((current) => ({ ...current, user, source: token ? 'server' : 'demo', orders: token ? [] : current.orders, cart: token ? {} : current.cart, complaints: token ? [] : current.complaints, points: token ? 0 : current.points }));
     tab("home");
   };
   const logout = () => {
-    setData((current) => ({ ...current, user: null }));
+    if (sessionToken) studentRequest('/auth/logout', sessionToken, { method: 'POST' }).catch(() => {});
+    setSessionToken(null);
+    setCartHydrated(false);
+    setData((current) => ({ ...current, user: null, orders: [], cart: {}, source: null }));
     setStack([{ name: "login", params: {} }]);
   };
+  useEffect(() => {
+    if (!sessionToken) return;
+    let active = true;
+    setSync(current => ({ ...current, loading: true, error: '' }));
+    Promise.all([studentRequest('/me', sessionToken), studentRequest('/me/cart', sessionToken), studentRequest('/me/orders?per_page=100', sessionToken)])
+      .then(([profile, cart, orders]) => {
+        if (!active) return;
+        cartVersion.current = cart?.version ?? null;
+        skipCartWrite.current = true;
+        setData(current => ({ ...current, user: profile, cart: Object.fromEntries((cart?.items || []).map(item => [`api-${item.content_id}`, item.quantity])), orders: (orders.data || []).map(mapOrder) }));
+        setCartHydrated(true);
+        setSync({ loading: false, error: '', lastSync: new Date().toISOString() });
+      })
+      .catch(error => {
+        if (!active) return;
+        if (error.status === 401 || error.status === 403) { setSessionToken(null); setData(current => ({ ...current, user: null, cart: {}, orders: [] })); tab('login'); }
+        setSync(current => ({ ...current, loading: false, error: error.message }));
+      });
+    return () => { active = false; };
+  }, [sessionToken]);
+  useEffect(() => {
+    if (!sessionToken || !cartHydrated) return;
+    if (skipCartWrite.current) { skipCartWrite.current = false; return; }
+    const timer = setTimeout(async () => {
+      try {
+        const entries = Object.entries(data.cart);
+        if (!entries.length) {
+          await studentRequest('/me/cart', sessionToken, { method: 'DELETE' });
+          cartVersion.current = null;
+        } else {
+          const restaurantId = findDish(entries[0][0])?.restaurantId;
+          if (!restaurantId) throw new Error('Plat du panier absent du catalogue serveur.');
+          const cart = await studentRequest('/me/cart', sessionToken, { method: 'PUT', body: JSON.stringify({
+            restaurant_id: restaurantId, replace_restaurant: true, expected_version: cartVersion.current,
+            items: entries.map(([id, quantity]) => ({ content_id: contentId(id), quantity })),
+          }) });
+          cartVersion.current = cart.version;
+        }
+        setSync(current => ({ ...current, error: '', lastSync: new Date().toISOString() }));
+      } catch (error) { setSync(current => ({ ...current, error: `Panier non synchronisé : ${error.message}` })); }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [data.cart, sessionToken, cartHydrated]);
   const finishOnboarding = () => {
     setData((current) => ({ ...current, onboardingDone: true }));
     setStack((current) => {
@@ -224,12 +293,40 @@ function AppProvider({ children, skipOnboarding = false }) {
     (sum, item) => sum + item.dish.price * item.quantity,
     0,
   );
-  const placeOrder = ({ mode, address, arrival, usePoints, paymentAttempt }) => {
+  const placeOrder = async ({ mode, address, district, phone, arrival, usePoints, paymentAttempt }) => {
     if (!cartItems.length) return;
     const restaurantId = cartItems[0].dish.restaurantId;
     if (cartItems.some(item => item.dish.restaurantId !== restaurantId)) {
       Alert.alert('Panier à vérifier', 'Une commande ne peut concerner qu’un seul restaurant.');
       return;
+    }
+    if (sessionToken) {
+      if (usePoints || paymentAttempt) throw new Error('La réduction et les paiements test locaux ne sont pas disponibles pour une commande serveur.');
+      setSync(current => ({ ...current, loading: true, error: '' }));
+      try {
+        const body = await buildOrderRequest(restaurantId, sessionToken, { mode, address, district, phone, arrival, cartItems });
+        const quote = await studentRequest(`/restaurants/${encodeURIComponent(restaurantId)}/quotes`, sessionToken,
+          { method: 'POST', body: JSON.stringify(body) });
+        const created = await studentRequest(`/restaurants/${encodeURIComponent(restaurantId)}/orders`, sessionToken,
+          { method: 'POST', headers: { 'Idempotency-Key': `mobile-${Date.now()}-${Math.random().toString(36).slice(2, 10)}` }, body: JSON.stringify(body) });
+        let paymentStatus = 'À régler';
+        try {
+          const intent = await studentRequest(`/me/orders/${encodeURIComponent(created.id)}/payment-intents`, sessionToken,
+            { method: 'POST', headers: { 'Idempotency-Key': `cash-${created.id}` }, body: JSON.stringify({ method: 'cash' }) });
+          paymentStatus = intent.status === 'cash_due' ? 'Espèces à régler' : 'Paiement en attente';
+        } catch (error) { paymentStatus = `Intention à créer : ${error.message}`; }
+        const order = { ...mapOrder(created), total: created.amount_cdf ?? quote.total_cdf, paymentStatus };
+        await studentRequest('/me/cart', sessionToken, { method: 'DELETE' }).catch(() => {});
+        cartVersion.current = null;
+        skipCartWrite.current = true;
+        setData(current => ({ ...current, cart: {}, orders: [order, ...current.orders.filter(item => item.id !== order.id)] }));
+        setSync({ loading: false, error: '', lastSync: new Date().toISOString() });
+        setStack([{ name: 'confirmation', params: { orderId: order.id } }]);
+        return;
+      } catch (error) {
+        setSync(current => ({ ...current, loading: false, error: error.message }));
+        throw error;
+      }
     }
     const discount = usePoints
       ? Math.min(Math.floor(data.points / 10) * 100, subtotal)
@@ -282,6 +379,8 @@ function AppProvider({ children, skipOnboarding = false }) {
     data,
     catalogVersion,
     apiConnected,
+    sessionToken,
+    sync,
     setData,
     screen,
     go,
@@ -381,7 +480,7 @@ function BottomTabs({ blurTarget }) {
 }
 
 function Router({ onOpenEmployee }) {
-  const { screen, finishOnboarding, cartItems, data, go, tab } = useApp();
+  const { screen, finishOnboarding, cartItems, data, go, tab, sync, sessionToken } = useApp();
   const blurTarget = useRef(null);
   if (screen.name === "onboarding")
     return (
@@ -447,6 +546,11 @@ function Router({ onOpenEmployee }) {
           }}
         />
       )}
+      {remoteApiUrl && <View style={{ paddingHorizontal: 22, paddingVertical: 5 }}>
+        <Text style={{ color: sync.error ? colors.red : colors.muted, fontSize: 11 }}>
+          {sync.loading ? 'Synchronisation en cours…' : sync.error ? `API : ${sync.error}` : sessionToken ? `Dernière synchronisation : ${sync.lastSync ? new Date(sync.lastSync).toLocaleTimeString('fr-CD') : 'en attente'}` : 'Mode démonstration · connexion disponible'}
+        </Text>
+      </View>}
       <BlurTargetView ref={blurTarget} collapsable={false} style={{ flex: 1 }}>
         <Component
           key={`${screen.name}-${screen.params?.id || ""}-${screen.params?.searchAt || ""}`}
@@ -635,7 +739,9 @@ function Login({ onOpenEmployee }) {
   const { login, go } = useApp();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const submit = () => {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const submit = async () => {
     if (!email.includes("@") || !password) {
       Alert.alert(
         "Informations manquantes",
@@ -643,7 +749,18 @@ function Login({ onOpenEmployee }) {
       );
       return;
     }
-    login({ name: email.split("@")[0], email });
+    if (!remoteApiUrl) return setError('API non configurée. Utilisez la démonstration.');
+    setBusy(true); setError('');
+    try {
+      const session = await studentRequest('/auth/login', null, { method: 'POST', body: JSON.stringify({ email, password }) });
+      const profile = await studentRequest('/me', session.token);
+      if (profile.account_type !== 'student') {
+        await studentRequest('/auth/logout', session.token, { method: 'POST' }).catch(() => {});
+        throw new Error('Ce compte ne correspond pas à un étudiant.');
+      }
+      login(profile, session.token);
+    } catch (reason) { setError(reason.message); }
+    finally { setBusy(false); }
   };
   return (
     <AuthShell
@@ -671,7 +788,8 @@ function Login({ onOpenEmployee }) {
       >
         <Text style={{ color: colors.gold }}>Mot de passe oublié ?</Text>
       </Pressable>
-      <Button title="Se connecter" onPress={submit} icon="log-in-outline" />
+      <Button title={busy ? 'Connexion…' : 'Se connecter'} onPress={submit} disabled={busy} icon="log-in-outline" />
+      {error ? <Text style={{ color: colors.red, marginTop: 9 }}>{error}</Text> : null}
       <Button
         title="Explorer la démo"
         variant="secondary"
@@ -708,6 +826,8 @@ function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
   return (
     <AuthShell
       title="Créer un compte"
@@ -732,19 +852,23 @@ function Register() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        placeholder="Au moins 6 caractères"
+        placeholder="Au moins 12 caractères"
       />
       <Button
-        title="Créer mon compte démo"
-        onPress={() => {
-          if (!name.trim() || !email.includes("@") || password.length < 6)
-            return Alert.alert(
-              "Vérifiez vos informations",
-              "Nom, e-mail valide et mot de passe de 6 caractères minimum requis.",
-            );
-          login({ name: name.trim(), email: email.trim() });
+        title={busy ? 'Création…' : 'Créer mon compte'}
+        disabled={busy}
+        onPress={async () => {
+          if (!name.trim() || !email.includes('@') || password.length < 12) return setError('Nom, e-mail valide et mot de passe de 12 caractères minimum requis.');
+          if (!remoteApiUrl) return setError('API non configurée. Revenez à la connexion pour explorer la démonstration.');
+          setBusy(true); setError('');
+          try {
+            const session = await studentRequest('/auth/register', null, { method: 'POST', body: JSON.stringify({ name: name.trim(), email: email.trim(), password, password_confirmation: password }) });
+            login(session.user, session.token);
+          } catch (reason) { setError(reason.message); }
+          finally { setBusy(false); }
         }}
       />
+      {error ? <Text style={{ color: colors.red, marginTop: 9 }}>{error}</Text> : null}
       <Button
         title="Retour à la connexion"
         variant="secondary"
@@ -1230,11 +1354,15 @@ function Cart() {
 }
 
 function Checkout() {
-  const { back, subtotal, data, cartItems, placeOrder } = useApp();
+  const { back, subtotal, data, cartItems, placeOrder, sessionToken } = useApp();
   const cartRestaurant = cartItems.length ? getRestaurant(cartItems[0].dish.restaurantId) : null;
   const [mode, setMode] = useState("Retrait");
   const [arrival, setArrival] = useState("");
   const [address, setAddress] = useState("");
+  const [district, setDistrict] = useState('');
+  const [phone, setPhone] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
   const [usePoints, setUsePoints] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState("cash");
   const [paymentScenario, setPaymentScenario] = useState("success");
@@ -1247,7 +1375,7 @@ function Checkout() {
       subtitle="Préparez votre commande étudiante."
       onBack={back}
     >
-      {cartRestaurant && <Glass style={{ padding: 14, marginBottom: 12 }}><Text style={{ color: colors.gold, fontWeight: '800' }}>Commande pour {cartRestaurant.name}</Text><Text style={{ color: colors.muted, fontSize: 12 }}>Paiement et livraison de démonstration, sans transmission au restaurant.</Text></Glass>}
+      {cartRestaurant && <Glass style={{ padding: 14, marginBottom: 12 }}><Text style={{ color: colors.gold, fontWeight: '800' }}>Commande pour {cartRestaurant.name}</Text><Text style={{ color: colors.muted, fontSize: 12 }}>{sessionToken ? 'Le serveur vérifiera les plats, le créneau, les frais et le total avant de créer la commande.' : 'Paiement et livraison de démonstration, sans transmission au restaurant.'}</Text></Glass>}
       <SectionTitle title="Mode de réception" />
       <View style={{ flexDirection: "row" }}>
         <Pill
@@ -1268,22 +1396,22 @@ function Checkout() {
           onChange={setArrival}
         />
         {mode === "Livraison" && (
-          <Field
+          <><Field
             label="Adresse de livraison"
             value={address}
             onChangeText={setAddress}
             placeholder="Bâtiment, campus, repère…"
-          />
+          />{sessionToken && <><Field label="Commune" value={district} onChangeText={setDistrict} placeholder="Gombe" /><Field label="Téléphone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="+243…" /></>}</>
         )}
       </Glass>
       <SectionTitle title="Paiement" />
-      <PaymentMethods mode={mode} selectedMethod={selectedMethod} onSelect={setSelectedMethod} scenario={paymentScenario} onScenarioChange={setPaymentScenario} />
+      <PaymentMethods mode={mode} selectedMethod={selectedMethod} onSelect={setSelectedMethod} scenario={paymentScenario} onScenarioChange={setPaymentScenario} connected={Boolean(sessionToken)} />
       <SectionTitle title="Vos points" />
-      <Glass style={{ padding: 16 }} onPress={() => setUsePoints(!usePoints)}>
+      <Glass style={{ padding: 16 }} onPress={() => { if (!sessionToken) setUsePoints(!usePoints); }}>
         <View style={styles.rowBetween}>
           <View>
             <Text style={{ color: colors.text, fontWeight: "800" }}>
-              Utiliser mes {data.points} points
+              {sessionToken ? 'Réduction en points indisponible pour la commande serveur' : `Utiliser mes ${data.points} points`}
             </Text>
             <Text style={{ color: colors.muted, marginTop: 3 }}>
               Réduction possible :{" "}
@@ -1305,20 +1433,22 @@ function Checkout() {
           style={{ height: 1, backgroundColor: "#484035", marginVertical: 13 }}
         />
         <Summary
-          label="Total"
+          label={sessionToken ? 'Total estimé' : 'Total'}
           value={money(subtotal + (mode === "Livraison" ? 1500 : 0) - discount)}
           strong
         />
       </Glass>
       <Button
-        title={selectedMethod === "cash" ? "Confirmer · payer à la réception" : "Tester le paiement et confirmer"}
-        onPress={() => {
+        title={busy ? 'Vérification serveur…' : selectedMethod === "cash" ? "Commander · espèces à régler" : "Tester le paiement et confirmer"}
+        disabled={busy}
+        onPress={async () => {
           if (!arrival.trim() || (mode === "Livraison" && !address.trim()))
             return Alert.alert(
               "Informations manquantes",
               "Indiquez l’heure souhaitée et, en livraison, votre adresse.",
             );
           const amount = subtotal + (mode === "Livraison" ? 1500 : 0) - discount;
+          if (sessionToken && selectedMethod !== 'cash') return setError('Ce moyen de paiement n’est pas encore disponible sur le serveur. Choisissez les espèces.');
           if (selectedMethod !== "cash" && amount <= 0) {
             return Alert.alert("Total nul", "Choisissez le paiement à la réception pour confirmer une commande sans montant à tester.");
           }
@@ -1329,16 +1459,14 @@ function Checkout() {
           if (paymentAttempt?.status === "test_pending") {
             return Alert.alert("Paiement test en attente", `Aucun débit ni commande créée. Référence : ${paymentAttempt.reference}`);
           }
-          placeOrder({
-            mode,
-            arrival: arrival.trim(),
-            address: address.trim(),
-            usePoints,
-            paymentAttempt,
-          });
+          setBusy(true); setError('');
+          try { await placeOrder({ mode, arrival: arrival.trim(), address: address.trim(), district, phone, usePoints, paymentAttempt }); }
+          catch (reason) { setError(reason.message); }
+          finally { setBusy(false); }
         }}
         style={{ marginTop: 20 }}
       />
+      {error ? <Text style={{ color: colors.red, marginTop: 10 }}>{error}</Text> : null}
       <Text
         style={{
           color: colors.muted,
@@ -1347,7 +1475,7 @@ function Checkout() {
           marginTop: 12,
         }}
       >
-        Simulation locale : aucun paiement n'est débité et aucune commande n'est envoyée au restaurant.
+        {sessionToken ? 'La commande n’existe que lorsque le serveur renvoie son identifiant. Espèces à régler ; aucun paiement électronique confirmé.' : "Simulation locale : aucun paiement n'est débité et aucune commande n'est envoyée au restaurant."}
       </Text>
     </Page>
   );
@@ -1382,8 +1510,8 @@ function Confirmation({ params }) {
     data.orders.find((item) => item.id === params.orderId) || data.orders[0];
   return (
     <Page
-      title="Commande confirmée"
-      subtitle="Votre commande de démonstration a été enregistrée sur cet appareil."
+      title={order?.source === 'server' ? 'Commande reçue par le serveur' : 'Commande de démonstration'}
+      subtitle={order?.source === 'server' ? `Statut serveur : ${order.status}. Le restaurant doit encore accepter la commande.` : 'Votre commande de démonstration a été enregistrée sur cet appareil.'}
     >
       <Glass style={{ padding: 25, alignItems: "center" }}>
         <Icon name="checkmark-circle" size={58} color={colors.green} />
@@ -1408,8 +1536,7 @@ function Confirmation({ params }) {
             marginTop: 11,
           }}
         >
-          Nous avons conservé les détails localement. Aucun restaurant n'a reçu
-          cette commande.
+          {order?.source === 'server' ? 'Le serveur a créé cette commande. Son acceptation et son paiement restent à confirmer.' : "Nous avons conservé les détails localement. Aucun restaurant n'a reçu cette commande."}
         </Text>
       </Glass>
       {order && (
@@ -1442,7 +1569,7 @@ function Confirmation({ params }) {
 }
 
 function Orders() {
-  const { data, go, tab } = useApp();
+  const { data, go, tab, sessionToken } = useApp();
   const [filter, setFilter] = useState("Toutes");
   const list = data.orders.filter(
     (order) => filter === "Toutes" || order.status.includes(filter),
@@ -1450,7 +1577,7 @@ function Orders() {
   return (
     <Page
       title="Mes commandes"
-      subtitle="Suivez vos commandes enregistrées dans la démo."
+      subtitle={sessionToken ? 'Statuts reçus du serveur lors de la dernière synchronisation.' : 'Suivez vos commandes enregistrées dans la démo.'}
     >
       <View style={{ flexDirection: "row", marginBottom: 16 }}>
         <Pill
@@ -1547,8 +1674,7 @@ function OrderDetail({ params }) {
           ● {order.status}
         </Text>
         <Text style={{ color: colors.muted, marginTop: 8, lineHeight: 20 }}>
-          Ce suivi est une simulation locale. Le statut réel sera disponible
-          après connexion à l'API.
+          {order.source === 'server' ? 'Statut transmis par le serveur lors de la dernière synchronisation.' : "Ce suivi est une simulation locale. Le statut réel sera disponible après connexion à l'API."}
         </Text>
       </Glass>
       <SectionTitle title="Plats commandés" />
