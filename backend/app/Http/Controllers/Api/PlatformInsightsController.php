@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Carbon;
 
 class PlatformInsightsController extends Controller
 {
@@ -27,8 +28,8 @@ class PlatformInsightsController extends Controller
         $scope = function (string $table) use ($restaurantId, $from, $to) {
             return DB::table($table)
                 ->when($restaurantId, fn ($query) => $query->where('restaurant_id', $restaurantId))
-                ->when($from, fn ($query) => $query->whereDate('created_at', '>=', $from))
-                ->when($to, fn ($query) => $query->whereDate('created_at', '<=', $to));
+                ->when($from, fn ($query) => $query->where('created_at', '>=', Carbon::parse($from, 'Africa/Kinshasa')->startOfDay()->utc()))
+                ->when($to, fn ($query) => $query->where('created_at', '<', Carbon::parse($to, 'Africa/Kinshasa')->addDay()->startOfDay()->utc()));
         };
         $contentScope = fn () => DB::table('restaurant_contents')
             ->when($restaurantId, fn ($query) => $query->where('restaurant_id', $restaurantId));
@@ -58,8 +59,20 @@ class PlatformInsightsController extends Controller
                 ];
             });
         $escalations = $scope('complaints')->where('escalated', true)
-            ->select(['id', 'restaurant_id', 'status', 'created_at', 'is_demo'])
+            ->select(['id', 'restaurant_id', 'status', 'created_at'])
             ->orderByDesc('created_at')->limit(100)->get();
+
+        $firstMonth = ($to ? Carbon::parse($to, 'Africa/Kinshasa') : Carbon::now('Africa/Kinshasa'))->startOfMonth()->subMonths(5);
+        $localDay = DB::getDriverName() === 'sqlite' ? "DATE(datetime(created_at, '+1 hour'))" : 'DATE(DATE_ADD(created_at, INTERVAL 1 HOUR))';
+        $dailyOrders = $scope('orders')->where('created_at', '>=', $firstMonth->copy()->startOfDay()->utc())
+            ->selectRaw("restaurant_id, {$localDay} as day, COUNT(*) as orders, SUM(CASE WHEN status IN ('Annulée', 'cancelled') THEN 0 ELSE amount_cdf END) as order_volume_cdf")
+            ->groupBy('restaurant_id', DB::raw($localDay))->get();
+        $monthlyOrders = $dailyOrders->groupBy(fn ($row) => substr($row->day, 0, 7));
+        $trends = collect(range(0, 5))->map(function ($offset) use ($firstMonth, $monthlyOrders) {
+            $month = $firstMonth->copy()->addMonths($offset)->format('Y-m');
+            $rows = $monthlyOrders->get($month, collect());
+            return ['month' => $month, 'orders' => (int) $rows->sum('orders'), 'order_volume_cdf' => (int) $rows->sum('order_volume_cdf')];
+        });
 
         return response()->json([
             'summary' => [
@@ -73,6 +86,7 @@ class PlatformInsightsController extends Controller
             ],
             'by_restaurant' => $byRestaurant,
             'complaints' => $escalations,
+            'trends' => $trends,
             'limits' => ['complaints' => 100],
             'has_demo_rows' => $scope('orders')->where('is_demo', true)->exists()
                 || $scope('complaints')->where('is_demo', true)->exists()

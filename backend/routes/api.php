@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\StaffRestaurantController;
 use App\Http\Controllers\Api\PlatformRestaurantController;
 use App\Http\Controllers\Api\PlatformUserController;
 use App\Http\Controllers\Api\PlatformInsightsController;
+use App\Http\Controllers\Api\PlatformInvitationController;
+use App\Http\Controllers\Api\PlatformProfileController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -20,6 +22,7 @@ Route::get('/restaurants', [RestaurantCatalogController::class, 'index']);
 Route::get('/restaurants/{restaurant}', [RestaurantCatalogController::class, 'show']);
 Route::get('/restaurants/{restaurant}/content', [RestaurantCatalogController::class, 'content']);
 Route::post('/login', [SessionController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/platform/register', [PlatformInvitationController::class, 'register'])->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [SessionController::class, 'logout']);
@@ -38,4 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/platform/restaurants/{restaurant}/members/{user}', [PlatformUserController::class, 'revoke']);
     Route::get('/platform/insights', [PlatformInsightsController::class, 'index']);
     Route::get('/platform/audit', [PlatformInsightsController::class, 'audit']);
+    Route::get('/platform/invitations', [PlatformInvitationController::class, 'index']);
+    Route::post('/platform/invitations', [PlatformInvitationController::class, 'store'])->middleware('throttle:5,1');
+    Route::delete('/platform/invitations/{invitation}', [PlatformInvitationController::class, 'destroy']);
+    Route::get('/platform/me', [PlatformProfileController::class, 'show']);
+    Route::put('/platform/me/password', [PlatformProfileController::class, 'password'])->middleware('throttle:5,1');
 });

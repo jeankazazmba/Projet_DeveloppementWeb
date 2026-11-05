@@ -58,10 +58,17 @@ export function getDemoInsights({ restaurantId = '', from = '', to = '' } = {}) 
     }
   })
   const complaints = inPeriod ? sampleEscalations.filter(item => !restaurantId || item.restaurant_id === restaurantId).map(item => ({ ...item, created_at: `${today}T12:00:00Z` })) : []
+  const trends = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(); date.setUTCDate(1); date.setUTCMonth(date.getUTCMonth() - 5 + index)
+    const month = date.toISOString().slice(0, 7)
+    const factor = [0.5, 0.7, 0.65, 0.8, 0.9, 1][index]
+    return { month, orders: inPeriod ? Math.round(sum(byRestaurant, 'orders') * factor) : 0, order_volume_cdf: inPeriod ? Math.round(sum(byRestaurant, 'order_volume_cdf') * factor) : 0 }
+  })
   return {
     summary: { orders: sum(byRestaurant, 'orders'), order_volume_cdf: sum(byRestaurant, 'order_volume_cdf'), escalated_complaints: sum(byRestaurant, 'escalated_complaints'), points_issued: sum(byRestaurant, 'points_issued'), points_used: sum(byRestaurant, 'points_used'), referrals: sum(byRestaurant, 'referrals'), published_contents: sum(byRestaurant, 'published_contents') },
     by_restaurant: byRestaurant,
     complaints,
+    trends,
     has_demo_rows: true,
   }
 }

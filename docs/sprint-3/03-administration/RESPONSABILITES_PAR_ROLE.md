@@ -10,7 +10,7 @@
 
 Le cahier attribue la gestion interne à la **direction d'un restaurant**, à son **gérant** et à ses **employés**. L'étudiant utilise les services du restaurant. La capacité à accueillir plusieurs restaurants est une contrainte d'évolution, mais le cahier ne crée aucun rôle « administrateur de plateforme ». Ce rôle est une **extension demandée ensuite** pour gérer ZeDuc-Sp@ce et les établissements qui y participent.
 
-Chaque plat, promotion, événement, jeu, commande, réclamation et mouvement de fidélité appartient à un restaurant. L'appartenance et les droits sont vérifiés par le serveur. Un administrateur de plateforme supervise le réseau avec des **indicateurs agrégés et des métadonnées minimales** ; il n'ouvre pas le menu interne, les commandes individuelles, les dossiers ordinaires ou les comptes clients d'un restaurant. Une personne qui a aussi un rôle local utilise une session ou un contexte de rôle explicite pour agir dans ce restaurant.
+Chaque plat, promotion, événement, jeu, commande, réclamation et mouvement de fidélité appartient à un restaurant. L'appartenance et les droits sont vérifiés par le serveur. Un administrateur de plateforme supervise le réseau avec des **indicateurs agrégés et des métadonnées minimales** ; il n'ouvre pas le menu interne, les commandes individuelles, les dossiers ordinaires ou les comptes clients d'un restaurant. Dans l'implémentation actuelle, un compte plateforme est refusé par les routes internes même si une ancienne affectation locale existe. Une personne exerçant aussi une fonction locale doit utiliser un compte local distinct.
 
 ## 2. Fonctions par type d'utilisateur
 
@@ -57,7 +57,7 @@ Le cahier mentionne la livraison, mais **ne définit pas un espace livreur**. Un
 | Fidélité et parrainage | Totaux agrégés par restaurant. | Solde et mouvements individuels, identité des filleuls, corrections de points. |
 | Audit | Actions de gouvernance de la plateforme avec auteur, cible, date et motif. | Journal des opérations propres au restaurant, à concevoir séparément. |
 
-**Contrôle serveur requis :** supprimer les champs et listes interdits des réponses `/api/platform/*`. Masquer une colonne dans React ne protège pas une API qui continue à la transmettre. Un admin plateforme n'accède au catalogue professionnel d'un établissement que s'il possède aussi une affectation locale autorisée, affichée comme rôle distinct. La création et l'affectation des employés et gérants doivent passer par des routes locales réservées au gérant ou à l'admin du restaurant ; elles ne font pas partie des routes de plateforme.
+**Contrôle serveur requis :** supprimer les champs et listes interdits des réponses `/api/platform/*`. Masquer une colonne dans React ne protège pas une API qui continue à la transmettre. Un compte admin plateforme ne peut ni être affecté comme admin local ni accéder au catalogue professionnel, y compris lorsqu'une ancienne affectation existe. La création et l'affectation des employés et gérants doivent passer par des routes locales réservées au gérant ou à l'admin du restaurant ; elles ne font pas partie des routes de plateforme.
 
 ## 5. Parcours et responsabilités de bout en bout
 

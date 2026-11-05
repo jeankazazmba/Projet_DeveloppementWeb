@@ -11,6 +11,7 @@ class StaffRestaurantController extends Controller
 {
     private function role(Request $request, Restaurant $restaurant): string
     {
+        abort_if($request->user()->is_platform_admin, 403);
         $role = $request->user()->restaurants()->whereKey($restaurant->id)->first()?->pivot?->role;
         abort_unless($role, 404);
         return $role;
@@ -23,6 +24,7 @@ class StaffRestaurantController extends Controller
 
     public function restaurants(Request $request)
     {
+        abort_if($request->user()->is_platform_admin, 403);
         return $request->user()->restaurants()->orderBy('name')->get();
     }
 

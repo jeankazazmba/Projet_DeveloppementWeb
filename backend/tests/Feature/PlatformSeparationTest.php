@@ -20,12 +20,12 @@ class PlatformSeparationTest extends TestCase
         $platform = User::create(['name' => 'Plateforme', 'email' => 'platform@example.test', 'password' => 'password123456', 'is_platform_admin' => true]);
         Sanctum::actingAs($platform);
 
-        $this->getJson('/api/staff/restaurants')->assertOk()->assertJsonCount(0);
-        $this->getJson('/api/staff/restaurants/khalifa/content')->assertNotFound();
-        $this->postJson('/api/staff/restaurants/khalifa/content', ['kind' => 'dish', 'title' => 'Intrus'])->assertNotFound();
+        $this->getJson('/api/staff/restaurants')->assertForbidden();
+        $this->getJson('/api/staff/restaurants/khalifa/content')->assertForbidden();
+        $this->postJson('/api/staff/restaurants/khalifa/content', ['kind' => 'dish', 'title' => 'Intrus'])->assertForbidden();
 
         $platform->restaurants()->attach($restaurant->id, ['role' => 'admin']);
-        $this->getJson('/api/staff/restaurants/khalifa/content')->assertOk()->assertJsonFragment(['title' => 'Recette interne']);
+        $this->getJson('/api/staff/restaurants/khalifa/content')->assertForbidden();
     }
 
     public function test_platform_insights_return_aggregates_without_order_or_complaint_details(): void
@@ -41,6 +41,7 @@ class PlatformSeparationTest extends TestCase
         $this->getJson('/api/platform/insights')->assertOk()
             ->assertJsonPath('summary.orders', 1)
             ->assertJsonPath('summary.published_contents', 1)
+            ->assertJsonCount(6, 'trends')
             ->assertJsonPath('complaints.0.id', 'ESC-1')
             ->assertJsonMissingPath('orders')
             ->assertJsonMissingPath('contents')

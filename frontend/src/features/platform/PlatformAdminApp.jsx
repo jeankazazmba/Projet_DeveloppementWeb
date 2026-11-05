@@ -6,6 +6,8 @@ import { platformApiBase, platformRequest } from './platformApi.js'
 import PlatformIcon from './PlatformIcon.jsx'
 import { AccountsPanel, AuditPanel, OverviewPanel, RestaurantsPanel } from './PlatformPanels.jsx'
 import { CatalogPanel, ComplaintsPanel, LoyaltyPanel, OrdersPanel } from './PlatformNetworkPanels.jsx'
+import PlatformInvitationsPanel from './PlatformInvitationsPanel.jsx'
+import PlatformProfilePanel from './PlatformProfilePanel.jsx'
 import './platform.css'
 
 const logo = '/assets/figma/dashboard-imgMonMiamMiamZeDucSpCe.png'
@@ -13,13 +15,15 @@ const nav = [
   { id: 'overview', label: 'Vue d’ensemble', icon: 'dashboard', group: 'Pilotage', description: 'Suivez l’activité de ZeDuc-Sp@ce et de ses restaurants.' },
   { id: 'restaurants', label: 'Restaurants', icon: 'restaurant', group: 'Pilotage', description: 'Créez et gérez les établissements de la plateforme.' },
   { id: 'accounts', label: 'Accès responsables', icon: 'team', group: 'Pilotage', description: 'Attribuez les accès des administrateurs de restaurant.' },
+  { id: 'invitations', label: 'Admins plateforme', icon: 'team', group: 'Pilotage', description: 'Invitez les administrateurs de ZeDuc-Sp@ce.' },
   { id: 'catalog', label: 'Publications', icon: 'catalog', group: 'Supervision', description: 'Suivez les volumes de contenus publiés par établissement.' },
   { id: 'orders', label: 'Activité des commandes', icon: 'orders', group: 'Supervision', description: 'Comparez les volumes de commandes entre les restaurants.' },
   { id: 'complaints', label: 'Escalades', icon: 'claims', group: 'Supervision', description: 'Repérez les dossiers transmis à la plateforme.' },
   { id: 'loyalty', label: 'Programmes', icon: 'loyalty', group: 'Supervision', description: 'Consultez les totaux de fidélité et parrainage.' },
   { id: 'audit', label: 'Journal d’audit', icon: 'audit', group: 'Traçabilité', description: 'Retrouvez les actions sensibles effectuées sur la plateforme.' },
+  { id: 'profile', label: 'Mon compte', icon: 'team', group: 'Compte', description: 'Consultez votre identité et sécurisez votre accès.' },
 ]
-const emptyInsights = { summary: { orders: 0, order_volume_cdf: 0, escalated_complaints: 0, points_issued: 0, points_used: 0, referrals: 0, published_contents: 0 }, by_restaurant: [], complaints: [], has_demo_rows: false }
+const emptyInsights = { summary: { orders: 0, order_volume_cdf: 0, escalated_complaints: 0, points_issued: 0, points_used: 0, referrals: 0, published_contents: 0 }, by_restaurant: [], complaints: [], trends: [], has_demo_rows: false }
 const statusKey = restaurant => restaurant.status === 'Actif' || restaurant.status === 'Exemple' || restaurant.status === 'active' ? 'active' : restaurant.status === 'Suspendu' || restaurant.status === 'suspended' ? 'suspended' : 'draft'
 const demoStatus = value => value === 'active' ? 'Actif' : value === 'suspended' ? 'Suspendu' : 'Brouillon'
 const slug = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -29,6 +33,8 @@ export default function PlatformAdminApp() {
   const [session, setSession] = useState(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [invitationToken, setInvitationToken] = useState(() => window.location.hash.startsWith('#invitation=') ? window.location.hash.slice(12) : '')
+  const [registration, setRegistration] = useState({ name: '', email: '', password: '', password_confirmation: '' })
   const [tab, setTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [restaurantFilter, setRestaurantFilter] = useState('')
@@ -37,6 +43,8 @@ export default function PlatformAdminApp() {
   const [restaurants, setRestaurants] = useState([])
   const [users, setUsers] = useState([])
   const [audit, setAudit] = useState([])
+  const [invitations, setInvitations] = useState([])
+  const [invitationLink, setInvitationLink] = useState('')
   const [insights, setInsights] = useState(emptyInsights)
   const [loading, setLoading] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -57,6 +65,7 @@ export default function PlatformAdminApp() {
     setRestaurants(getRestaurants())
     setUsers(getDemoUsers())
     setAudit(getDemoAudit().filter(item => !restaurantFilter || item.restaurant_id === restaurantFilter))
+    setInvitations([])
     setInsights(getDemoInsights({ restaurantId: restaurantFilter, from, to }))
   }, [restaurantFilter, from, to])
   const refreshConnected = useCallback(async () => {
@@ -68,21 +77,25 @@ export default function PlatformAdminApp() {
       if (from) query.set('from', from)
       if (to) query.set('to', to)
       const auditQuery = restaurantFilter ? `?restaurant_id=${encodeURIComponent(restaurantFilter)}` : ''
-      const [list, accounts, report, log] = await Promise.all([
+      const [list, accounts, report, log, pendingInvitations] = await Promise.all([
         platformRequest('/platform/restaurants', session.token),
         platformRequest('/platform/users', session.token),
         platformRequest(`/platform/insights${query.size ? `?${query}` : ''}`, session.token),
         platformRequest(`/platform/audit${auditQuery}`, session.token),
+        platformRequest('/platform/invitations', session.token),
       ])
-      setRestaurants(list); setUsers(accounts); setInsights(report); setAudit(log)
+      setRestaurants(list); setUsers(accounts); setInsights(report); setAudit(log); setInvitations(pendingInvitations)
     } catch (reason) {
-      setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([])
+      setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([]); setInvitations([])
       if (reason.status === 401 || reason.status === 403) { setSession(null); setMode(null) }
       setError(reason.message)
     }
     finally { setLoading(false) }
   }, [session, restaurantFilter, from, to])
-  useEffect(() => { if (mode === 'demo') refreshDemo(); else if (mode === 'connected') void refreshConnected() }, [mode, refreshDemo, refreshConnected])
+  useEffect(() => {
+    const timer = window.setTimeout(() => { if (mode === 'demo') refreshDemo(); else if (mode === 'connected') void refreshConnected() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [mode, refreshDemo, refreshConnected])
 
   const login = async event => {
     event.preventDefault(); setBusy(true); setError('')
@@ -97,9 +110,17 @@ export default function PlatformAdminApp() {
     finally { setBusy(false) }
   }
   const enterDemo = () => { setError(''); setSession(null); setMode('demo'); setTab('overview') }
+  const register = async event => {
+    event.preventDefault(); setBusy(true); setError('')
+    try {
+      const result = await platformRequest('/platform/register', null, { method: 'POST', body: JSON.stringify({ ...registration, token: invitationToken }) })
+      setSession(result); setMode('connected'); setInvitationToken(''); setRegistration({ name: '', email: '', password: '', password_confirmation: '' }); window.history.replaceState(null, '', '/plateforme')
+    } catch (reason) { setError(reason.message) }
+    finally { setBusy(false) }
+  }
   const logout = async () => {
     if (session) await platformRequest('/logout', session.token, { method: 'POST' }).catch(() => {})
-    setMode(null); setSession(null); setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([]); setRestaurantFilter(''); setTab('overview'); setSidebarOpen(false)
+    setMode(null); setSession(null); setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([]); setInvitations([]); setInvitationLink(''); setRestaurantFilter(''); setTab('overview'); setSidebarOpen(false)
   }
   const mutate = async (connectedAction, demoAction, success) => {
     setBusy(true); setError(''); setNotice('')
@@ -146,11 +167,59 @@ export default function PlatformAdminApp() {
     isActive ? 'Compte réactivé.' : 'Compte suspendu.',
   )
 
-  const context = { restaurants, users, audit, insights, restaurantFilter, mode, busy, statusKey, onCreateRestaurant: createRestaurant, onUpdateRestaurant: updateRestaurant, onCreateUser: createUser, onAssignUser: assignUser, onRevokeUser: revokeUser, onSetUserActive: setUserActive, onTab: setTab }
+  const createInvitation = async emailAddress => {
+    setBusy(true); setError(''); setInvitationLink('')
+    try {
+      const result = await platformRequest('/platform/invitations', session.token, { method: 'POST', body: JSON.stringify({ email: emailAddress }) })
+      setInvitationLink(`${window.location.origin}/plateforme#invitation=${result.token}`)
+      await refreshConnected()
+      setNotice('Invitation créée. Copiez le lien avant de quitter cette page.')
+      return true
+    } catch (reason) { setError(reason.message); return false }
+    finally { setBusy(false) }
+  }
+  const revokeInvitation = id => mutate(
+    () => platformRequest(`/platform/invitations/${id}`, session.token, { method: 'DELETE' }),
+    () => {},
+    'Invitation révoquée.',
+  )
+  const changePassword = async draft => {
+    setBusy(true); setError(''); setNotice('')
+    try {
+      await platformRequest('/platform/me/password', session.token, { method: 'PUT', body: JSON.stringify(draft) })
+      setNotice('Mot de passe modifié. Les autres sessions ont été déconnectées.')
+      return true
+    } catch (reason) { setError(reason.message); return false }
+    finally { setBusy(false) }
+  }
+
+  const context = { restaurants, users, audit, insights, invitations, invitationLink, restaurantFilter, mode, busy, statusKey, onCreateRestaurant: createRestaurant, onUpdateRestaurant: updateRestaurant, onCreateUser: createUser, onAssignUser: assignUser, onRevokeUser: revokeUser, onSetUserActive: setUserActive, onInvite: createInvitation, onRevoke: revokeInvitation, onTab: setTab }
   const currentPage = nav.find(item => item.id === tab) || nav[0]
   const escalatedCount = insights.summary.escalated_complaints
 
-  if (!mode) return <div className="platform-app" data-theme={theme}><main className="platform-gateway"><img src={logo} alt="Mon Miam Miam" /><span className="platform-kicker">ZEDUC-SP@CE · ADMINISTRATION</span><h1>Administration de la plateforme</h1><p>Connectez-vous avec un compte administrateur de plateforme pour gérer les établissements et leurs accès.</p>{platformApiBase && <form className="platform-login" onSubmit={login}><label>Adresse e-mail<input type="email" autoComplete="username" required value={email} onChange={event => setEmail(event.target.value)} /></label><label>Mot de passe<input type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} /></label><button className="platform-primary" disabled={busy}>Se connecter</button></form>}{!platformApiBase && <p className="platform-note">API non configurée : renseignez VITE_API_URL pour la connexion réelle.</p>}<button className="platform-demo-entry" onClick={enterDemo}>Explorer la démonstration →</button>{error && <p className="platform-error" role="alert">{error}</p>}<Link to="/acces">← Choisir un autre espace</Link></main></div>
+  if (!mode) return <div className="platform-app" data-theme={theme}><main className="platform-gateway">
+    <img src={logo} alt="Mon Miam Miam" />
+    <span className="platform-kicker">ZEDUC-SP@CE · ADMINISTRATION</span>
+    <h1>{invitationToken ? 'Créer votre compte plateforme' : 'Administration de la plateforme'}</h1>
+    <p>{invitationToken ? 'Cette inscription nécessite une invitation émise par un administrateur de ZeDuc-Sp@ce.' : 'Connectez-vous avec un compte administrateur de plateforme pour gérer les établissements et leurs accès.'}</p>
+    {invitationToken ? <form className="platform-login" onSubmit={register}>
+      <label>Nom complet<input required autoComplete="name" value={registration.name} onChange={event => setRegistration({ ...registration, name: event.target.value })} /></label>
+      <label>Adresse e-mail invitée<input type="email" required autoComplete="email" value={registration.email} onChange={event => setRegistration({ ...registration, email: event.target.value })} /></label>
+      <label>Mot de passe<input type="password" minLength={12} required autoComplete="new-password" value={registration.password} onChange={event => setRegistration({ ...registration, password: event.target.value })} /></label>
+      <label>Confirmer le mot de passe<input type="password" minLength={12} required autoComplete="new-password" value={registration.password_confirmation} onChange={event => setRegistration({ ...registration, password_confirmation: event.target.value })} /></label>
+      <button className="platform-primary" disabled={busy || !platformApiBase}>Créer le compte</button>
+    </form> : <>
+      {platformApiBase && <form className="platform-login" onSubmit={login}>
+        <label>Adresse e-mail<input type="email" autoComplete="username" required value={email} onChange={event => setEmail(event.target.value)} /></label>
+        <label>Mot de passe<input type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} /></label>
+        <button className="platform-primary" disabled={busy}>Se connecter</button>
+      </form>}
+      <button className="platform-demo-entry" onClick={enterDemo}>Explorer la démonstration →</button>
+    </>}
+    {!platformApiBase && <p className="platform-note">API non configurée : renseignez VITE_API_URL pour la connexion réelle.</p>}
+    {error && <p className="platform-error" role="alert">{error}</p>}
+    <Link to="/acces">← Choisir un autre espace</Link>
+  </main></div>
 
   return <div className="platform-app" data-theme={theme}>
     <a className="platform-skip" href="#platform-main">Aller au contenu</a>
@@ -177,11 +246,13 @@ export default function PlatformAdminApp() {
         {tab === 'overview' && <OverviewPanel {...context} />}
         {tab === 'restaurants' && <RestaurantsPanel {...context} />}
         {tab === 'accounts' && <AccountsPanel {...context} />}
+        {tab === 'invitations' && <PlatformInvitationsPanel {...context} />}
         {tab === 'catalog' && <CatalogPanel {...context} />}
         {tab === 'orders' && <OrdersPanel {...context} />}
         {tab === 'complaints' && <ComplaintsPanel {...context} />}
         {tab === 'loyalty' && <LoyaltyPanel {...context} />}
         {tab === 'audit' && <AuditPanel {...context} />}
+        {tab === 'profile' && <PlatformProfilePanel user={session?.user} mode={mode} busy={busy} onPasswordChange={changePassword} />}
       </main><footer className="platform-footer">© ZeDuc-Sp@ce · Mon Miam Miam <span>{mode === 'demo' ? 'Mode démonstration' : 'Administration connectée'}</span></footer></div>
   </div>
 }

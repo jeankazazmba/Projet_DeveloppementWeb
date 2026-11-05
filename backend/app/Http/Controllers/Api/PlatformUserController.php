@@ -44,7 +44,7 @@ class PlatformUserController extends Controller
     public function assign(Request $request, Restaurant $restaurant, User $user)
     {
         abort_unless($request->user()->is_platform_admin, 403);
-        abort_unless($user->is_platform_admin || $user->restaurants()->wherePivot('role', 'admin')->exists(), 404);
+        abort_unless(!$user->is_platform_admin && $user->restaurants()->wherePivot('role', 'admin')->exists(), 404);
         $data = $request->validate(['role' => ['required', Rule::in(['admin'])]]);
         DB::transaction(function () use ($request, $restaurant, $user, $data) {
             $previous = $user->restaurants()->whereKey($restaurant->id)->first()?->pivot?->role;
@@ -71,6 +71,7 @@ class PlatformUserController extends Controller
         abort_unless($user->is_platform_admin || $user->restaurants()->wherePivot('role', 'admin')->exists(), 404);
         $data = $request->validate(['is_active' => ['required', 'boolean'], 'reason' => ['nullable', 'string', 'max:1000']]);
         abort_if($user->id === $request->user()->id && !$data['is_active'], 422, 'Vous ne pouvez pas suspendre votre propre compte.');
+        abort_if($user->is_platform_admin && !$data['is_active'] && User::where('is_platform_admin', true)->where('is_active', true)->count() <= 1, 422, 'Le dernier administrateur plateforme actif ne peut pas être suspendu.');
         if (!$data['is_active'] && empty($data['reason'])) return response()->json(['message' => 'Un motif est obligatoire pour suspendre un compte.'], 422);
         DB::transaction(function () use ($request, $user, $data) {
             $previous = $user->is_active;
