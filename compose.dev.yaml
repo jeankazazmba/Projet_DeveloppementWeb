@@ -15,6 +15,11 @@ services:
       sh -c "composer install --no-interaction --prefer-dist &&
       php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"
 
+  queue:
+    volumes:
+      - ./backend:/var/www/html
+      - backend_vendor:/var/www/html/vendor
+
   frontend:
     build:
       context: ./frontend

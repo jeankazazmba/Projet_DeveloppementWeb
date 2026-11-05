@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Carbon;
 use App\Support\PlatformAccess;
 use App\Support\ApiResponse;
+use App\Support\RestaurantStatistics;
 
 class PlatformInsightsController extends Controller
 {
@@ -46,7 +47,8 @@ class PlatformInsightsController extends Controller
         $contentScope = fn () => DB::table('restaurant_contents')
             ->when($restaurantId, fn ($query) => $query->where('restaurant_id', $restaurantId));
 
-        $orderTotals = $scope('orders')->selectRaw("restaurant_id, COUNT(*) as orders, SUM(CASE WHEN status IN ('Annulée', 'cancelled') THEN 0 ELSE amount_cdf END) as order_volume_cdf")->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
+        $orderTotals = $scope('orders')->whereIn('status', RestaurantStatistics::CONFIRMED)
+            ->selectRaw('restaurant_id, COUNT(*) as orders, SUM(amount_cdf) as order_volume_cdf')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
         $complaintTotals = $scope('complaints')->where('escalated', true)->selectRaw('restaurant_id, COUNT(*) as escalated_complaints')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
         $contentTotals = $contentScope()->where('is_published', true)->selectRaw("restaurant_id, COUNT(*) as published_contents, SUM(CASE WHEN kind = 'dish' THEN 1 ELSE 0 END) as dishes, SUM(CASE WHEN kind = 'promotion' THEN 1 ELSE 0 END) as promotions, SUM(CASE WHEN kind = 'event' THEN 1 ELSE 0 END) as events, SUM(CASE WHEN kind = 'game' THEN 1 ELSE 0 END) as games")->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
         $loyaltyTotals = $scope('loyalty_movements')->selectRaw('restaurant_id, SUM(CASE WHEN points > 0 THEN points ELSE 0 END) as points_issued, SUM(CASE WHEN points < 0 THEN -points ELSE 0 END) as points_used')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
@@ -76,8 +78,8 @@ class PlatformInsightsController extends Controller
 
         $firstMonth = ($to ? Carbon::parse($to, 'Africa/Kinshasa') : Carbon::now('Africa/Kinshasa'))->startOfMonth()->subMonths(5);
         $localDay = DB::getDriverName() === 'sqlite' ? "DATE(datetime(created_at, '+1 hour'))" : 'DATE(DATE_ADD(created_at, INTERVAL 1 HOUR))';
-        $dailyOrders = $scope('orders')->where('created_at', '>=', $firstMonth->copy()->startOfDay()->utc())
-            ->selectRaw("restaurant_id, {$localDay} as day, COUNT(*) as orders, SUM(CASE WHEN status IN ('Annulée', 'cancelled') THEN 0 ELSE amount_cdf END) as order_volume_cdf")
+        $dailyOrders = $scope('orders')->whereIn('status', RestaurantStatistics::CONFIRMED)->where('created_at', '>=', $firstMonth->copy()->startOfDay()->utc())
+            ->selectRaw("restaurant_id, {$localDay} as day, COUNT(*) as orders, SUM(amount_cdf) as order_volume_cdf")
             ->groupBy('restaurant_id', DB::raw($localDay))->get();
         $monthlyOrders = $dailyOrders->groupBy(fn ($row) => substr($row->day, 0, 7));
         $trends = collect(range(0, 5))->map(function ($offset) use ($firstMonth, $monthlyOrders) {

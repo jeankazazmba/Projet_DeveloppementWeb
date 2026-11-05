@@ -17,6 +17,7 @@ services:
 
   backend:
     build: ./backend
+    image: mmm-backend
     restart: unless-stopped
     depends_on:
       db:
@@ -37,10 +38,31 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:?Renseigner DB_PASSWORD dans .env}
       SESSION_DRIVER: file
       CACHE_STORE: file
-      QUEUE_CONNECTION: sync
+      QUEUE_CONNECTION: database
       FRONTEND_URL: http://localhost:5173
     ports:
       - "8000:8000"
+
+  queue:
+    image: mmm-backend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+      db:
+        condition: service_healthy
+    environment:
+      APP_NAME: Mon Miam Miam
+      APP_ENV: local
+      APP_KEY: ${APP_KEY:-}
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: mon_miam_miam
+      DB_USERNAME: mmm
+      DB_PASSWORD: ${DB_PASSWORD:?Renseigner DB_PASSWORD dans .env}
+      QUEUE_CONNECTION: database
+    command: php artisan queue:work database --queue=notifications,exports --sleep=2 --tries=3
 
   frontend:
     build:

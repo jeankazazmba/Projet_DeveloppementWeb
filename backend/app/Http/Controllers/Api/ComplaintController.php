@@ -9,6 +9,7 @@ use App\Models\Restaurant;
 use App\Support\ComplaintView;
 use App\Support\RestaurantAccess;
 use App\Support\StudentAccess;
+use App\Support\DomainNotifications;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -34,6 +35,8 @@ class ComplaintController extends Controller
             ]);
             $complaint->events()->create(['actor_id' => $request->user()->id, 'from_status' => null,
                 'to_status' => 'ouverte', 'complaint_version' => 1, 'created_at' => now()]);
+            DomainNotifications::staff($restaurant->id, 'complaint_opened', 'complaint:'.$complaint->id.':opened',
+                ['complaint_id' => $complaint->id, 'restaurant_id' => $restaurant->id, 'status' => 'ouverte']);
             return $complaint;
         });
         return response()->json(ComplaintView::forStudent($complaint), 201);
@@ -116,6 +119,10 @@ class ComplaintController extends Controller
             $locked->events()->create(['actor_id' => $request->user()->id, 'from_status' => $before,
                 'to_status' => $data['status'], 'reason' => $data['reason'] ?? null,
                 'complaint_version' => $locked->version, 'created_at' => now()]);
+            DomainNotifications::student($locked->user_id, $locked->restaurant_id, 'complaint_status',
+                'complaint:'.$locked->id.':version:'.$locked->version,
+                ['complaint_id' => $locked->id, 'restaurant_id' => $locked->restaurant_id, 'status' => $locked->status]);
+            if ($locked->escalated) DomainNotifications::platformEscalation($locked->restaurant_id, $locked->id, $locked->status);
         });
         return ComplaintView::forStaff($complaint->refresh());
     }

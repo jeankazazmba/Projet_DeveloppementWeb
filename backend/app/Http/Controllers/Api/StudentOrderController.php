@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\TableReservation;
 use App\Support\OrderPricing;
 use App\Support\StudentAccess;
+use App\Support\DomainNotifications;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -61,6 +62,8 @@ class StudentOrderController extends Controller
             ]);
             $order->lines()->createMany($quote['lines']);
             $order->events()->create(['actor_id' => $request->user()->id, 'from_status' => null, 'to_status' => 'received', 'action' => 'created', 'order_version' => 1, 'created_at' => now()]);
+            DomainNotifications::staff($restaurant->id, 'order_received', 'order:'.$order->id.':received',
+                ['order_id' => $order->id, 'restaurant_id' => $restaurant->id, 'status' => 'received']);
             if ($quote['dining_table_id']) TableReservation::create([
                 'order_id' => $order->id, 'dining_table_id' => $quote['dining_table_id'],
                 'starts_at' => $order->requested_at, 'ends_at' => $order->requested_at->copy()->addMinutes(90), 'status' => 'active',

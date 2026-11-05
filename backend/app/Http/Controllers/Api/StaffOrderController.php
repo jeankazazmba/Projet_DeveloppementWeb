@@ -13,6 +13,7 @@ use App\Models\TableReservation;
 use App\Support\RestaurantAccess;
 use App\Support\OrderView;
 use App\Support\LoyaltyService;
+use App\Support\DomainNotifications;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -71,6 +72,9 @@ class StaffOrderController extends Controller
             if (in_array($data['status'], ['served', 'delivered'], true)) LoyaltyService::awardForOrder($locked);
             $locked->events()->create(['actor_id' => $request->user()->id, 'from_status' => $before, 'to_status' => $data['status'],
                 'action' => 'status_changed', 'reason' => $data['reason'] ?? null, 'order_version' => $locked->version, 'created_at' => now()]);
+            DomainNotifications::student($locked->user_id, $locked->restaurant_id, 'order_status',
+                'order:'.$locked->id.':version:'.$locked->version,
+                ['order_id' => $locked->id, 'restaurant_id' => $locked->restaurant_id, 'status' => $locked->status]);
         });
         return OrderView::forStaff($order->refresh(), $role, $request->user()->id);
     }
@@ -90,6 +94,12 @@ class StaffOrderController extends Controller
             $locked->update(['delivery_assignee_id' => $data['employee_id'], 'delivery_assigned_at' => now(), 'version' => $locked->version + 1]);
             $locked->events()->create(['actor_id' => $request->user()->id, 'from_status' => $locked->status, 'to_status' => $locked->status,
                 'action' => 'delivery_assigned', 'reason' => $data['reason'] ?? null, 'order_version' => $locked->version, 'created_at' => now()]);
+            DomainNotifications::student($locked->user_id, $locked->restaurant_id, 'delivery_assigned',
+                'order:'.$locked->id.':delivery:'.$locked->version,
+                ['order_id' => $locked->id, 'restaurant_id' => $locked->restaurant_id, 'status' => $locked->status]);
+            DomainNotifications::staffMember($locked->delivery_assignee_id, $locked->restaurant_id, 'delivery_assigned',
+                'order:'.$locked->id.':assignee:'.$locked->version,
+                ['order_id' => $locked->id, 'restaurant_id' => $locked->restaurant_id, 'status' => $locked->status]);
         });
         return OrderView::forStaff($order->refresh(), $role, $request->user()->id);
     }

@@ -23,6 +23,8 @@ use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\ComplaintAttachmentController;
 use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\RestaurantStatisticsController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -55,6 +57,12 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', EnsureActiveAccount::class])->group(function () {
+    Route::get('/me/notifications', [NotificationController::class, 'index']);
+    Route::patch('/me/notifications/{notification}/read', [NotificationController::class, 'read']);
+    Route::get('/staff/restaurants/{restaurant}/statistics', [RestaurantStatisticsController::class, 'index']);
+    Route::post('/staff/restaurants/{restaurant}/statistics/exports', [RestaurantStatisticsController::class, 'export']);
+    Route::get('/me/statistics/exports/{export}', [RestaurantStatisticsController::class, 'showExport']);
+    Route::get('/me/statistics/exports/{export}/download', [RestaurantStatisticsController::class, 'download']);
     Route::get('/me/orders/{order}/payment-intents', [PaymentController::class, 'index']);
     Route::post('/me/orders/{order}/payment-intents', [PaymentController::class, 'store']);
     Route::post('/me/payment-intents/{intent}/cancel', [PaymentController::class, 'cancel']);
