@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\StaffOrderController;
 use App\Http\Controllers\Api\RestaurantOperationsController;
 use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\ComplaintAttachmentController;
+use App\Http\Controllers\Api\LoyaltyController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -37,6 +38,7 @@ Route::get('/restaurants/{restaurant}/menu', [RestaurantCatalogController::class
 Route::get('/restaurants/{restaurant}/service-slots', [RestaurantSlotController::class, 'publicIndex']);
 Route::get('/restaurants/{restaurant}/tables', [RestaurantOperationsController::class, 'publicTables']);
 Route::get('/restaurants/{restaurant}/delivery-zones', [RestaurantOperationsController::class, 'publicZones']);
+Route::get('/restaurants/{restaurant}/leaderboard', [LoyaltyController::class, 'leaderboard']);
 Route::post('/login', [SessionController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/auth/register', [AuthProfileController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/auth/login', [SessionController::class, 'login'])->middleware('throttle:5,1');
@@ -50,6 +52,16 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', EnsureActiveAccount::class])->group(function () {
+    Route::get('/me/loyalty', [LoyaltyController::class, 'loyalty']);
+    Route::get('/me/referrals', [LoyaltyController::class, 'referrals']);
+    Route::get('/me/game-participations', [LoyaltyController::class, 'myGames']);
+    Route::post('/restaurants/{restaurant}/referral-code', [LoyaltyController::class, 'code']);
+    Route::post('/restaurants/{restaurant}/referrals', [LoyaltyController::class, 'claim']);
+    Route::post('/restaurants/{restaurant}/games/{game}/participations', [LoyaltyController::class, 'play']);
+    Route::get('/staff/restaurants/{restaurant}/loyalty-rules', [LoyaltyController::class, 'rules']);
+    Route::post('/staff/restaurants/{restaurant}/loyalty-rules', [LoyaltyController::class, 'createRule']);
+    Route::post('/staff/restaurants/{restaurant}/loyalty-rules/{rule}/validate', [LoyaltyController::class, 'validateRule']);
+    Route::post('/staff/restaurants/{restaurant}/loyalty-rules/{rule}/activate', [LoyaltyController::class, 'activateRule']);
     Route::post('/restaurants/{restaurant}/complaints', [ComplaintController::class, 'store']);
     Route::get('/me/complaints', [ComplaintController::class, 'mine']);
     Route::get('/me/complaints/{complaint}', [ComplaintController::class, 'myShow']);
