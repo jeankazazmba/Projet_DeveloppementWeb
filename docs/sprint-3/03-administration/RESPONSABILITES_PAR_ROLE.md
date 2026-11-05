@@ -55,7 +55,7 @@ Le cahier mentionne la livraison, mais **ne définit pas un espace livreur**. Un
 | Changer disponibilité ou plat du jour d'un plat publié | Oui | Non : supervision uniquement | Oui | Non |
 | Créer/publier/suspendre un établissement ou affecter son administrateur | Non | Non | Non | Oui |
 
-Ces droits sont vérifiés dans Laravel avec le compte actif **et** l'affectation au restaurant. La route de service n'accepte que `is_available` et `is_featured` ; un prix transmis en plus n'est pas enregistré. Les boutons des démonstrations locales reflètent ces frontières, mais leurs données de navigateur ne constituent pas une authentification. La création réelle des comptes employés, les commandes et la validation des réclamations demandent encore leurs API locales ; aucun droit supplémentaire n'est déduit de la maquette.
+Ces droits sont vérifiés dans Laravel avec le compte actif **et** l'affectation au restaurant. La route de service n'accepte que `is_available` et `is_featured` ; un prix transmis en plus n'est pas enregistré. Les boutons des démonstrations locales reflètent ces frontières, mais leurs données de navigateur ne constituent pas une authentification. Les comptes employés et gérants disposent désormais de routes locales de création, affectation et suspension documentées dans [AUTH_PROFILS_EQUIPES.md](../09-integration-recette/AUTH_PROFILS_EQUIPES.md). Les commandes et la validation des réclamations demandent encore leurs API locales ; aucun droit supplémentaire n'est déduit de la maquette.
 
 ## 4. Données autorisées dans la vue plateforme
 

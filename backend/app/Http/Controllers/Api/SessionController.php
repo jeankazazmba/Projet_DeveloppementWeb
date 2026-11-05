@@ -24,7 +24,7 @@ class SessionController extends Controller
         return response()->json([
             'token' => $user->createToken('app')->plainTextToken,
             'user' => $user->only(['id', 'name', 'email', 'is_platform_admin', 'is_active']),
-            'restaurants' => $user->is_platform_admin ? [] : $user->restaurants()->get(['restaurants.id', 'name', 'location', 'hours', 'description', 'status', 'is_public', 'is_demo']),
+            'restaurants' => $user->is_platform_admin ? [] : $user->restaurants()->wherePivot('is_active', true)->get(['restaurants.id', 'name', 'location', 'hours', 'description', 'status', 'is_public', 'is_demo']),
         ]);
     }
 

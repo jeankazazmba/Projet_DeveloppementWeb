@@ -12,7 +12,7 @@ class RestaurantAccess
     {
         $user = $request->user();
         abort_if(!$user || !$user->is_active || $user->is_platform_admin, 403);
-        $role = $user->restaurants()->whereKey($restaurant->id)->first()?->pivot?->role;
+        $role = $user->restaurants()->whereKey($restaurant->id)->wherePivot('is_active', true)->first()?->pivot?->role;
         abort_unless(in_array($role, ['admin', 'manager', 'employee'], true), 404);
         return $role;
     }

@@ -9,6 +9,9 @@ use App\Http\Controllers\Api\PlatformUserController;
 use App\Http\Controllers\Api\PlatformInsightsController;
 use App\Http\Controllers\Api\PlatformInvitationController;
 use App\Http\Controllers\Api\PlatformProfileController;
+use App\Http\Controllers\Api\AuthProfileController;
+use App\Http\Controllers\Api\RestaurantTeamController;
+use App\Http\Middleware\EnsureActiveAccount;
 
 Route::get('/health', function () {
     return response()->json([
@@ -22,10 +25,26 @@ Route::get('/restaurants', [RestaurantCatalogController::class, 'index']);
 Route::get('/restaurants/{restaurant}', [RestaurantCatalogController::class, 'show']);
 Route::get('/restaurants/{restaurant}/content', [RestaurantCatalogController::class, 'content']);
 Route::post('/login', [SessionController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/auth/register', [AuthProfileController::class, 'register'])->middleware('throttle:5,1');
+Route::post('/auth/login', [SessionController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/auth/password/forgot', [AuthProfileController::class, 'forgot'])->middleware('throttle:5,1');
+Route::post('/auth/password/reset', [AuthProfileController::class, 'reset'])->middleware('throttle:5,1');
 Route::post('/platform/register', [PlatformInvitationController::class, 'register'])->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [SessionController::class, 'logout']);
+    Route::post('/auth/logout', [SessionController::class, 'logout']);
+});
+
+Route::middleware(['auth:sanctum', EnsureActiveAccount::class])->group(function () {
+    Route::get('/me', [AuthProfileController::class, 'me']);
+    Route::patch('/me', [AuthProfileController::class, 'update']);
+    Route::post('/auth/email/verification/request', [AuthProfileController::class, 'requestVerification'])->middleware('throttle:5,1');
+    Route::post('/auth/email/verify', [AuthProfileController::class, 'verifyEmail'])->middleware('throttle:5,1');
+    Route::get('/staff/restaurants/{restaurant}/members', [RestaurantTeamController::class, 'index']);
+    Route::post('/staff/restaurants/{restaurant}/members', [RestaurantTeamController::class, 'store']);
+    Route::put('/staff/restaurants/{restaurant}/members/{user}', [RestaurantTeamController::class, 'assign']);
+    Route::patch('/staff/restaurants/{restaurant}/members/{user}/status', [RestaurantTeamController::class, 'status']);
     Route::get('/staff/restaurants', [StaffRestaurantController::class, 'restaurants']);
     Route::get('/staff/restaurants/{restaurant}/content', [StaffRestaurantController::class, 'content']);
     Route::post('/staff/restaurants/{restaurant}/content', [StaffRestaurantController::class, 'store']);

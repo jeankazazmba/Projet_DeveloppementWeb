@@ -21,4 +21,9 @@ class Restaurant extends Model
     {
         return $this->hasMany(RestaurantContent::class);
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class)->withPivot('role', 'is_active', 'version')->withTimestamps();
+    }
 }

@@ -23,6 +23,11 @@ class User extends Authenticatable
 
     public function restaurants()
     {
-        return $this->belongsToMany(Restaurant::class)->withPivot('role')->withTimestamps();
+        return $this->belongsToMany(Restaurant::class)->withPivot('role', 'is_active', 'version')->withTimestamps();
+    }
+
+    public function studentProfile()
+    {
+        return $this->hasOne(StudentProfile::class);
     }
 }

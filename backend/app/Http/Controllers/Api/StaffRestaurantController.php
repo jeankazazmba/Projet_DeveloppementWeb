@@ -14,7 +14,7 @@ class StaffRestaurantController extends Controller
     public function restaurants(Request $request)
     {
         abort_if(!$request->user()->is_active || $request->user()->is_platform_admin, 403);
-        return $request->user()->restaurants()->orderBy('name')->get();
+        return $request->user()->restaurants()->wherePivot('is_active', true)->orderBy('name')->get();
     }
 
     public function content(Request $request, Restaurant $restaurant)
