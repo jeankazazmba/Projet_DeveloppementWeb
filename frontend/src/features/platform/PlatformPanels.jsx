@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-const money = amount => `${Number(amount || 0).toLocaleString('fr-FR')} CDF`
-const date = value => value ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Kinshasa' }).format(new Date(value)) : '—'
+const money = amount => `${Number(amount || 0).toLocaleString('fr-CD')} CDF`
+const date = value => value ? new Intl.DateTimeFormat('fr-CD', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Kinshasa' }).format(new Date(value)) : '—'
 const roles = { admin: 'Admin restaurant' }
 const restaurantName = (restaurants, id) => restaurants.find(item => item.id === id)?.name || id || '—'
 const Empty = ({ children }) => <p className="platform-empty">{children}</p>

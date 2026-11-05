@@ -36,7 +36,7 @@ export default function DeliveryTracking({ order }) {
     </View>
     <Text style={{ color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 11 }}>
       {realCourier && tracking.updatedAt
-        ? `Dernière position : ${new Date(tracking.updatedAt).toLocaleString("fr-FR")}. Actualisation à connecter à l’API.`
+        ? `Dernière position : ${new Date(tracking.updatedAt).toLocaleString("fr-CD", { timeZone: "Africa/Kinshasa" })}. Actualisation à connecter à l’API.`
         : "Les points de la carte sont fictifs. La position et l’heure d’arrivée réelles nécessitent l’application livreur et l’API de suivi."}
     </Text>
   </Glass>;

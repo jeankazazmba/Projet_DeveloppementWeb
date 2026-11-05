@@ -40,4 +40,4 @@ export const events = [
   { day: '14', month: 'NOV', title: 'Soirée jeux sleepy hollow', time: '19h30', place: 'Espace sleepy hollow', description: 'Quiz et plats à partager dans le restaurant.', price: 'Accès libre · consommation à confirmer', restaurantId: SECONDARY_RESTAURANT_ID },
 ].map(event => ({ restaurantId: PRIMARY_RESTAURANT_ID, ...event }))
 
-export const formatPrice = price => `${new Intl.NumberFormat('fr-FR').format(price)} CDF`
+export const formatPrice = price => `${new Intl.NumberFormat('fr-CD').format(price)} CDF`

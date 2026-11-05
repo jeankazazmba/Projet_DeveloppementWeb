@@ -246,7 +246,7 @@ export function FoodCard({ dish, onPress, onAdd, compact = false }) {
           </Pressable>
           <View style={styles.foodFooter}>
             <Text style={styles.foodPrice}>
-              {dish.price.toLocaleString("fr-FR")} CDF
+              {dish.price.toLocaleString("fr-CD")} CDF
             </Text>
             <Pressable
               onPress={onAdd}

@@ -54,6 +54,6 @@ export const initialSettings: SettingsData = {
   payments: { orange: false, airtel: false, mpesa: false, cash: true, card: false },
   policies: { salesTerms: '', cancellation: '', privacy: '' },
 }
-export const money = (value: number) => new Intl.NumberFormat('fr-FR').format(value)
+export const money = (value: number) => new Intl.NumberFormat('fr-CD').format(value)
 export const initials = (name: string) => name.split(/[\s-]+/).filter(Boolean).slice(0, 2).map(s => s[0]).join('').toUpperCase()
 export const matches = (text: string, query: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(query.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim())

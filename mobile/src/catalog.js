@@ -275,4 +275,4 @@ export function setDishes(items) {
   if (Array.isArray(items)) dishes = items;
 }
 export const money = (amount) =>
-  `${Math.round(amount).toLocaleString("fr-FR")} CDF`;
+  `${Math.round(amount).toLocaleString("fr-CD")} CDF`;

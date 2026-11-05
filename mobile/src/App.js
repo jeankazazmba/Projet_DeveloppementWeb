@@ -516,7 +516,7 @@ function Notifications() {
                 <Text
                   style={{ color: colors.gold, fontSize: 12, marginTop: 9 }}
                 >
-                  {new Date(item.date).toLocaleString("fr-FR")}
+                  {new Date(item.date).toLocaleString("fr-CD", { timeZone: "Africa/Kinshasa" })}
                 </Text>
               </View>
               <Icon name="chevron-forward" size={18} color={colors.muted} />
@@ -1480,7 +1480,7 @@ function Orders() {
               <Icon name="chevron-forward" size={18} />
             </View>
             <Text style={{ color: colors.muted, marginTop: 6 }}>
-              {new Date(order.date).toLocaleDateString("fr-FR")} ·{" "}
+              {new Date(order.date).toLocaleDateString("fr-CD", { timeZone: "Africa/Kinshasa" })} ·{" "}
               {order.items.length} plat{order.items.length > 1 ? "s" : ""} ·{" "}
               {order.mode}
             </Text>
@@ -1538,7 +1538,7 @@ function OrderDetail({ params }) {
   return (
     <Page
       title={order.id}
-      subtitle={new Date(order.date).toLocaleString("fr-FR")}
+      subtitle={new Date(order.date).toLocaleString("fr-CD", { timeZone: "Africa/Kinshasa" })}
       onBack={back}
     >
       <Glass style={{ padding: 18 }}>
@@ -1815,7 +1815,7 @@ function Complaints() {
               {item.subject}
             </Text>
             <Text style={{ color: colors.muted, marginTop: 5 }}>
-              {item.id} · {new Date(item.date).toLocaleDateString("fr-FR")}
+              {item.id} · {new Date(item.date).toLocaleDateString("fr-CD", { timeZone: "Africa/Kinshasa" })}
             </Text>
             <Text
               style={{

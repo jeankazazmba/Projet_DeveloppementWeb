@@ -1,6 +1,6 @@
 import { menuImage } from '../public/publicData.js'
 
-export const money = value => `${Math.round(value).toLocaleString('fr-FR')} CDF`
+export const money = value => `${Math.round(value).toLocaleString('fr-CD')} CDF`
 export const orderSteps = ['Reçue', 'En préparation', 'Prête', 'Livrée']
 export const menuCategories = ['Tout', 'Plats chauds', 'Grillades & Braisés', 'Boissons fraîches', 'Desserts & Douceurs']
 

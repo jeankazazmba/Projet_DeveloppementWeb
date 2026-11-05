@@ -26,7 +26,7 @@ export function AreaChart({ values, labels, suffix = '', compact = false }) {
         {(compact || index % Math.max(1, Math.floor(labels.length / 6)) === 0 || index === labels.length - 1) && <text x={point.x} y="213" textAnchor="middle" fill={chartColors.muted} fontSize="10">{labels[index]}</text>}
       </g>)}
     </svg>
-    {!compact && <p className="chart-readout">{labels[activeIndex] || `Point ${activeIndex + 1}`} · <strong>{values[activeIndex]?.toLocaleString('fr-FR')}{suffix}</strong></p>}
+    {!compact && <p className="chart-readout">{labels[activeIndex] || `Point ${activeIndex + 1}`} · <strong>{values[activeIndex]?.toLocaleString('fr-CD')}{suffix}</strong></p>}
   </div>
 }
 

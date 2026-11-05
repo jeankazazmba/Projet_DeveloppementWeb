@@ -1,7 +1,7 @@
-const money = amount => `${Number(amount || 0).toLocaleString('fr-FR')} CDF`
-const number = value => Number(value || 0).toLocaleString('fr-FR')
+const money = amount => `${Number(amount || 0).toLocaleString('fr-CD')} CDF`
+const number = value => Number(value || 0).toLocaleString('fr-CD')
 const restaurantName = (restaurants, id) => restaurants.find(item => item.id === id)?.name || id || '—'
-const date = value => value ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Kinshasa' }).format(new Date(value)) : '—'
+const date = value => value ? new Intl.DateTimeFormat('fr-CD', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Kinshasa' }).format(new Date(value)) : '—'
 
 function Card({ title, children }) {
   return <section className="platform-card"><header className="platform-card-heading"><h2>{title}</h2></header>{children}</section>

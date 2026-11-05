@@ -1,4 +1,4 @@
-export const money = value => `${Math.round(value).toLocaleString('fr-FR')} CDF`
+export const money = value => `${Math.round(value).toLocaleString('fr-CD')} CDF`
 
 export const rights = [
   { key: 'orders', title: 'Gérer les commandes', detail: 'Tableau des commandes et préparation en cuisine' },

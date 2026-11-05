@@ -6,7 +6,7 @@ import { nextStatus } from '../operations'
 import { Badge, Modal, PageHeading, Panel } from '../components/ui'
 
 const statusTone: Record<OrderStatus, string> = { 'Reçue': 'yellow', 'En préparation': 'blue', 'Prête': 'green', 'En livraison': 'blue', 'Terminée': 'green', 'Annulée': 'red' }
-const time = (value: string) => new Date(value).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+const time = (value: string) => new Date(value).toLocaleTimeString('fr-CD', { timeZone: 'Africa/Kinshasa', hour: '2-digit', minute: '2-digit' })
 
 export default function Orders({ orders, setOrders, notify }: { orders: Order[]; setOrders: Dispatch<SetStateAction<Order[]>>; notify: (message: string) => void }) {
   const [query, setQuery] = useState('')
