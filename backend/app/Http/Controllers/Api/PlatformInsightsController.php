@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Carbon;
+use App\Support\PlatformAccess;
+use App\Support\ApiResponse;
 
 class PlatformInsightsController extends Controller
 {
     public function index(Request $request)
     {
-        abort_unless($request->user()->is_platform_admin, 403);
+        PlatformAccess::requireActiveAdmin($request);
         $filters = $request->validate([
             'restaurant_id' => ['nullable', Rule::exists('restaurants', 'id')],
             'from' => ['nullable', 'date_format:Y-m-d'],
@@ -98,13 +100,19 @@ class PlatformInsightsController extends Controller
 
     public function audit(Request $request)
     {
-        abort_unless($request->user()->is_platform_admin, 403);
-        $filters = $request->validate(['restaurant_id' => ['nullable', Rule::exists('restaurants', 'id')]]);
-        return DB::table('platform_audit_logs as log')
+        PlatformAccess::requireActiveAdmin($request);
+        $filters = $request->validate([
+            'restaurant_id' => ['nullable', Rule::exists('restaurants', 'id')],
+            'paginate' => ['nullable', 'boolean'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
+        $query = DB::table('platform_audit_logs as log')
             ->leftJoin('users as actor', 'actor.id', '=', 'log.actor_id')
             ->select('log.id', 'log.restaurant_id', 'log.action', 'log.target_type', 'log.target_id', 'log.reason', 'log.created_at', 'actor.name as actor_name')
             ->where('log.action', 'not like', 'content.%')
             ->when($filters['restaurant_id'] ?? null, fn ($query, $id) => $query->where('log.restaurant_id', $id))
-            ->orderByDesc('log.id')->limit(100)->get();
+            ->orderByDesc('log.id');
+        if ($request->boolean('paginate')) return ApiResponse::paginated($query->paginate($filters['per_page'] ?? 25)->appends($request->query()));
+        return $query->limit(100)->get();
     }
 }

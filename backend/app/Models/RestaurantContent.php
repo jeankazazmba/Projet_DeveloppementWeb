@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class RestaurantContent extends Model
 {
-    protected $fillable = ['kind', 'title', 'description', 'price_cdf', 'image_url', 'details', 'is_published', 'is_available', 'is_featured'];
+    protected $fillable = ['kind', 'title', 'description', 'price_cdf', 'image_url', 'details', 'is_published', 'is_available', 'is_featured', 'version'];
 
     protected function casts(): array
     {
-        return ['details' => 'array', 'is_published' => 'boolean', 'price_cdf' => 'integer', 'is_available' => 'boolean', 'is_featured' => 'boolean'];
+        return ['details' => 'array', 'is_published' => 'boolean', 'price_cdf' => 'integer', 'is_available' => 'boolean', 'is_featured' => 'boolean', 'version' => 'integer'];
     }
 
     public function restaurant()

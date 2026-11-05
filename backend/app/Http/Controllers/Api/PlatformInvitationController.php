@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\PlatformAudit;
+use App\Support\PlatformAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
@@ -15,7 +16,7 @@ class PlatformInvitationController extends Controller
 {
     private function authorizePlatform(Request $request): void
     {
-        abort_unless($request->user()->is_platform_admin && $request->user()->is_active, 403);
+        PlatformAccess::requireActiveAdmin($request);
     }
 
     public function index(Request $request)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Support\PlatformAudit;
+use App\Support\PlatformAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,13 +14,13 @@ class PlatformProfileController extends Controller
 {
     public function show(Request $request)
     {
-        abort_unless($request->user()->is_platform_admin && $request->user()->is_active, 403);
+        PlatformAccess::requireActiveAdmin($request);
         return $request->user()->only(['id', 'name', 'email', 'is_platform_admin', 'is_active']);
     }
 
     public function password(Request $request)
     {
-        abort_unless($request->user()->is_platform_admin && $request->user()->is_active, 403);
+        PlatformAccess::requireActiveAdmin($request);
         $data = $request->validate([
             'current_password' => ['required', 'string'],
             'password' => ['required', 'string', 'min:12', 'confirmed'],

@@ -12,13 +12,13 @@ class User extends Authenticatable
     /** Tout compte nouvellement créé est actif jusqu’à une suspension explicite. */
     protected $attributes = ['is_active' => true, 'is_platform_admin' => false];
 
-    protected $fillable = ['name', 'email', 'password', 'is_platform_admin', 'is_active'];
+    protected $fillable = ['name', 'email', 'password', 'is_platform_admin', 'is_active', 'version'];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'is_platform_admin' => 'boolean', 'is_active' => 'boolean'];
+        return ['password' => 'hashed', 'is_platform_admin' => 'boolean', 'is_active' => 'boolean', 'version' => 'integer'];
     }
 
     public function restaurants()

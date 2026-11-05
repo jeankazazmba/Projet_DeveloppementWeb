@@ -142,7 +142,7 @@ export default function PlatformAdminApp() {
     )
   }
   const updateRestaurant = (id, draft, reason = '') => mutate(
-    () => platformRequest(`/platform/restaurants/${encodeURIComponent(id)}`, session.token, { method: 'PATCH', body: JSON.stringify({ ...draft, reason }) }),
+    () => { const { version, ...payload } = draft; return platformRequest(`/platform/restaurants/${encodeURIComponent(id)}`, session.token, { method: 'PATCH', body: JSON.stringify({ ...payload, reason, ...(version ? { expected_version: version } : {}) }) }) },
     () => { const next = restaurants.map(item => item.id === id ? { ...item, ...draft, status: draft.status ? demoStatus(draft.status) : item.status } : item); saveRestaurants(next); recordDemoAudit('restaurant.updated', 'restaurant', id, id, reason) },
     'Fiche du restaurant mise à jour.',
   )
@@ -161,8 +161,8 @@ export default function PlatformAdminApp() {
     () => { saveDemoUsers(users.map(user => user.id === userId ? { ...user, restaurants: user.restaurants.filter(item => item.id !== restaurantId) } : user)); recordDemoAudit('assignment.revoked', 'user', userId, restaurantId) },
     'Affectation retirée.',
   )
-  const setUserActive = (userId, isActive, reason) => mutate(
-    () => platformRequest(`/platform/users/${encodeURIComponent(userId)}`, session.token, { method: 'PATCH', body: JSON.stringify({ is_active: isActive, reason }) }),
+  const setUserActive = (userId, isActive, reason, expectedVersion) => mutate(
+    () => platformRequest(`/platform/users/${encodeURIComponent(userId)}`, session.token, { method: 'PATCH', body: JSON.stringify({ is_active: isActive, reason, ...(expectedVersion ? { expected_version: expectedVersion } : {}) }) }),
     () => { saveDemoUsers(users.map(user => user.id === userId ? { ...user, is_active: isActive } : user)); recordDemoAudit('user.status_changed', 'user', userId, null, reason) },
     isActive ? 'Compte réactivé.' : 'Compte suspendu.',
   )

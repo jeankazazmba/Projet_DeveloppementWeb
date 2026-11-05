@@ -22,7 +22,7 @@ class StaffRestaurantController extends Controller
         $role = RestaurantAccess::role($request, $restaurant);
         if ($role === 'admin') return $restaurant->contents()->orderByDesc('updated_at')->get();
         return $restaurant->contents()->where('kind', 'dish')->where('is_published', true)
-            ->orderBy('title')->get(['id', 'restaurant_id', 'kind', 'title', 'price_cdf', 'image_url', 'is_published', 'is_available', 'is_featured']);
+            ->orderBy('title')->get(['id', 'restaurant_id', 'kind', 'title', 'price_cdf', 'image_url', 'is_published', 'is_available', 'is_featured', 'version']);
     }
 
     public function store(Request $request, Restaurant $restaurant)
@@ -36,7 +36,14 @@ class StaffRestaurantController extends Controller
     {
         RestaurantAccess::require($request, $restaurant, ['admin']);
         abort_unless($content->restaurant_id === $restaurant->id, 404);
-        $content->update($this->validatedContent($request, true));
+        $data = $this->validatedContent($request, true);
+        $expectedVersion = $data['expected_version'] ?? null;
+        unset($data['expected_version']);
+        DB::transaction(function () use ($content, $data, $expectedVersion) {
+            $locked = RestaurantContent::whereKey($content->id)->lockForUpdate()->firstOrFail();
+            abort_if($expectedVersion !== null && $locked->version !== $expectedVersion, 409, 'Ce contenu a été modifié. Rechargez-le avant de réessayer.');
+            $locked->update([...$data, 'version' => $locked->version + 1]);
+        });
         return $content->refresh();
     }
 
@@ -55,20 +62,24 @@ class StaffRestaurantController extends Controller
         $data = $request->validate([
             'is_available' => ['sometimes', 'required', 'boolean'],
             'is_featured' => ['sometimes', 'required', 'boolean'],
+            'expected_version' => ['nullable', 'integer', 'min:1'],
         ]);
         abort_if(!$data, 422, 'Indiquez une disponibilité ou un plat du jour.');
         DB::transaction(function () use ($restaurant, $content, $data) {
             Restaurant::whereKey($restaurant->id)->lockForUpdate()->firstOrFail();
-            $content->refresh();
+            $content = RestaurantContent::whereKey($content->id)->lockForUpdate()->firstOrFail();
             abort_unless($content->is_published, 404);
+            abort_if(isset($data['expected_version']) && $content->version !== $data['expected_version'], 409, 'Ce contenu a été modifié. Rechargez-le avant de réessayer.');
+            unset($data['expected_version']);
             abort_if(($data['is_featured'] ?? false) && ($data['is_available'] ?? $content->is_available) === false, 422, 'Un plat indisponible ne peut pas être le plat du jour.');
             if ($data['is_featured'] ?? false) {
-                $restaurant->contents()->where('kind', 'dish')->where('id', '!=', $content->id)->update(['is_featured' => false]);
+                $restaurant->contents()->where('kind', 'dish')->where('id', '!=', $content->id)->where('is_featured', true)
+                    ->update(['is_featured' => false, 'version' => DB::raw('version + 1')]);
             }
             if (($data['is_available'] ?? true) === false) $data['is_featured'] = false;
-            $content->update($data);
+            $content->update([...$data, 'version' => $content->version + 1]);
         });
-        return $content->refresh()->only(['id', 'restaurant_id', 'kind', 'title', 'price_cdf', 'image_url', 'is_published', 'is_available', 'is_featured']);
+        return $content->refresh()->only(['id', 'restaurant_id', 'kind', 'title', 'price_cdf', 'image_url', 'is_published', 'is_available', 'is_featured', 'version']);
     }
 
     private function validatedContent(Request $request, bool $partial = false): array
@@ -82,6 +93,7 @@ class StaffRestaurantController extends Controller
             'image_url' => ['nullable', 'url', 'max:2048'],
             'details' => ['nullable', 'array'],
             'is_published' => ['sometimes', 'boolean'],
+            'expected_version' => [$partial ? 'sometimes' : 'prohibited', 'integer', 'min:1'],
         ]);
     }
 }
