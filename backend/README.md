@@ -7,6 +7,8 @@ parrainage, classement, promotions et événements. Elle suit les routes du cont
 ## Démarrage
 
 1. Créer une base MySQL puis exécuter `database/schema.sql`.
+   Sur une base issue du Sprint 2, exécuter plutôt la migration
+   `database/migrations/2026_11_05_sprint3_leaderboard_consent.sql`.
 2. Définir `DB_DSN`, `DB_USER`, `DB_PASSWORD` et `APP_ENV` dans l'environnement.
    Exemple DSN : `mysql:host=127.0.0.1;dbname=mon_miam_miam;charset=utf8mb4`.
 3. Relier l'authentification existante en stockant dans `sessions.token_hash`
@@ -26,6 +28,8 @@ configurables, initialisés à zéro jusqu'à validation métier. Les exemples
 - `POST /api/v1/parrainage/generer`, `POST /utiliser`, `GET /parrainage`
 - `GET/POST /api/v1/promotions` et `GET/POST /api/v1/evenements`
 - `GET /api/v1/classement?periode=jour|semaine|mois`
+- `PUT /api/v1/classement/consentement` avec `{ "autorise": true|false }`
+- `PUT /api/v1/fidelite/regles` (administrateur) pour configurer les taux
 - services internes `LoyaltyService::creditForOrder()` et
   `ReferralService::rewardAfterSuccessfulOrder()` à appeler depuis la
   transaction qui finalise une commande réussie. Il n'existe pas de route
@@ -34,3 +38,9 @@ configurables, initialisés à zéro jusqu'à validation métier. Les exemples
 Les accès administrateur utilisent le rôle `administrateur`; le classement
 public n'affiche qu'un pseudonyme et inclut les comptes ayant activé
 `leaderboard_opt_in`.
+
+Les périodes du classement sont des périodes calendaires UTC : journée,
+semaine commençant lundi et mois en cours. Les promotions et événements
+publiques comprennent les contenus actifs en cours ou à venir. La remise de
+points est idempotente par clé `Idempotency-Key`; une commande ne peut recevoir
+qu'une seule application de points.

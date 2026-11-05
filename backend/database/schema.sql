@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(254) NOT NULL UNIQUE,
   role ENUM('etudiant','employe','gerant','administrateur') NOT NULL DEFAULT 'etudiant',
   leaderboard_opt_in BOOLEAN NOT NULL DEFAULT FALSE,
+  leaderboard_alias VARCHAR(32) NULL UNIQUE,
   referral_code VARCHAR(32) NULL UNIQUE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

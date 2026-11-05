@@ -25,7 +25,7 @@ final class LoyaltyService
     }
 
     /** Débite des points à l'intérieur d'une transaction PDO active. */
-    public static function redeem(PDO $db, int $userId, int $points, string $key): int
+    public static function redeem(PDO $db, int $userId, int $orderId, int $points, string $key): int
     {
         if ($points < 1 || $points > 1000000) Api::fail(422, 'validation_error', 'Nombre de points invalide.');
         $q = $db->prepare('SELECT currency_per_point,points_per_reward,reward_amount FROM loyalty_rules WHERE id=1 FOR UPDATE');
@@ -33,8 +33,8 @@ final class LoyaltyService
         if (!$rules || (int)$rules['points_per_reward'] < 1 || (int)$rules['reward_amount'] < 1) Api::fail(409, 'loyalty_not_configured', 'Les règles de fidélité ne sont pas encore configurées.');
         if ($points % (int)$rules['points_per_reward'] !== 0) Api::fail(422, 'invalid_redemption', 'Les points doivent correspondre à un seuil de récompense.');
         if (self::balance($db, $userId) < $points) Api::fail(409, 'insufficient_points', 'Solde de points insuffisant.');
-        $q = $db->prepare("INSERT INTO loyalty_transactions(user_id,type,points,reason,idempotency_key) VALUES(?,'debit',?,'Utilisation de points',?)");
-        try { $q->execute([$userId, $points, $key]); }
+        $q = $db->prepare("INSERT INTO loyalty_transactions(user_id,order_id,type,points,reason,idempotency_key) VALUES(?,?,'debit',?,'Utilisation de points',?)");
+        try { $q->execute([$userId, $orderId, $points, $key]); }
         catch (PDOException $e) { if ($e->getCode()==='23000') Api::fail(409, 'duplicate_operation', 'Cette opération a déjà été traitée.'); throw $e; }
         return intdiv($points, (int)$rules['points_per_reward']) * (int)$rules['reward_amount'];
     }
