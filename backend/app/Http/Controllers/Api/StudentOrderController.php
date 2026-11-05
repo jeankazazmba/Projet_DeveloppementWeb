@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\User;
+use App\Models\TableReservation;
 use App\Support\OrderPricing;
 use App\Support\StudentAccess;
 use Illuminate\Http\Request;
@@ -46,17 +47,24 @@ class StudentOrderController extends Controller
             $order = Order::create([
                 'id' => 'ORD-'.Str::ulid(), 'restaurant_id' => $restaurant->id,
                 'user_id' => $request->user()->id, 'customer_name' => $request->user()->name,
-                'service' => $quote['service'], 'status' => 'pending',
+                'service' => $quote['service'], 'status' => 'received',
                 'amount_cdf' => $quote['total_cdf'], 'subtotal_cdf' => $quote['subtotal_cdf'],
                 'delivery_fee_cdf' => $quote['delivery_fee_cdf'],
                 'service_slot_id' => $quote['service_slot_id'],
                 'delivery_address_id' => $quote['delivery_address_id'],
                 'delivery_address_snapshot' => $quote['delivery_address_snapshot'],
+                'delivery_zone_id' => $quote['delivery_zone_id'],
+                'delivery_zone_snapshot' => $quote['delivery_zone_snapshot'],
+                'dining_table_id' => $quote['dining_table_id'], 'party_size' => $quote['party_size'],
                 'requested_at' => $quote['requested_at'],
                 'idempotency_key' => $key, 'request_hash' => $hash,
             ]);
             $order->lines()->createMany($quote['lines']);
-            $order->events()->create(['actor_id' => $request->user()->id, 'from_status' => null, 'to_status' => 'pending', 'created_at' => now()]);
+            $order->events()->create(['actor_id' => $request->user()->id, 'from_status' => null, 'to_status' => 'received', 'action' => 'created', 'order_version' => 1, 'created_at' => now()]);
+            if ($quote['dining_table_id']) TableReservation::create([
+                'order_id' => $order->id, 'dining_table_id' => $quote['dining_table_id'],
+                'starts_at' => $order->requested_at, 'ends_at' => $order->requested_at->copy()->addMinutes(90), 'status' => 'active',
+            ]);
             if ($cart) $cart->delete();
             return [$order, false];
         });
@@ -78,6 +86,13 @@ class StudentOrderController extends Controller
         return $order->load(['lines', 'events', 'address']);
     }
 
+    public function tracking(Request $request, Order $order)
+    {
+        StudentAccess::require($request);
+        abort_unless($order->user_id === $request->user()->id && $order->service === 'delivery', 404);
+        return ['id' => $order->id, 'status' => $order->status, 'position' => $order->positions()->latest('id')->first()];
+    }
+
     private function items(Request $request, Restaurant $restaurant, array $data): array
     {
         if (array_key_exists('items', $data)) return [$data['items'], null];
@@ -96,6 +111,8 @@ class StudentOrderController extends Controller
             'requested_at' => ['required', 'date'],
             'service_slot_id' => ['required', 'integer'],
             'delivery_address_id' => ['nullable', 'integer'],
+            'dining_table_id' => ['nullable', 'integer'],
+            'party_size' => ['nullable', 'integer', 'min:1', 'max:20'],
             'items' => ['sometimes', 'array', 'min:1', 'max:30'],
             'items.*.content_id' => ['required', 'integer'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:20'],

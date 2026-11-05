@@ -3,6 +3,9 @@
 namespace App\Support;
 
 use App\Models\DeliveryAddress;
+use App\Models\DeliveryZone;
+use App\Models\DiningTable;
+use App\Models\TableReservation;
 use App\Models\MenuOption;
 use App\Models\Restaurant;
 use App\Models\RestaurantContent;
@@ -27,12 +30,33 @@ class OrderPricing
         if (!$slot || $requested->format('H:i:s') < $slot->starts_at || $requested->format('H:i:s') >= $slot->ends_at) {
             self::invalid('service_slot_id', 'Ce créneau ne couvre pas l’heure demandée.');
         }
-        $address = null;
+        $address = null; $zone = null; $table = null;
         if ($data['service'] === 'delivery') {
             $address = DeliveryAddress::whereKey($data['delivery_address_id'] ?? null)->where('user_id', $userId)->first();
             if (!$address || mb_strtolower($address->city) !== 'kinshasa') self::invalid('delivery_address_id', 'Adresse de livraison invalide à Kinshasa.');
+            if (DeliveryZone::where('restaurant_id', $restaurant->id)->exists()) {
+                $zone = DeliveryZone::where('restaurant_id', $restaurant->id)->whereRaw('LOWER(district) = ?', [mb_strtolower($address->district)])->where('is_active', true)->first();
+                if (!$zone) self::invalid('delivery_address_id', 'Adresse hors zone de livraison active.');
+            }
         } elseif (isset($data['delivery_address_id'])) {
             self::invalid('delivery_address_id', 'Adresse réservée aux livraisons.');
+        }
+        if ($data['service'] === 'dine_in') {
+            if (empty($data['dining_table_id']) || empty($data['party_size'])) self::invalid('dining_table_id', 'Table et nombre de convives obligatoires.');
+            if ($requested->copy()->addMinutes(90)->format('H:i') > substr($slot->ends_at, 0, 5) || $requested->copy()->addMinutes(90)->dayOfWeek !== $requested->dayOfWeek) {
+                self::invalid('requested_at', 'Le service sur place doit se terminer pendant le créneau ouvert.');
+            }
+            $tableQuery = DiningTable::whereKey($data['dining_table_id'])->where('restaurant_id', $restaurant->id)->where('is_active', true);
+            if ($reserve) $tableQuery->lockForUpdate();
+            $table = $tableQuery->first();
+            if (!$table || $data['party_size'] > $table->capacity) self::invalid('dining_table_id', 'Table indisponible ou capacité insuffisante.');
+            $starts = $requested->copy()->utc(); $ends = $starts->copy()->addMinutes(90);
+            if (TableReservation::where('dining_table_id', $table->id)->where('status', 'active')
+                ->where('starts_at', '<', $ends)->where('ends_at', '>', $starts)->exists()) {
+                self::invalid('dining_table_id', 'Table déjà réservée pour cette heure.');
+            }
+        } elseif (isset($data['dining_table_id']) || isset($data['party_size'])) {
+            self::invalid('dining_table_id', 'Table réservée au service sur place.');
         }
 
         $contentIds = collect($items)->pluck('content_id')->unique()->sort()->values()->all();
@@ -89,7 +113,7 @@ class OrderPricing
         foreach ($optionQuantities as $id => $quantity) {
             if ($options[$id]->stock_quantity !== null && $options[$id]->stock_quantity < $quantity) self::invalid('items', 'Stock insuffisant pour une option.');
         }
-        $fee = $data['service'] === 'delivery' ? $restaurant->delivery_fee_cdf : 0;
+        $fee = $data['service'] === 'delivery' ? ($zone?->fee_cdf ?? $restaurant->delivery_fee_cdf) : 0;
         if ($subtotal + $fee > 4000000000) self::invalid('items', 'Montant trop élevé.');
         if ($reserve) {
             foreach ($dishQuantities as $id => $quantity) {
@@ -104,6 +128,9 @@ class OrderPricing
             'service_slot_id' => $slot->id, 'requested_at' => $requested->toIso8601String(),
             'delivery_address_id' => $address?->id,
             'delivery_address_snapshot' => $address ? $address->only(['label', 'address_line', 'district', 'city', 'phone']) : null,
+            'delivery_zone_id' => $zone?->id,
+            'delivery_zone_snapshot' => $zone ? ['district' => $zone->district, 'fee_cdf' => $zone->fee_cdf] : null,
+            'dining_table_id' => $table?->id, 'party_size' => $table ? $data['party_size'] : null,
             'lines' => $lines,
             'subtotal_cdf' => $subtotal, 'delivery_fee_cdf' => $fee, 'total_cdf' => $subtotal + $fee,
         ];

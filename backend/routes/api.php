@@ -18,6 +18,9 @@ use App\Http\Controllers\Api\StudentCartController;
 use App\Http\Controllers\Api\StudentAddressController;
 use App\Http\Controllers\Api\StudentOrderController;
 use App\Http\Controllers\Api\StaffOrderController;
+use App\Http\Controllers\Api\RestaurantOperationsController;
+use App\Http\Controllers\Api\ComplaintController;
+use App\Http\Controllers\Api\ComplaintAttachmentController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -32,6 +35,8 @@ Route::get('/restaurants/{restaurant}', [RestaurantCatalogController::class, 'sh
 Route::get('/restaurants/{restaurant}/content', [RestaurantCatalogController::class, 'content']);
 Route::get('/restaurants/{restaurant}/menu', [RestaurantCatalogController::class, 'menu']);
 Route::get('/restaurants/{restaurant}/service-slots', [RestaurantSlotController::class, 'publicIndex']);
+Route::get('/restaurants/{restaurant}/tables', [RestaurantOperationsController::class, 'publicTables']);
+Route::get('/restaurants/{restaurant}/delivery-zones', [RestaurantOperationsController::class, 'publicZones']);
 Route::post('/login', [SessionController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/auth/register', [AuthProfileController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/auth/login', [SessionController::class, 'login'])->middleware('throttle:5,1');
@@ -45,6 +50,17 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', EnsureActiveAccount::class])->group(function () {
+    Route::post('/restaurants/{restaurant}/complaints', [ComplaintController::class, 'store']);
+    Route::get('/me/complaints', [ComplaintController::class, 'mine']);
+    Route::get('/me/complaints/{complaint}', [ComplaintController::class, 'myShow']);
+    Route::post('/me/complaints/{complaint}/messages', [ComplaintController::class, 'studentMessage']);
+    Route::get('/staff/restaurants/{restaurant}/complaints', [ComplaintController::class, 'staffIndex']);
+    Route::get('/staff/restaurants/{restaurant}/complaints/{complaint}', [ComplaintController::class, 'staffShow']);
+    Route::patch('/staff/complaints/{complaint}/status', [ComplaintController::class, 'transition']);
+    Route::post('/complaints/{complaint}/attachments', [ComplaintAttachmentController::class, 'store'])->middleware('throttle:20,1');
+    Route::get('/complaints/{complaint}/attachments/{attachment}/url', [ComplaintAttachmentController::class, 'temporaryUrl']);
+    Route::get('/complaint-attachments/{attachment}/download', [ComplaintAttachmentController::class, 'download'])
+        ->middleware('signed')->name('complaint.attachment.download');
     Route::get('/me/cart', [StudentCartController::class, 'show']);
     Route::put('/me/cart', [StudentCartController::class, 'save']);
     Route::delete('/me/cart', [StudentCartController::class, 'clear']);
@@ -56,8 +72,22 @@ Route::middleware(['auth:sanctum', EnsureActiveAccount::class])->group(function 
     Route::post('/restaurants/{restaurant}/orders', [StudentOrderController::class, 'store']);
     Route::get('/me/orders', [StudentOrderController::class, 'index']);
     Route::get('/me/orders/{order}', [StudentOrderController::class, 'show']);
+    Route::get('/me/orders/{order}/tracking', [StudentOrderController::class, 'tracking']);
     Route::get('/staff/restaurants/{restaurant}/orders', [StaffOrderController::class, 'index']);
+    Route::get('/staff/restaurants/{restaurant}/orders/{order}', [StaffOrderController::class, 'show']);
+    Route::get('/staff/restaurants/{restaurant}/orders/{order}/tracking', [StaffOrderController::class, 'tracking']);
     Route::patch('/staff/orders/{order}/status', [StaffOrderController::class, 'status']);
+    Route::put('/staff/orders/{order}/delivery-assignment', [StaffOrderController::class, 'assignDelivery']);
+    Route::put('/staff/orders/{order}/table-assignment', [StaffOrderController::class, 'assignTable']);
+    Route::post('/staff/orders/{order}/delivery-position', [StaffOrderController::class, 'position'])->middleware('throttle:60,1');
+    Route::get('/staff/restaurants/{restaurant}/tables', [RestaurantOperationsController::class, 'tables']);
+    Route::post('/staff/restaurants/{restaurant}/tables', [RestaurantOperationsController::class, 'tableStore']);
+    Route::patch('/staff/restaurants/{restaurant}/tables/{table}', [RestaurantOperationsController::class, 'tableUpdate']);
+    Route::delete('/staff/restaurants/{restaurant}/tables/{table}', [RestaurantOperationsController::class, 'tableDelete']);
+    Route::get('/staff/restaurants/{restaurant}/delivery-zones', [RestaurantOperationsController::class, 'zones']);
+    Route::post('/staff/restaurants/{restaurant}/delivery-zones', [RestaurantOperationsController::class, 'zoneStore']);
+    Route::patch('/staff/restaurants/{restaurant}/delivery-zones/{zone}', [RestaurantOperationsController::class, 'zoneUpdate']);
+    Route::delete('/staff/restaurants/{restaurant}/delivery-zones/{zone}', [RestaurantOperationsController::class, 'zoneDelete']);
     Route::get('/staff/restaurants/{restaurant}/categories', [RestaurantMenuController::class, 'categories']);
     Route::post('/staff/restaurants/{restaurant}/categories', [RestaurantMenuController::class, 'categoryStore']);
     Route::patch('/staff/restaurants/{restaurant}/categories/{category}', [RestaurantMenuController::class, 'categoryUpdate']);
@@ -98,6 +128,7 @@ Route::middleware(['auth:sanctum', EnsureActiveAccount::class])->group(function 
     Route::put('/platform/restaurants/{restaurant}/members/{user}', [PlatformUserController::class, 'assign']);
     Route::delete('/platform/restaurants/{restaurant}/members/{user}', [PlatformUserController::class, 'revoke']);
     Route::get('/platform/insights', [PlatformInsightsController::class, 'index']);
+    Route::get('/platform/complaint-escalations', [PlatformInsightsController::class, 'complaintEscalations']);
     Route::get('/platform/audit', [PlatformInsightsController::class, 'audit']);
     Route::get('/platform/invitations', [PlatformInvitationController::class, 'index']);
     Route::post('/platform/invitations', [PlatformInvitationController::class, 'store'])->middleware('throttle:5,1');

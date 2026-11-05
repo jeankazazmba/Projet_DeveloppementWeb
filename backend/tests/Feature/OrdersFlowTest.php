@@ -64,7 +64,7 @@ class OrdersFlowTest extends TestCase
         $body = $this->orderBody($f);
         $this->postJson('/api/restaurants/a/quotes', $body)->assertOk()->assertJsonPath('subtotal_cdf', 2600)->assertJsonPath('delivery_fee_cdf', 500)->assertJsonPath('total_cdf', 3100);
         $created = $this->withHeader('Idempotency-Key', 'order-test-001')->postJson('/api/restaurants/a/orders', $body)->assertCreated()
-            ->assertJsonPath('amount_cdf', 3100)->assertJsonPath('lines.0.unit_price_cdf', 1300)->assertJsonPath('status', 'pending');
+            ->assertJsonPath('amount_cdf', 3100)->assertJsonPath('lines.0.unit_price_cdf', 1300)->assertJsonPath('status', 'received');
         $id = $created->json('id');
         $this->assertDatabaseHas('restaurant_contents', ['id' => $f['dish']->id, 'stock_quantity' => 0]);
         $this->assertDatabaseHas('menu_options', ['id' => $f['variant']->id, 'stock_quantity' => 0]);
@@ -79,7 +79,7 @@ class OrdersFlowTest extends TestCase
         $this->getJson('/api/me/orders')->assertOk()->assertJsonPath('total', 0);
         Sanctum::actingAs($this->staff($f['b'], 'employee'));
         $this->getJson('/api/staff/restaurants/a/orders')->assertNotFound();
-        $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'confirmed', 'expected_version' => 1])->assertNotFound();
+        $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'accepted', 'expected_version' => 1])->assertNotFound();
         $platform = User::create(['name' => 'Platform', 'email' => 'platform@example.test', 'password' => 'LongPassword!123', 'is_platform_admin' => true]);
         Sanctum::actingAs($platform);
         $this->getJson('/api/staff/restaurants/a/orders')->assertForbidden();
@@ -94,12 +94,14 @@ class OrdersFlowTest extends TestCase
         $id = $this->withHeader('Idempotency-Key', 'order-test-003')->postJson('/api/restaurants/a/orders', $body)->assertCreated()->json('id');
         Sanctum::actingAs($this->staff($f['a'], 'employee'));
         $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'ready', 'expected_version' => 1])->assertStatus(409);
-        $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'confirmed', 'expected_version' => 1])->assertOk()->assertJsonPath('version', 2);
+        $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'accepted', 'expected_version' => 1])->assertOk()->assertJsonPath('version', 2);
         $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'preparing', 'expected_version' => 1])->assertStatus(409);
-        $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'cancelled', 'expected_version' => 2])->assertOk()->assertJsonPath('version', 3);
+        $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'cancelled', 'reason' => 'Client absent', 'expected_version' => 2])->assertForbidden();
+        Sanctum::actingAs($this->staff($f['a'], 'manager'));
+        $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'cancelled', 'reason' => 'Client absent', 'expected_version' => 2])->assertOk()->assertJsonPath('version', 3);
         $this->assertDatabaseHas('restaurant_contents', ['id' => $f['dish']->id, 'stock_quantity' => 2]);
         $this->assertDatabaseHas('menu_options', ['id' => $f['supplement']->id, 'stock_quantity' => 2]);
-        $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'confirmed', 'expected_version' => 3])->assertStatus(409);
+        $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'accepted', 'expected_version' => 3])->assertStatus(409);
         $this->assertDatabaseCount('order_events', 3);
     }
 

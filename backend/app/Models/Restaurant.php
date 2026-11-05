@@ -29,4 +29,6 @@ class Restaurant extends Model
 
     public function categories() { return $this->hasMany(MenuCategory::class); }
     public function serviceSlots() { return $this->hasMany(ServiceSlot::class); }
+    public function diningTables() { return $this->hasMany(DiningTable::class); }
+    public function deliveryZones() { return $this->hasMany(DeliveryZone::class); }
 }

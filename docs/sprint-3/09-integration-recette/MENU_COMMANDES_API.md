@@ -47,11 +47,11 @@ L'étudiant utilise `GET/PUT/DELETE /me/cart`. `PUT` remplace le panier entier (
 }
 ```
 
-`items` est facultatif si le compte possède un panier du restaurant ciblé. Le serveur recalcule chaque prix, les options, le stock cumulé, la période de publication, le créneau, les frais et le total. Le devis ne réserve rien. La commande revérifie sous transaction et décompte le stock suivi. Elle demande l'en-tête `Idempotency-Key` (8 à 120 caractères alphanumériques, `.`, `_`, `:`, `-`). Une répétition identique retourne la commande existante avec 200 ; la première création retourne 201 ; la même clé pour un autre corps retourne 409. Les lignes gardent titre, options et prix unitaires figés. La commande commence à `pending` ; aucun encaissement n'est déclenché à cette étape.
+`items` est facultatif si le compte possède un panier du restaurant ciblé. Le serveur recalcule chaque prix, les options, le stock cumulé, la période de publication, le créneau, les frais et le total. Le devis ne réserve rien. La commande revérifie sous transaction et décompte le stock suivi. Elle demande l'en-tête `Idempotency-Key` (8 à 120 caractères alphanumériques, `.`, `_`, `:`, `-`). Une répétition identique retourne la commande existante avec 200 ; la première création retourne 201 ; la même clé pour un autre corps retourne 409. Les lignes gardent titre, options et prix unitaires figés. La commande commence à `received` ; aucun encaissement n'est déclenché à cette étape.
 
 `GET /me/orders` renvoie les commandes de l'étudiant connecté, paginées (`per_page`, `status`). `GET /me/orders/{order}` ne révèle jamais celle d'un autre étudiant. `GET /staff/restaurants/{restaurant}/orders` renvoie les commandes réelles du restaurant à l'équipe affectée, paginées ; l'admin plateforme est exclu. `PATCH /staff/orders/{order}/status` demande `status` et `expected_version` ; le conflit renvoie 409.
 
-Transitions autorisées : `pending → confirmed → preparing → ready`. Ensuite, livraison : `ready → delivering → completed` ; retrait/sur place : `ready → completed`. `cancelled` est possible avant `completed`, sans saut d'étape, et rend le stock suivi. Chaque transition est inscrite dans `order_events`. Les anciennes commandes de démonstration n'ont pas de propriétaire étudiant et ne sont pas modifiables par cette route.
+Les transitions, tables, zones de livraison et règles d'accès détaillées sont documentées dans [OPERATIONS_RECLAMATIONS_API.md](OPERATIONS_RECLAMATIONS_API.md). Les anciennes commandes de démonstration n'ont pas de propriétaire étudiant et ne sont pas modifiables par cette route.
 
 ## Vérification et limites
 

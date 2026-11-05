@@ -13,6 +13,16 @@ use App\Support\ApiResponse;
 
 class PlatformInsightsController extends Controller
 {
+    public function complaintEscalations(Request $request)
+    {
+        PlatformAccess::requireActiveAdmin($request);
+        $filters = $request->validate(['restaurant_id' => ['nullable', Rule::exists('restaurants', 'id')], 'per_page' => ['nullable', 'integer', 'min:1', 'max:100']]);
+        return DB::table('complaints')->where('escalated', true)
+            ->when($filters['restaurant_id'] ?? null, fn ($q, $id) => $q->where('restaurant_id', $id))
+            ->select('id', 'restaurant_id', 'status', 'created_at')
+            ->orderByDesc('created_at')->paginate($filters['per_page'] ?? 25);
+    }
+
     public function index(Request $request)
     {
         PlatformAccess::requireActiveAdmin($request);
