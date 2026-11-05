@@ -33,30 +33,51 @@ class PlatformInsightsController extends Controller
         $contentScope = fn () => DB::table('restaurant_contents')
             ->when($restaurantId, fn ($query) => $query->where('restaurant_id', $restaurantId));
 
-        $orders = $scope('orders')->orderByDesc('created_at')->limit(100)->get();
-        $complaints = $scope('complaints')->where('escalated', true)->orderByDesc('created_at')->limit(100)->get();
-        $loyalty = $scope('loyalty_movements')->orderByDesc('created_at')->limit(100)->get();
-        $referrals = $scope('referrals')->orderByDesc('created_at')->limit(100)->get();
-        $contents = $contentScope()->orderByDesc('updated_at')->limit(200)->get();
+        $orderTotals = $scope('orders')->selectRaw("restaurant_id, COUNT(*) as orders, SUM(CASE WHEN status IN ('Annulée', 'cancelled') THEN 0 ELSE amount_cdf END) as order_volume_cdf")->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
+        $complaintTotals = $scope('complaints')->where('escalated', true)->selectRaw('restaurant_id, COUNT(*) as escalated_complaints')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
+        $contentTotals = $contentScope()->where('is_published', true)->selectRaw("restaurant_id, COUNT(*) as published_contents, SUM(CASE WHEN kind = 'dish' THEN 1 ELSE 0 END) as dishes, SUM(CASE WHEN kind = 'promotion' THEN 1 ELSE 0 END) as promotions, SUM(CASE WHEN kind = 'event' THEN 1 ELSE 0 END) as events, SUM(CASE WHEN kind = 'game' THEN 1 ELSE 0 END) as games")->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
+        $loyaltyTotals = $scope('loyalty_movements')->selectRaw('restaurant_id, SUM(CASE WHEN points > 0 THEN points ELSE 0 END) as points_issued, SUM(CASE WHEN points < 0 THEN -points ELSE 0 END) as points_used')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
+        $referralTotals = $scope('referrals')->selectRaw('restaurant_id, COUNT(*) as referrals')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
+        $byRestaurant = DB::table('restaurants')->select('id')
+            ->when($restaurantId, fn ($query) => $query->where('id', $restaurantId))
+            ->orderBy('name')->get()->map(function ($restaurant) use ($orderTotals, $complaintTotals, $contentTotals, $loyaltyTotals, $referralTotals) {
+                $id = $restaurant->id;
+                return [
+                    'restaurant_id' => $id,
+                    'orders' => (int) ($orderTotals->get($id)?->orders ?? 0),
+                    'order_volume_cdf' => (int) ($orderTotals->get($id)?->order_volume_cdf ?? 0),
+                    'escalated_complaints' => (int) ($complaintTotals->get($id)?->escalated_complaints ?? 0),
+                    'published_contents' => (int) ($contentTotals->get($id)?->published_contents ?? 0),
+                    'dishes' => (int) ($contentTotals->get($id)?->dishes ?? 0),
+                    'promotions' => (int) ($contentTotals->get($id)?->promotions ?? 0),
+                    'events' => (int) ($contentTotals->get($id)?->events ?? 0),
+                    'games' => (int) ($contentTotals->get($id)?->games ?? 0),
+                    'points_issued' => (int) ($loyaltyTotals->get($id)?->points_issued ?? 0),
+                    'points_used' => (int) ($loyaltyTotals->get($id)?->points_used ?? 0),
+                    'referrals' => (int) ($referralTotals->get($id)?->referrals ?? 0),
+                ];
+            });
+        $escalations = $scope('complaints')->where('escalated', true)
+            ->select(['id', 'restaurant_id', 'status', 'created_at', 'is_demo'])
+            ->orderByDesc('created_at')->limit(100)->get();
 
         return response()->json([
             'summary' => [
-                'orders' => $scope('orders')->count(),
-                'order_volume_cdf' => $scope('orders')->whereNotIn('status', ['Annulée', 'cancelled'])->sum('amount_cdf'),
-                'escalated_complaints' => $scope('complaints')->where('escalated', true)->count(),
-                'points_issued' => $scope('loyalty_movements')->where('points', '>', 0)->sum('points'),
-                'points_used' => abs($scope('loyalty_movements')->where('points', '<', 0)->sum('points')),
-                'referrals' => $scope('referrals')->count(),
-                'published_contents' => $contentScope()->where('is_published', true)->count(),
+                'orders' => $byRestaurant->sum('orders'),
+                'order_volume_cdf' => $byRestaurant->sum('order_volume_cdf'),
+                'escalated_complaints' => $byRestaurant->sum('escalated_complaints'),
+                'points_issued' => $byRestaurant->sum('points_issued'),
+                'points_used' => $byRestaurant->sum('points_used'),
+                'referrals' => $byRestaurant->sum('referrals'),
+                'published_contents' => $byRestaurant->sum('published_contents'),
             ],
-            'by_restaurant' => $scope('orders')->selectRaw("restaurant_id, COUNT(*) as orders, SUM(CASE WHEN status IN ('Annulée', 'cancelled') THEN 0 ELSE amount_cdf END) as order_volume_cdf")->groupBy('restaurant_id')->get(),
-            'orders' => $orders,
-            'complaints' => $complaints,
-            'loyalty' => $loyalty,
-            'referrals' => $referrals,
-            'contents' => $contents,
-            'limits' => ['orders' => 100, 'complaints' => 100, 'loyalty' => 100, 'referrals' => 100, 'contents' => 200],
-            'has_demo_rows' => $orders->contains('is_demo', true) || $complaints->contains('is_demo', true) || $loyalty->contains('is_demo', true) || $referrals->contains('is_demo', true),
+            'by_restaurant' => $byRestaurant,
+            'complaints' => $escalations,
+            'limits' => ['complaints' => 100],
+            'has_demo_rows' => $scope('orders')->where('is_demo', true)->exists()
+                || $scope('complaints')->where('is_demo', true)->exists()
+                || $scope('loyalty_movements')->where('is_demo', true)->exists()
+                || $scope('referrals')->where('is_demo', true)->exists(),
             'filters' => $filters,
         ]);
     }
@@ -67,7 +88,8 @@ class PlatformInsightsController extends Controller
         $filters = $request->validate(['restaurant_id' => ['nullable', Rule::exists('restaurants', 'id')]]);
         return DB::table('platform_audit_logs as log')
             ->leftJoin('users as actor', 'actor.id', '=', 'log.actor_id')
-            ->select('log.*', 'actor.name as actor_name')
+            ->select('log.id', 'log.restaurant_id', 'log.action', 'log.target_type', 'log.target_id', 'log.reason', 'log.created_at', 'actor.name as actor_name')
+            ->where('log.action', 'not like', 'content.%')
             ->when($filters['restaurant_id'] ?? null, fn ($query, $id) => $query->where('log.restaurant_id', $id))
             ->orderByDesc('log.id')->limit(100)->get();
     }

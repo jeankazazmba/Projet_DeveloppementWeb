@@ -14,8 +14,8 @@ class RestaurantIsolationTest extends TestCase
 
     public function test_public_catalog_hides_private_restaurants_and_drafts(): void
     {
-        $public = Restaurant::create(['id' => 'a', 'name' => 'A', 'is_public' => true]);
-        $private = Restaurant::create(['id' => 'b', 'name' => 'B', 'is_public' => false]);
+        $public = Restaurant::create(['id' => 'a', 'name' => 'A', 'is_public' => true, 'status' => 'active']);
+        $private = Restaurant::create(['id' => 'b', 'name' => 'B', 'is_public' => false, 'status' => 'draft']);
         $public->contents()->create(['kind' => 'dish', 'title' => 'Visible', 'is_published' => true]);
         $public->contents()->create(['kind' => 'dish', 'title' => 'Brouillon', 'is_published' => false]);
         $private->contents()->create(['kind' => 'dish', 'title' => 'Secret', 'is_published' => true]);

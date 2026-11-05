@@ -8,6 +8,8 @@ Le cahier V1.0.2 décrit un **administrateur de la direction d'un restaurant** :
 
 Le présent espace `/plateforme` est donc une **extension multi-restaurants demandée après le cahier**. Les fonctions sans équivalent dans la source sont marquées **Proposition** et doivent être validées comme règles métier avant une mise en production. L'espace `/admin` reste l'administration **d'un restaurant actif** ; sa spécification détaillée est dans [SPEC_FONCTIONNELLE_ADMIN.md](SPEC_FONCTIONNELLE_ADMIN.md).
 
+**Décision du 5 novembre 2026 :** la séparation effective des responsabilités et des données prévaut sur les propositions plus larges ci-dessous. L'admin plateforme ne voit que les informations publiques des restaurants, les comptes de leurs administrateurs, les agrégats et les métadonnées minimales des escalades. Il ne consulte plus les contenus, commandes, réclamations ou mouvements de points individuels par son seul rôle plateforme. Voir [RESPONSABILITES_PAR_ROLE.md](RESPONSABILITES_PAR_ROLE.md).
+
 | Origine | Besoin | Conséquence pour l'admin plateforme |
 | --- | --- | --- |
 | Cahier | Un admin de restaurant gère employés, menu, campagnes, réclamations, paramètres et statistiques. | La plateforme ne doit pas mélanger ces données ni remplacer le responsable de chaque restaurant. |

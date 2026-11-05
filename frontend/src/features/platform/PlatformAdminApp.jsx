@@ -4,21 +4,22 @@ import { getRestaurants, saveRestaurants } from '../../data/restaurants.js'
 import { getDemoAudit, getDemoInsights, getDemoUsers, recordDemoAudit, saveDemoUsers } from './platformDemo.js'
 import { platformApiBase, platformRequest } from './platformApi.js'
 import PlatformIcon from './PlatformIcon.jsx'
-import { AccountsPanel, AuditPanel, CatalogPanel, ComplaintsPanel, LoyaltyPanel, OrdersPanel, OverviewPanel, RestaurantsPanel } from './PlatformPanels.jsx'
+import { AccountsPanel, AuditPanel, OverviewPanel, RestaurantsPanel } from './PlatformPanels.jsx'
+import { CatalogPanel, ComplaintsPanel, LoyaltyPanel, OrdersPanel } from './PlatformNetworkPanels.jsx'
 import './platform.css'
 
 const logo = '/assets/figma/dashboard-imgMonMiamMiamZeDucSpCe.png'
 const nav = [
   { id: 'overview', label: 'Vue d’ensemble', icon: 'dashboard', group: 'Pilotage', description: 'Suivez l’activité de ZeDuc-Sp@ce et de ses restaurants.' },
   { id: 'restaurants', label: 'Restaurants', icon: 'restaurant', group: 'Pilotage', description: 'Créez et gérez les établissements de la plateforme.' },
-  { id: 'accounts', label: 'Comptes & accès', icon: 'team', group: 'Pilotage', description: 'Gérez les comptes et leurs affectations par restaurant.' },
-  { id: 'catalog', label: 'Contenus publiés', icon: 'catalog', group: 'Supervision', description: 'Consultez les plats, offres, événements et jeux de chaque restaurant.' },
-  { id: 'orders', label: 'Commandes', icon: 'orders', group: 'Supervision', description: 'Consultez les commandes de la période sélectionnée.' },
-  { id: 'complaints', label: 'Réclamations', icon: 'claims', group: 'Supervision', description: 'Retrouvez les réclamations remontées à la plateforme.' },
-  { id: 'loyalty', label: 'Fidélité & parrainage', icon: 'loyalty', group: 'Supervision', description: 'Suivez les mouvements et parrainages par restaurant.' },
+  { id: 'accounts', label: 'Accès responsables', icon: 'team', group: 'Pilotage', description: 'Attribuez les accès des administrateurs de restaurant.' },
+  { id: 'catalog', label: 'Publications', icon: 'catalog', group: 'Supervision', description: 'Suivez les volumes de contenus publiés par établissement.' },
+  { id: 'orders', label: 'Activité des commandes', icon: 'orders', group: 'Supervision', description: 'Comparez les volumes de commandes entre les restaurants.' },
+  { id: 'complaints', label: 'Escalades', icon: 'claims', group: 'Supervision', description: 'Repérez les dossiers transmis à la plateforme.' },
+  { id: 'loyalty', label: 'Programmes', icon: 'loyalty', group: 'Supervision', description: 'Consultez les totaux de fidélité et parrainage.' },
   { id: 'audit', label: 'Journal d’audit', icon: 'audit', group: 'Traçabilité', description: 'Retrouvez les actions sensibles effectuées sur la plateforme.' },
 ]
-const emptyInsights = { summary: { orders: 0, order_volume_cdf: 0, escalated_complaints: 0, points_issued: 0, points_used: 0, referrals: 0, published_contents: 0 }, by_restaurant: [], orders: [], complaints: [], loyalty: [], referrals: [], contents: [], has_demo_rows: false }
+const emptyInsights = { summary: { orders: 0, order_volume_cdf: 0, escalated_complaints: 0, points_issued: 0, points_used: 0, referrals: 0, published_contents: 0 }, by_restaurant: [], complaints: [], has_demo_rows: false }
 const statusKey = restaurant => restaurant.status === 'Actif' || restaurant.status === 'Exemple' || restaurant.status === 'active' ? 'active' : restaurant.status === 'Suspendu' || restaurant.status === 'suspended' ? 'suspended' : 'draft'
 const demoStatus = value => value === 'active' ? 'Actif' : value === 'suspended' ? 'Suspendu' : 'Brouillon'
 const slug = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -161,7 +162,7 @@ export default function PlatformAdminApp() {
         {(index === 0 || nav[index - 1].group !== item.group) && <p className="platform-nav-heading">{item.group}</p>}
         <button type="button" className={tab === item.id ? 'active' : ''} aria-current={tab === item.id ? 'page' : undefined} onClick={() => { setTab(item.id); setSidebarOpen(false) }}><PlatformIcon name={item.icon} />{item.label}{item.id === 'complaints' && escalatedCount > 0 && <b className="platform-nav-count">{escalatedCount}</b>}</button>
       </div>)}</nav>
-      <div className="platform-sidebar-bottom"><Link to="/admin">Administration restaurant <PlatformIcon name="arrow" size={16} /></Link><Link to="/catalogue-pro">Catalogue partagé <PlatformIcon name="arrow" size={16} /></Link><button type="button" onClick={logout}><PlatformIcon name="logout" size={17} /> Quitter cet espace</button></div>
+      <div className="platform-sidebar-bottom"><Link to="/acces">Choisir un autre rôle <PlatformIcon name="arrow" size={16} /></Link><button type="button" onClick={logout}><PlatformIcon name="logout" size={17} /> Quitter cet espace</button></div>
       <div className="platform-sidebar-profile"><span className="platform-avatar">AP</span><span><strong>Administration</strong><small>ZeDuc-Sp@ce</small></span></div>
     </aside>
     <div className="platform-workspace"><header className="platform-topbar">
