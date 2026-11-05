@@ -84,7 +84,7 @@ Cette commande compile l’application et produit un installateur NSIS. Le propr
 
 ## 4. API Laravel (backend)
 
-L’API n’est **pas nécessaire** pour consulter les interfaces de démonstration actuelles. Elle sert au futur échange de données et expose pour l’instant `GET /api/health`.
+L’API n’est **pas nécessaire** pour consulter les interfaces de démonstration actuelles. Elle fournit déjà la connexion réelle de l’admin plateforme, la gestion des établissements et des administrateurs locaux, les invitations, l’audit et les indicateurs agrégés. Pour tester ce parcours, suivre [le guide de recette plateforme](docs/sprint-3/03-administration/TEST_ADMIN_PLATEFORME.md).
 
 Prérequis : PHP 8.2+, Composer 2 et MySQL 8+ avec une base locale `mon_miam_miam`. À la première installation, depuis la racine du dépôt :
 
