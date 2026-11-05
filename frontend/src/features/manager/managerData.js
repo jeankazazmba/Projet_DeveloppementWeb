@@ -2,8 +2,8 @@ export const money = value => `${Math.round(value).toLocaleString('fr-CD')} CDF`
 
 export const rights = [
   { key: 'orders', title: 'Gérer les commandes', detail: 'Tableau des commandes et préparation en cuisine' },
-  { key: 'menu', title: 'Mettre à jour le menu (temporaire)', detail: 'Disponibilités, plats du jour et prix' },
-  { key: 'claims', title: 'Traiter les réclamations', detail: 'Suivi et résolution des litiges clients' },
+  { key: 'menu', title: 'Mettre à jour le menu du service', detail: 'Disponibilités et plats du jour ; prix en lecture seule' },
+  { key: 'claims', title: 'Proposer une réponse aux réclamations', detail: 'Le gérant valide ou rejette la proposition' },
   { key: 'stats', title: 'Voir les statistiques hebdomadaires', detail: 'Rapports de ventes et taux d’affluence' },
 ]
 

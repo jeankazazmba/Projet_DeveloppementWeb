@@ -45,6 +45,18 @@ Le cahier mentionne la livraison, mais **ne définit pas un espace livreur**. Un
 
 « Selon délégation locale » signifie qu'un droit précis doit être décidé et contrôlé côté serveur avant d'être offert dans l'interface. Le cahier ne tranche pas ces cas. La gestion des accès par l'admin plateforme concerne l'identité, le rôle et l'affectation ; elle ne lui donne pas automatiquement accès aux données internes du restaurant.
 
+### Droits appliqués par défaut dans l'API actuelle
+
+| Route / action | Employé | Gérant | Admin restaurant | Admin plateforme |
+| --- | --- | --- | --- | --- |
+| Lire le catalogue professionnel complet, y compris brouillons | Non | Non | Oui, restaurant affecté | Non |
+| Lire les plats publiés utiles au service | Oui, restaurant affecté | Oui, restaurant affecté | Oui | Non |
+| Créer, modifier ou supprimer un plat, une offre, un événement ou un jeu | Non | Non : délégation non validée | Oui | Non |
+| Changer disponibilité ou plat du jour d'un plat publié | Oui | Non : supervision uniquement | Oui | Non |
+| Créer/publier/suspendre un établissement ou affecter son administrateur | Non | Non | Non | Oui |
+
+Ces droits sont vérifiés dans Laravel avec le compte actif **et** l'affectation au restaurant. La route de service n'accepte que `is_available` et `is_featured` ; un prix transmis en plus n'est pas enregistré. Les boutons des démonstrations locales reflètent ces frontières, mais leurs données de navigateur ne constituent pas une authentification. La création réelle des comptes employés, les commandes et la validation des réclamations demandent encore leurs API locales ; aucun droit supplémentaire n'est déduit de la maquette.
+
 ## 4. Données autorisées dans la vue plateforme
 
 | Domaine | Vue plateforme autorisée | Vue réservée au restaurant |

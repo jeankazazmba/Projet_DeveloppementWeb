@@ -5,45 +5,36 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use App\Models\RestaurantContent;
+use App\Support\RestaurantAccess;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StaffRestaurantController extends Controller
 {
-    private function role(Request $request, Restaurant $restaurant): string
-    {
-        abort_if($request->user()->is_platform_admin, 403);
-        $role = $request->user()->restaurants()->whereKey($restaurant->id)->first()?->pivot?->role;
-        abort_unless($role, 404);
-        return $role;
-    }
-
-    private function canWrite(Request $request, Restaurant $restaurant): void
-    {
-        abort_unless(in_array($this->role($request, $restaurant), ['admin', 'manager'], true), 403);
-    }
-
     public function restaurants(Request $request)
     {
-        abort_if($request->user()->is_platform_admin, 403);
+        abort_if(!$request->user()->is_active || $request->user()->is_platform_admin, 403);
         return $request->user()->restaurants()->orderBy('name')->get();
     }
 
     public function content(Request $request, Restaurant $restaurant)
     {
-        $this->role($request, $restaurant);
-        return $restaurant->contents()->orderByDesc('updated_at')->get();
+        $role = RestaurantAccess::role($request, $restaurant);
+        if ($role === 'admin') return $restaurant->contents()->orderByDesc('updated_at')->get();
+        return $restaurant->contents()->where('kind', 'dish')->where('is_published', true)
+            ->orderBy('title')->get(['id', 'restaurant_id', 'kind', 'title', 'price_cdf', 'image_url', 'is_published', 'is_available', 'is_featured']);
     }
 
     public function store(Request $request, Restaurant $restaurant)
     {
-        $this->canWrite($request, $restaurant);
+        RestaurantAccess::require($request, $restaurant, ['admin']);
         $data = $this->validatedContent($request);
         return response()->json($restaurant->contents()->create($data), 201);
     }
 
     public function update(Request $request, Restaurant $restaurant, RestaurantContent $content)
     {
-        $this->canWrite($request, $restaurant);
+        RestaurantAccess::require($request, $restaurant, ['admin']);
         abort_unless($content->restaurant_id === $restaurant->id, 404);
         $content->update($this->validatedContent($request, true));
         return $content->refresh();
@@ -51,10 +42,33 @@ class StaffRestaurantController extends Controller
 
     public function destroy(Request $request, Restaurant $restaurant, RestaurantContent $content)
     {
-        $this->canWrite($request, $restaurant);
+        RestaurantAccess::require($request, $restaurant, ['admin']);
         abort_unless($content->restaurant_id === $restaurant->id, 404);
         $content->delete();
         return response()->noContent();
+    }
+
+    public function service(Request $request, Restaurant $restaurant, RestaurantContent $content)
+    {
+        RestaurantAccess::require($request, $restaurant, ['admin', 'employee']);
+        abort_unless($content->restaurant_id === $restaurant->id && $content->kind === 'dish' && $content->is_published, 404);
+        $data = $request->validate([
+            'is_available' => ['sometimes', 'required', 'boolean'],
+            'is_featured' => ['sometimes', 'required', 'boolean'],
+        ]);
+        abort_if(!$data, 422, 'Indiquez une disponibilité ou un plat du jour.');
+        DB::transaction(function () use ($restaurant, $content, $data) {
+            Restaurant::whereKey($restaurant->id)->lockForUpdate()->firstOrFail();
+            $content->refresh();
+            abort_unless($content->is_published, 404);
+            abort_if(($data['is_featured'] ?? false) && ($data['is_available'] ?? $content->is_available) === false, 422, 'Un plat indisponible ne peut pas être le plat du jour.');
+            if ($data['is_featured'] ?? false) {
+                $restaurant->contents()->where('kind', 'dish')->where('id', '!=', $content->id)->update(['is_featured' => false]);
+            }
+            if (($data['is_available'] ?? true) === false) $data['is_featured'] = false;
+            $content->update($data);
+        });
+        return $content->refresh()->only(['id', 'restaurant_id', 'kind', 'title', 'price_cdf', 'image_url', 'is_published', 'is_available', 'is_featured']);
     }
 
     private function validatedContent(Request $request, bool $partial = false): array

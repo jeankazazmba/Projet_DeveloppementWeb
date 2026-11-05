@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/staff/restaurants/{restaurant}/content', [StaffRestaurantController::class, 'store']);
     Route::patch('/staff/restaurants/{restaurant}/content/{content}', [StaffRestaurantController::class, 'update']);
     Route::delete('/staff/restaurants/{restaurant}/content/{content}', [StaffRestaurantController::class, 'destroy']);
+    Route::patch('/staff/restaurants/{restaurant}/content/{content}/service', [StaffRestaurantController::class, 'service']);
     Route::post('/platform/restaurants', [PlatformRestaurantController::class, 'store']);
     Route::get('/platform/restaurants', [PlatformRestaurantController::class, 'index']);
     Route::patch('/platform/restaurants/{restaurant}', [PlatformRestaurantController::class, 'update']);

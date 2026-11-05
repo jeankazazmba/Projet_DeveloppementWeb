@@ -86,7 +86,7 @@ function ManagerWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRe
   const [claims, setClaims] = useState(() => readSaved(`${storagePrefix}-claims-v1`, sleepy ? sleepyClaims : initialClaims))
   const [orders] = useState(sleepy ? sleepyOrders : initialOrders)
   const [tables, setTables] = useState(() => readSaved(`${storagePrefix}-tables-v1`, sleepy ? sleepyTables : initialTables))
-  const [dishes, setDishes] = useState(() => readSaved(`${storagePrefix}-dishes-v1`, sleepy ? sleepyDishes : initialDishes))
+  const [dishes] = useState(() => readSaved(`${storagePrefix}-dishes-v1`, sleepy ? sleepyDishes : initialDishes))
   const [query, setQuery] = useState('')
   const [editor, setEditor] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -99,7 +99,6 @@ function ManagerWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRe
   useEffect(() => { localStorage.setItem(`${storagePrefix}-employees-v1`, JSON.stringify(employees)) }, [employees, storagePrefix])
   useEffect(() => { localStorage.setItem(`${storagePrefix}-claims-v1`, JSON.stringify(claims)) }, [claims, storagePrefix])
   useEffect(() => { localStorage.setItem(`${storagePrefix}-tables-v1`, JSON.stringify(tables)) }, [tables, storagePrefix])
-  useEffect(() => { localStorage.setItem(`${storagePrefix}-dishes-v1`, JSON.stringify(dishes)) }, [dishes, storagePrefix])
   useEffect(() => { if (!notice) return; const timer = window.setTimeout(() => setNotice(''), 4500); return () => window.clearTimeout(timer) }, [notice])
   useEffect(() => { try { localStorage.setItem('mon-miam-miam-theme', theme) } catch { /* Le thème reste actif pendant cette visite. */ } }, [theme])
   useEffect(() => { document.title = `${navigation.find(item => item.key === page)?.label} · Mon Miam Miam` }, [page])
@@ -110,17 +109,13 @@ function ManagerWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRe
     setNotice(`${employee.name} ${selectedEmployee ? 'modifié' : 'ajouté'} dans la démo. Aucun compte réel n’a été créé.`)
     closeDrawer()
   }
-  const decideClaim = (id, status, gesture, note) => {
-    setClaims(current => current.map(claim => claim.id === id ? { ...claim, status, gesture, note } : claim))
+  const decideClaim = (id, status, note) => {
+    setClaims(current => current.map(claim => claim.id === id ? { ...claim, status, note } : claim))
     setNotice(`Réclamation ${id} ${status.toLowerCase()} dans la démo. Aucune réponse n’a été envoyée au client.`)
   }
   const saveTable = table => {
     setTables(current => current.map(item => item.id === table.id ? table : item))
     setNotice(`Table ${table.id.slice(1)} mise à jour dans la démo. Aucun service distant n’a été modifié.`)
-  }
-  const updateDish = (id, fields) => {
-    setDishes(current => current.map(dish => dish.id === id ? { ...dish, ...fields } : dish))
-    setNotice('Disponibilité du menu enregistrée dans la démo. Aucun catalogue distant n’a été modifié.')
   }
   const openClaims = claims.filter(claim => claim.status === 'À valider').length
   return <div className="manager-app" data-theme={theme}>
@@ -139,7 +134,7 @@ function ManagerWorkspace({ restaurant, restaurantId, setRestaurantId, allowedRe
         {page === 'team' && <TeamPage employees={employees} query={query} onAdd={() => go('/gerant/equipe/nouveau')} onEdit={employee => setEditor(employee.id)} />}
         {page === 'tables' && <TablesPage tables={tables} orders={orders} query={query} onSave={saveTable} />}
         {page === 'delivery' && <ManagerDeliveryMap couriers={sleepy ? sleepyPreviewCouriers : undefined} />}
-        {page === 'menu' && <MenuStockPage dishes={dishes} query={query} onUpdate={updateDish} />}
+        {page === 'menu' && <MenuStockPage dishes={dishes} query={query} />}
         {page === 'statistics' && <StatisticsPage onNotice={setNotice} statsSource={sleepy ? sleepyStats : undefined} dishes={sleepy ? sleepyPopularDishes : undefined} restaurantName={restaurant.name} />}
         {page === 'claims' && <ClaimsPage claims={claims} query={query} onDecide={decideClaim} />}
       </main>
