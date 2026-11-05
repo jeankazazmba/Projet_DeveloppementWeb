@@ -3,19 +3,20 @@ import { Link } from 'react-router-dom'
 import { getRestaurants, saveRestaurants } from '../../data/restaurants.js'
 import { getDemoAudit, getDemoInsights, getDemoUsers, recordDemoAudit, saveDemoUsers } from './platformDemo.js'
 import { platformApiBase, platformRequest } from './platformApi.js'
+import PlatformIcon from './PlatformIcon.jsx'
 import { AccountsPanel, AuditPanel, CatalogPanel, ComplaintsPanel, LoyaltyPanel, OrdersPanel, OverviewPanel, RestaurantsPanel } from './PlatformPanels.jsx'
 import './platform.css'
 
 const logo = '/assets/figma/dashboard-imgMonMiamMiamZeDucSpCe.png'
 const nav = [
-  { id: 'overview', label: 'Vue d’ensemble', icon: '▦' },
-  { id: 'restaurants', label: 'Restaurants', icon: '⌂' },
-  { id: 'accounts', label: 'Comptes & accès', icon: '♙' },
-  { id: 'catalog', label: 'Contenus publiés', icon: '▤' },
-  { id: 'orders', label: 'Commandes', icon: '◫' },
-  { id: 'complaints', label: 'Réclamations', icon: '◇' },
-  { id: 'loyalty', label: 'Fidélité & parrainage', icon: '☆' },
-  { id: 'audit', label: 'Journal d’audit', icon: '◷' },
+  { id: 'overview', label: 'Vue d’ensemble', icon: 'dashboard', group: 'Pilotage', description: 'Suivez l’activité de ZeDuc-Sp@ce et de ses restaurants.' },
+  { id: 'restaurants', label: 'Restaurants', icon: 'restaurant', group: 'Pilotage', description: 'Créez et gérez les établissements de la plateforme.' },
+  { id: 'accounts', label: 'Comptes & accès', icon: 'team', group: 'Pilotage', description: 'Gérez les comptes et leurs affectations par restaurant.' },
+  { id: 'catalog', label: 'Contenus publiés', icon: 'catalog', group: 'Supervision', description: 'Consultez les plats, offres, événements et jeux de chaque restaurant.' },
+  { id: 'orders', label: 'Commandes', icon: 'orders', group: 'Supervision', description: 'Consultez les commandes de la période sélectionnée.' },
+  { id: 'complaints', label: 'Réclamations', icon: 'claims', group: 'Supervision', description: 'Retrouvez les réclamations remontées à la plateforme.' },
+  { id: 'loyalty', label: 'Fidélité & parrainage', icon: 'loyalty', group: 'Supervision', description: 'Suivez les mouvements et parrainages par restaurant.' },
+  { id: 'audit', label: 'Journal d’audit', icon: 'audit', group: 'Traçabilité', description: 'Retrouvez les actions sensibles effectuées sur la plateforme.' },
 ]
 const emptyInsights = { summary: { orders: 0, order_volume_cdf: 0, escalated_complaints: 0, points_issued: 0, points_used: 0, referrals: 0, published_contents: 0 }, by_restaurant: [], orders: [], complaints: [], loyalty: [], referrals: [], contents: [], has_demo_rows: false }
 const statusKey = restaurant => restaurant.status === 'Actif' || restaurant.status === 'Exemple' || restaurant.status === 'active' ? 'active' : restaurant.status === 'Suspendu' || restaurant.status === 'suspended' ? 'suspended' : 'draft'
@@ -28,6 +29,7 @@ export default function PlatformAdminApp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [tab, setTab] = useState('overview')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [restaurantFilter, setRestaurantFilter] = useState('')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
@@ -43,6 +45,12 @@ export default function PlatformAdminApp() {
 
   useEffect(() => { try { localStorage.setItem('mon-miam-miam-theme', theme) } catch { /* Le thème reste actif pour cette visite. */ } }, [theme])
   useEffect(() => { document.title = `${nav.find(item => item.id === tab)?.label || 'Plateforme'} · ZeDuc-Sp@ce` }, [tab])
+  useEffect(() => {
+    if (!sidebarOpen) return
+    const close = event => { if (event.key === 'Escape') setSidebarOpen(false) }
+    window.addEventListener('keydown', close)
+    return () => window.removeEventListener('keydown', close)
+  }, [sidebarOpen])
 
   const refreshDemo = useCallback(() => {
     setRestaurants(getRestaurants())
@@ -90,7 +98,7 @@ export default function PlatformAdminApp() {
   const enterDemo = () => { setError(''); setSession(null); setMode('demo'); setTab('overview') }
   const logout = async () => {
     if (session) await platformRequest('/logout', session.token, { method: 'POST' }).catch(() => {})
-    setMode(null); setSession(null); setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([]); setRestaurantFilter(''); setTab('overview')
+    setMode(null); setSession(null); setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([]); setRestaurantFilter(''); setTab('overview'); setSidebarOpen(false)
   }
   const mutate = async (connectedAction, demoAction, success) => {
     setBusy(true); setError(''); setNotice('')
@@ -138,14 +146,32 @@ export default function PlatformAdminApp() {
   )
 
   const context = { restaurants, users, audit, insights, restaurantFilter, mode, busy, statusKey, onCreateRestaurant: createRestaurant, onUpdateRestaurant: updateRestaurant, onCreateUser: createUser, onAssignUser: assignUser, onRevokeUser: revokeUser, onSetUserActive: setUserActive, onTab: setTab }
+  const currentPage = nav.find(item => item.id === tab) || nav[0]
+  const escalatedCount = insights.summary.escalated_complaints
 
   if (!mode) return <div className="platform-app" data-theme={theme}><main className="platform-gateway"><img src={logo} alt="Mon Miam Miam" /><span className="platform-kicker">ZEDUC-SP@CE · ADMINISTRATION</span><h1>Administration de la plateforme</h1><p>Connectez-vous avec un compte administrateur de plateforme pour gérer les établissements et leurs accès.</p>{platformApiBase && <form className="platform-login" onSubmit={login}><label>Adresse e-mail<input type="email" autoComplete="username" required value={email} onChange={event => setEmail(event.target.value)} /></label><label>Mot de passe<input type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} /></label><button className="platform-primary" disabled={busy}>Se connecter</button></form>}{!platformApiBase && <p className="platform-note">API non configurée : renseignez VITE_API_URL pour la connexion réelle.</p>}<button className="platform-demo-entry" onClick={enterDemo}>Explorer la démonstration →</button>{error && <p className="platform-error" role="alert">{error}</p>}<Link to="/acces">← Choisir un autre espace</Link></main></div>
 
   return <div className="platform-app" data-theme={theme}>
     <a className="platform-skip" href="#platform-main">Aller au contenu</a>
-    <aside className="platform-sidebar"><Link className="platform-brand" to="/"><img src={logo} alt="Mon Miam Miam" /><span>ZeDuc-Sp@ce<small>PLATEFORME</small></span></Link><div className="platform-role">ADMIN PLATEFORME <small>{mode === 'demo' ? 'Démonstration locale' : session?.user?.name}</small></div><nav aria-label="Navigation plateforme">{nav.map(item => <button key={item.id} className={tab === item.id ? 'active' : ''} aria-current={tab === item.id ? 'page' : undefined} onClick={() => setTab(item.id)}><span className="platform-nav-icon" aria-hidden="true">{item.icon}</span>{item.label}</button>)}</nav><div className="platform-sidebar-bottom"><Link to="/admin">Administration restaurant ↗</Link><Link to="/catalogue-pro">Catalogue partagé ↗</Link><button onClick={logout}>Quitter cet espace</button></div></aside>
-    <div className="platform-workspace"><header className="platform-topbar"><div><span className="platform-kicker">ESPACE ADMINISTRATEUR · ZEDUC-SP@CE</span><h1>{nav.find(item => item.id === tab)?.label}</h1></div><div className="platform-top-actions"><label>Restaurant<select value={restaurantFilter} onChange={event => setRestaurantFilter(event.target.value)}><option value="">Tous les restaurants</option>{restaurants.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><span className="platform-mode" title={mode === 'demo' ? 'Données locales de démonstration' : 'Données du serveur'}>{mode === 'demo' ? 'DÉMO' : 'API'}</span><button className="platform-theme" onClick={() => setTheme(value => value === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'}>{theme === 'dark' ? '☀' : '☾'}</button></div></header>
-      <main id="platform-main" className="platform-main"><div className="platform-intro"><p>{mode === 'demo' ? 'Aperçu local : les comptes, commandes et chiffres ci-dessous ne sont pas synchronisés avec le serveur.' : insights.has_demo_rows ? 'Données serveur incluant des lignes de démonstration clairement marquées.' : 'Données serveur · accès réservé à l’administration plateforme.'}</p>{loading && <span>Actualisation…</span>}</div>{['overview', 'orders', 'complaints', 'loyalty'].includes(tab) && <div className="platform-period"><label>Du <input type="date" value={from} max={to || undefined} onChange={event => setFrom(event.target.value)} /></label><label>Au <input type="date" value={to} min={from || undefined} onChange={event => setTo(event.target.value)} /></label>{(from || to) && <button onClick={() => { setFrom(''); setTo('') }}>Effacer les dates</button>}</div>}
+    {sidebarOpen && <button className="platform-sidebar-shade" type="button" aria-label="Fermer la navigation" onClick={() => setSidebarOpen(false)} />}
+    <aside id="platform-navigation" className={`platform-sidebar ${sidebarOpen ? 'is-open' : ''}`}>
+      <Link className="platform-brand" to="/"><img src={logo} alt="Mon Miam Miam" /><span>ZeDuc-Sp@ce</span></Link>
+      <div className="platform-role"><span>ADMIN PLATEFORME</span><small>{mode === 'demo' ? 'Démonstration locale' : session?.user?.name}</small></div>
+      <nav aria-label="Navigation plateforme">{nav.map((item, index) => <div key={item.id}>
+        {(index === 0 || nav[index - 1].group !== item.group) && <p className="platform-nav-heading">{item.group}</p>}
+        <button type="button" className={tab === item.id ? 'active' : ''} aria-current={tab === item.id ? 'page' : undefined} onClick={() => { setTab(item.id); setSidebarOpen(false) }}><PlatformIcon name={item.icon} />{item.label}{item.id === 'complaints' && escalatedCount > 0 && <b className="platform-nav-count">{escalatedCount}</b>}</button>
+      </div>)}</nav>
+      <div className="platform-sidebar-bottom"><Link to="/admin">Administration restaurant <PlatformIcon name="arrow" size={16} /></Link><Link to="/catalogue-pro">Catalogue partagé <PlatformIcon name="arrow" size={16} /></Link><button type="button" onClick={logout}><PlatformIcon name="logout" size={17} /> Quitter cet espace</button></div>
+      <div className="platform-sidebar-profile"><span className="platform-avatar">AP</span><span><strong>Administration</strong><small>ZeDuc-Sp@ce</small></span></div>
+    </aside>
+    <div className="platform-workspace"><header className="platform-topbar">
+      <button type="button" className="platform-mobile-menu" aria-label={sidebarOpen ? 'Fermer la navigation' : 'Ouvrir la navigation'} aria-expanded={sidebarOpen} aria-controls="platform-navigation" onClick={() => setSidebarOpen(value => !value)}><PlatformIcon name={sidebarOpen ? 'close' : 'menu'} /></button>
+      <div className="platform-top-context"><span className={`platform-live-dot ${mode === 'demo' ? 'is-demo' : ''}`} aria-hidden="true" />{mode === 'demo' ? 'Démonstration plateforme' : 'Administration connectée'}</div>
+      <div className="platform-top-actions"><label>Restaurant<select value={restaurantFilter} onChange={event => setRestaurantFilter(event.target.value)}><option value="">Tous les restaurants</option>{restaurants.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><span className="platform-mode" title={mode === 'demo' ? 'Données locales de démonstration' : 'Données du serveur'}>{mode === 'demo' ? 'Démo' : 'Connecté'}</span><button type="button" className="platform-theme" onClick={() => setTheme(value => value === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre'} aria-pressed={theme === 'light'}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span><span>{theme === 'dark' ? 'Clair' : 'Sombre'}</span></button><button type="button" className="platform-notification" onClick={() => setTab('complaints')} aria-label={`Voir ${escalatedCount} réclamation${escalatedCount > 1 ? 's' : ''} escaladée${escalatedCount > 1 ? 's' : ''}`}><PlatformIcon name="bell" size={19} />{escalatedCount > 0 && <b>{escalatedCount}</b>}</button><span className="platform-top-profile"><span className="platform-avatar">AP</span><span>Admin</span></span></div>
+    </header>
+      <main id="platform-main" className="platform-main" tabIndex={-1}>
+        <div className="platform-page-heading"><div><span className="platform-kicker">ZEDUC-SP@CE · {currentPage.group.toUpperCase()}</span><h1>{currentPage.label}</h1><p>{currentPage.description}</p></div>{tab === 'overview' && <button type="button" className="platform-primary" onClick={() => setTab('restaurants')}><PlatformIcon name="restaurant" size={18} /> Gérer les restaurants</button>}</div>
+        <div className="platform-intro"><p>{mode === 'demo' ? 'Aperçu local : les comptes, commandes et chiffres ci-dessous ne sont pas synchronisés avec le serveur.' : insights.has_demo_rows ? 'Données serveur incluant des lignes de démonstration clairement marquées.' : 'Données serveur · accès réservé à l’administration plateforme.'}</p>{loading && <span>Actualisation…</span>}</div>{['overview', 'orders', 'complaints', 'loyalty'].includes(tab) && <div className="platform-period"><label>Du <input type="date" value={from} max={to || undefined} onChange={event => setFrom(event.target.value)} /></label><label>Au <input type="date" value={to} min={from || undefined} onChange={event => setTo(event.target.value)} /></label>{(from || to) && <button onClick={() => { setFrom(''); setTo('') }}>Effacer les dates</button>}</div>}
         {error && <p className="platform-error" role="alert">{error}</p>}{notice && <p className="platform-notice" role="status">{notice}</p>}
         {tab === 'overview' && <OverviewPanel {...context} />}
         {tab === 'restaurants' && <RestaurantsPanel {...context} />}

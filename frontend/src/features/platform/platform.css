@@ -31,3 +31,122 @@
 @media(max-width:1100px){.platform-sidebar{width:220px;flex-basis:220px}.platform-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.platform-two-columns{grid-template-columns:1fr}}
 @media(max-width:760px){.platform-app{display:block}.platform-sidebar{position:static;width:auto;height:auto;padding:12px;border-right:0;border-bottom:1px solid var(--pf-line)}.platform-brand{padding-bottom:7px}.platform-role{display:none}.platform-sidebar nav{display:flex;overflow-x:auto;padding:5px 0}.platform-sidebar nav button{white-space:nowrap;width:auto}.platform-sidebar-bottom{display:none}.platform-topbar{padding:16px;align-items:start;flex-direction:column}.platform-top-actions{width:100%}.platform-top-actions label{flex:1}.platform-top-actions select{width:100%;min-width:0}.platform-main{padding:18px 16px 40px}.platform-footer{padding:16px}.platform-card{padding:16px}}
 @media(max-width:520px){.platform-metrics{grid-template-columns:1fr 1fr}.platform-metrics strong{font-size:19px}.platform-overview-list{grid-template-columns:1fr 1fr}.platform-card-heading{align-items:start;flex-direction:column}.platform-card-heading input{max-width:none;width:100%}.platform-restaurant-row{align-items:start;flex-direction:column}.platform-status-actions>div:last-child>*{flex:1}.platform-gateway{padding:23px}.platform-footer{flex-direction:column}}
+
+/* Alignement avec les espaces administrateur et gérant. */
+.platform-app{--pf-bg:#000;--pf-side:#121212;--pf-card:#121212;--pf-card-2:#1b1b1b;--pf-line:#2c2a25;--pf-muted:#a8a294;--pf-input:#0d0d0d;color-scheme:dark;font-size:16px}
+.platform-app[data-theme='light']{--pf-bg:#f6f4ee;--pf-side:#fff;--pf-card:#fff;--pf-card-2:#efede5;--pf-line:#d8d3c6;--pf-text:#25231e;--pf-muted:#676257;--pf-input:#fff;color-scheme:light}
+.platform-sidebar{padding:24px 12px 12px;border-right:0}
+.platform-brand{flex-direction:column;justify-content:center;gap:9px;text-align:center;padding:0 12px 12px}
+.platform-brand img{width:60px;height:56px}
+.platform-brand>span{color:var(--pf-gold);font-size:12px;font-weight:600;letter-spacing:1.6px}
+.platform-role{display:grid;justify-items:center;gap:4px;margin:8px 5px 16px;padding:0;background:none;text-align:center}
+.platform-role>span{padding:4px 11px;border-radius:30px;background:#302b23;color:#cfbd97;font-size:11px}
+.platform-role small{max-width:205px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.platform-nav-heading{padding:18px 16px 6px;color:var(--pf-muted);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase}
+.platform-sidebar nav{gap:1px}
+.platform-sidebar nav button{min-height:44px;padding:11px 16px;font-size:15px;font-weight:400;line-height:1.35}
+.platform-sidebar nav button svg{flex:0 0 20px}
+.platform-sidebar nav button.active{font-weight:600}
+.platform-nav-count{margin-left:auto;padding:1px 7px;border-radius:30px;background:#51312b;color:#ffb4ab;font-size:12px}
+.platform-sidebar-bottom{gap:8px;padding:24px 12px 18px}
+.platform-sidebar-bottom a,.platform-sidebar-bottom button{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500}
+.platform-sidebar-profile{display:flex;align-items:center;gap:10px;margin:0 4px;padding:9px;border-radius:12px;background:var(--pf-card-2)}
+.platform-sidebar-profile>span:last-child{display:grid}
+.platform-sidebar-profile strong{font-size:13px;font-weight:600}
+.platform-sidebar-profile small{color:var(--pf-muted);font-size:12px}
+.platform-avatar{display:inline-grid;flex:0 0 36px;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--pf-gold);color:#15130e;font-size:12px;font-weight:700}
+.platform-sidebar-shade,.platform-mobile-menu{display:none}
+.platform-topbar{min-height:64px;padding:10px 32px;background:var(--pf-bg)}
+.platform-top-context{display:flex;align-items:center;gap:10px;color:var(--pf-muted);font-size:14px;font-weight:500}
+.platform-live-dot{width:8px;height:8px;border-radius:50%;background:#67d6a1;box-shadow:0 0 0 4px #67d6a121}
+.platform-live-dot.is-demo{background:var(--pf-gold);box-shadow:0 0 0 4px #cfbd9721}
+.platform-top-actions{gap:14px}
+.platform-top-actions label{display:flex;align-items:center;gap:9px;color:var(--pf-muted);font-size:13px;letter-spacing:0;text-transform:none}
+.platform-top-actions select{min-width:174px;max-width:225px}
+.platform-mode{padding:3px 8px;border-radius:6px;color:var(--pf-muted);font-size:12px;letter-spacing:0;text-transform:none}
+.platform-theme,.platform-notification{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;border:1px solid var(--pf-line);background:var(--pf-card-2);color:var(--pf-gold)}
+.platform-theme{width:auto;height:auto;padding:7px 12px;border-radius:20px;font-size:13px;font-weight:600}
+.platform-notification{position:relative;width:39px;border-radius:50%}
+.platform-notification b{position:absolute;top:-7px;right:-7px;min-width:18px;padding:1px 4px;border-radius:50%;background:#a33e32;color:#fff;font-size:10px}
+.platform-top-profile{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.platform-top-profile .platform-avatar{flex-basis:32px;width:32px;height:32px}
+.platform-main{padding:28px 32px 48px}
+.platform-page-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}
+.platform-kicker{font-size:12px;letter-spacing:.08em}
+.platform-page-heading h1{margin:5px 0 3px;font-size:clamp(27px,2.8vw,36px);font-weight:700;line-height:1.2;letter-spacing:-.035em}
+.platform-page-heading p{color:var(--pf-muted);font-size:14px;line-height:1.6}
+.platform-intro{margin-bottom:20px;padding:13px 16px;border:1px solid var(--pf-line);border-radius:12px;background:var(--pf-card);font-size:13px}
+.platform-period{margin-bottom:22px}
+.platform-period label,.platform-period button{font-size:13px}
+.platform-app input,.platform-app select,.platform-app textarea{min-height:42px;padding:10px 12px;font-size:14px}
+.platform-error,.platform-notice,.platform-note{font-size:13px}
+.platform-metrics{gap:16px;margin-bottom:24px}
+.platform-metrics>div,.platform-metrics>button{min-height:148px;padding:20px;border-radius:14px}
+.platform-metrics small,.platform-metrics span{font-size:12px}
+.platform-metrics strong{color:var(--pf-text);font-size:clamp(23px,2.3vw,29px);font-weight:700}
+.platform-metrics>:first-child strong{color:var(--pf-gold)}
+.platform-metrics-small>div{min-height:110px}
+.platform-two-columns,.platform-stack{gap:24px}
+.platform-card{padding:24px}
+.platform-card-heading h2{font-size:18px;font-weight:600}
+.platform-help{font-size:13px;line-height:1.6}
+.platform-empty{font-size:14px}
+.platform-text-button{font-size:13px}
+.platform-primary,.platform-secondary,.platform-danger,.platform-demo-entry{gap:8px;min-height:44px;font-size:14px;font-weight:600}
+.platform-form{gap:14px}
+.platform-form label,.platform-status-actions label{font-size:14px;font-weight:500}
+.platform-form label small{font-size:12px}
+.platform-restaurant-row strong,.platform-user-row strong{font-size:15px}
+.platform-restaurant-row small,.platform-user-row small,.platform-user-row>span:last-child{font-size:13px}
+.platform-state{font-size:12px;font-weight:600}
+.platform-status-actions h3{font-size:16px}
+.platform-assignments small{font-size:12px}
+.platform-bar-row>div:first-child{font-size:14px}
+.platform-overview-list strong{font-size:23px}
+.platform-overview-list span{font-size:12px}
+.platform-table-wrap table{font-size:14px}
+.platform-table-wrap th{padding:14px 12px;font-size:12px;font-weight:600;letter-spacing:0}
+.platform-table-wrap td{padding:14px 12px}
+.platform-table-wrap tbody tr:hover{background:var(--pf-card-2)}
+.platform-table-wrap td small{font-size:12px}
+.platform-footer{font-size:12px}
+.platform-gateway{width:min(490px,calc(100% - 32px));padding:38px}
+.platform-gateway>p{font-size:15px}
+.platform-gateway>a,.platform-login label{font-size:14px}
+.platform-app[data-theme='light'] :is(.platform-state.state-active,.platform-positive){color:#267243}
+.platform-app[data-theme='light'] :is(.platform-state.state-suspended,.platform-negative,.platform-danger){color:#a43d30}
+.platform-app[data-theme='light'] .platform-error{color:#9b3a2e}
+.platform-app[data-theme='light'] .platform-notice{color:#27683a}
+@media(max-width:1180px){.platform-top-context{display:none}}
+@media(max-width:900px){.platform-sidebar{width:222px;flex-basis:222px}.platform-sidebar nav button{padding-inline:12px;font-size:14px}.platform-topbar,.platform-main{padding-inline:22px}.platform-top-profile{display:none}}
+@media(max-width:760px){
+  .platform-app{display:flex}
+  .platform-sidebar{position:fixed;z-index:21;top:0;left:0;width:min(280px,86vw);height:100svh;transform:translateX(-102%);transition:transform .2s ease;box-shadow:20px 0 50px #0005}
+  .platform-sidebar.is-open{transform:translateX(0)}
+  .platform-role{display:grid}
+  .platform-sidebar nav{display:grid;overflow-x:visible}
+  .platform-sidebar nav button{width:100%;white-space:normal}
+  .platform-sidebar-bottom{display:grid}
+  .platform-sidebar-shade{position:fixed;z-index:20;inset:0;display:block;width:100%;border:0;background:#0009}
+  .platform-mobile-menu{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid var(--pf-line);border-radius:10px;background:var(--pf-card-2);color:var(--pf-text)}
+  .platform-topbar{flex-direction:row;align-items:center;gap:12px;padding:12px 16px}
+  .platform-top-actions{flex:1;justify-content:flex-end;gap:8px;width:auto}
+  .platform-top-actions label{flex:1;justify-content:flex-end;font-size:0}
+  .platform-top-actions select{width:100%;min-width:0;font-size:13px}
+  .platform-mode{display:none}
+  .platform-main{padding:22px 16px 40px}
+  .platform-footer{padding-inline:16px}
+}
+@media(max-width:520px){
+  .platform-top-actions{gap:7px}
+  .platform-theme{width:40px;padding:7px}
+  .platform-theme span:last-child{display:none}
+  .platform-page-heading{align-items:start;flex-direction:column}
+  .platform-page-heading h1{font-size:27px}
+  .platform-metrics{gap:10px}
+  .platform-metrics>div,.platform-metrics>button{min-height:130px;padding:15px}
+  .platform-metrics strong{font-size:22px}
+  .platform-card{padding:17px}
+  .platform-gateway{padding:24px}
+}
+@media(prefers-reduced-motion:reduce){.platform-sidebar{transition:none}}
