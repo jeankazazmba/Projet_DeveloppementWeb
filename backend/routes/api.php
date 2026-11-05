@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\RestaurantOperationsController;
 use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\ComplaintAttachmentController;
 use App\Http\Controllers\Api\LoyaltyController;
+use App\Http\Controllers\Api\PaymentController;
 
 Route::get('/health', function () {
     return response()->json([
@@ -39,6 +40,8 @@ Route::get('/restaurants/{restaurant}/service-slots', [RestaurantSlotController:
 Route::get('/restaurants/{restaurant}/tables', [RestaurantOperationsController::class, 'publicTables']);
 Route::get('/restaurants/{restaurant}/delivery-zones', [RestaurantOperationsController::class, 'publicZones']);
 Route::get('/restaurants/{restaurant}/leaderboard', [LoyaltyController::class, 'leaderboard']);
+Route::get('/payment-methods', [PaymentController::class, 'methods']);
+Route::post('/webhooks/payments/test', [PaymentController::class, 'webhook'])->middleware('throttle:60,1');
 Route::post('/login', [SessionController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/auth/register', [AuthProfileController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/auth/login', [SessionController::class, 'login'])->middleware('throttle:5,1');
@@ -52,6 +55,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', EnsureActiveAccount::class])->group(function () {
+    Route::get('/me/orders/{order}/payment-intents', [PaymentController::class, 'index']);
+    Route::post('/me/orders/{order}/payment-intents', [PaymentController::class, 'store']);
+    Route::post('/me/payment-intents/{intent}/cancel', [PaymentController::class, 'cancel']);
     Route::get('/me/loyalty', [LoyaltyController::class, 'loyalty']);
     Route::get('/me/referrals', [LoyaltyController::class, 'referrals']);
     Route::get('/me/game-participations', [LoyaltyController::class, 'myGames']);
