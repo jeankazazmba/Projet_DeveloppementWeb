@@ -98,3 +98,11 @@ Le plan de recette détaillé à quinze scénarios est dans `ETAT_FRONT_BACK_ET_
 - `docs/sprint-3/09-integration-recette/ETAT_FRONT_BACK_ET_TESTS_INTERAPPS.md` : écarts et tests entre applications.
 - `docs/sprint-3/09-integration-recette/RECETTE_PRODUCTION.md` : commandes de recette, migration et sauvegarde.
 - `docs/sprint-3/09-integration-recette/PAIEMENTS_API.md` : états de paiement et webhook local.
+
+## 12. Lancement simultané et contrôle du Sprint 4
+
+Le lanceur Windows `scripts/start-ecosystem.ps1` démarre en une commande Docker Compose pour MySQL, l'API Laravel, la file de notifications et le web, puis ouvre deux terminaux interactifs pour Expo SDK 58 et Tauri. Le serveur Vite déjà exposé sur le port 5173 est réutilisé par Tauri, ce qui évite le conflit entre le site web et la fenêtre desktop. Si Tauri est lancé seul, son script `ensure-vite.mjs` démarre Vite à sa place. Le mobile utilise l'adresse IPv4 locale du PC fournie au lanceur ; le téléphone doit partager le réseau local.
+
+Commande de précontrôle : `./scripts/start-ecosystem.ps1 -CheckOnly -LanIp <IP_DU_PC>`. Commande de lancement : `./scripts/start-ecosystem.ps1 -LanIp <IP_DU_PC>`. Le lanceur attend une réponse positive de `/api/ready` et de `desktop.html`, puis exécute un contrôle réseau avant d'ouvrir les deux autres applications. Le même contrôle, Expo compris, peut être rejoué avec `./scripts/test-ecosystem.ps1`. `APP_KEY` est générée dans le fichier `.env` local si elle est vide. Arrêt : Ctrl+C dans les fenêtres Expo et Tauri, puis `./scripts/stop-ecosystem.ps1` pour Docker. Aucun volume MySQL n'est supprimé.
+
+Contrôles effectués dans cette livraison : analyse syntaxique des scripts PowerShell, analyse syntaxique JavaScript et JSON Tauri, `docker compose config --quiet`, et exécution du précontrôle sans serveur lancé. Ce précontrôle signale que `APP_KEY` est vide et que Node 23 est installé sur ce poste ; le lanceur génère la clé au démarrage réel, tandis que Node 22.13+ ou 24.3+ est préférable pour Expo SDK 58. La suite Feature Laravel repasse avec **51 tests et 627 assertions**. `npm run lint` passe avec **zéro erreur et trois avertissements** relatifs aux dépendances de hooks préexistants. La recette visuelle sur les trois surfaces et le test réel sur MySQL restent à faire après lancement par le propriétaire.

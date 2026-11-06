@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import AccessPortal from './AccessPortal.jsx'
-import { formatPrice, homeImage, menuImage, promoImage } from './publicData.js'
+import { formatPrice, homeImage, menuImage } from './publicData.js'
 import { demoCatalog, loadPublicCatalog } from '../../data/remoteCatalog.js'
 import './public.css'
 

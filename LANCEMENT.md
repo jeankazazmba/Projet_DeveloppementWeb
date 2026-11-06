@@ -2,6 +2,27 @@
 
 Ce guide utilise **PowerShell sous Windows**. Ouvrir un terminal distinct pour chaque serveur à laisser actif. Les chemins ci-dessous partent de la racine du dépôt `Projet_DeveloppementWeb`.
 
+## Démarrage de tout l'écosystème
+
+Préparer `.env` à la racine avec `DB_PASSWORD` et `MYSQL_ROOT_PASSWORD`, puis installer les dépendances avec `npm ci` dans `frontend/` et `mobile/`. Docker Desktop, Rust, WebView2 et les outils C++ Windows sont requis pour cette configuration complète. Relever l'adresse IPv4 du PC sur le réseau Wi-Fi avec `ipconfig`. Le téléphone Expo Go doit être sur ce même réseau.
+
+```powershell
+.\scripts\start-ecosystem.ps1 -CheckOnly -LanIp 192.168.1.10
+.\scripts\start-ecosystem.ps1 -LanIp 192.168.1.10
+```
+
+Remplacer `192.168.1.10` par l'IPv4 réelle du PC. La première commande vérifie la configuration sans lancer les applications. La seconde démarre MySQL, Laravel, le worker et le web dans Docker, attend l'API, puis ouvre Expo et Tauri dans deux fenêtres interactives. Une clé `APP_KEY` absente est générée dans le `.env` local. Pour se passer temporairement de l'une des interfaces, utiliser `-SkipMobile` ou `-SkipDesktop`. `-NoBuild` évite de reconstruire les images Docker déjà disponibles.
+
+Arrêter Expo et Tauri avec `Ctrl+C` dans leurs fenêtres, puis arrêter les conteneurs sans supprimer MySQL :
+
+```powershell
+.\scripts\stop-ecosystem.ps1
+```
+
+Les URL sont `http://localhost:5173/`, `http://localhost:5173/etudiant`, `http://localhost:8000/api/health` et `http://localhost:8000/api/ready`. Le code QR d'Expo apparaît dans sa fenêtre. Le rapport technique est dans [docs/sprint-4/rapport-technique](docs/sprint-4/rapport-technique/README.md).
+
+Après le lancement, vérifier les services web et Expo avec `.\scripts\test-ecosystem.ps1`. Le lanceur exécute déjà la partie web/API de ce contrôle ; la fenêtre Tauri et les parcours avec comptes doivent être vérifiés manuellement. Le scénario étudiant → employé → gérant → plateforme est décrit dans le rapport technique.
+
 ## 1. Site public et applications web
 
 Prérequis : Node.js et npm. À la première installation :
@@ -31,7 +52,7 @@ Le serveur Vite affiche son adresse dans le terminal, normalement `http://localh
 | Gérant | http://localhost:5173/gerant |
 | Employé | http://localhost:5173/employe |
 
-**Un seul `npm run dev` suffit pour toutes ces pages.** Les espaces métier contiennent actuellement des données de démonstration ; ouvrir leur URL ne constitue pas une connexion sécurisée.
+**Un seul `npm run dev` suffit pour toutes ces pages.** Les espaces métier proposent encore un mode démonstration ; seuls les parcours connectés à Laravel utilisent les comptes et les données réelles.
 
 Pour arrêter Vite : `Ctrl + C` dans son terminal.
 
@@ -52,7 +73,7 @@ npx expo start
 
 Scanner le code QR affiché avec Expo Go. Pour demander directement Android, utiliser `npm run android` ; pour la prévisualisation dans un navigateur, `npm run web`. La prévisualisation web ne reproduit pas nécessairement les composants natifs, notamment la carte.
 
-L’application mobile contient les espaces **étudiant** et **employé** dans le même projet. Le passage à l’espace employé se fait dans l’interface de démonstration ; il n’y a pas de deuxième serveur Expo à lancer. L’étudiant peut filtrer le catalogue par restaurant ; l’employé choisit son restaurant de travail en entrant dans son espace. Les données des deux espaces sont locales et ne se synchronisent pas encore avec le site ou le backend.
+L’application mobile contient les espaces **étudiant** et **employé** dans le même projet ; il n’y a pas de deuxième serveur Expo à lancer. Avec `EXPO_PUBLIC_API_URL=http://IP_DU_PC:8000`, les parcours connectés utilisent l’API. Le téléphone doit pouvoir joindre l’IPv4 du PC sur le même réseau local.
 
 Pour arrêter Expo : `Ctrl + C`.
 
@@ -73,7 +94,7 @@ Pour lancer la fenêtre bureau depuis `frontend/` :
 npx @tauri-apps/cli@2 dev
 ```
 
-Tauri démarre Vite lui-même : **ne pas lancer `npm run dev` dans un autre terminal pour cette même session**, sauf configuration particulière des ports. Pour arrêter Tauri : `Ctrl + C`.
+Tauri vérifie si le Vite du projet tourne déjà sur le port 5173 et le réutilise. Lorsqu'il est lancé seul, il démarre Vite. Le site web et le bureau peuvent donc coexister sur le même serveur Vite. Pour arrêter Tauri : `Ctrl + C`.
 
 Pour générer plus tard l’installateur Windows, depuis `frontend/` :
 
@@ -81,11 +102,11 @@ Pour générer plus tard l’installateur Windows, depuis `frontend/` :
 npx @tauri-apps/cli@2 build
 ```
 
-Cette commande compile l’application et produit un installateur NSIS. Le propriétaire du projet effectue lui-même cette étape. La connexion réelle de la version bureau attend encore une API d’authentification ; le bouton « Explorer la démo » n’authentifie personne. Voir [frontend/DESKTOP.md](frontend/DESKTOP.md).
+Cette commande compile l’application et produit un installateur NSIS. Le propriétaire du projet effectue lui-même cette étape. L'écran d'entrée Tauri contient encore un parcours de démonstration ; l'authentification réelle et les droits sont vérifiés dans les espaces connectés. Voir [frontend/DESKTOP.md](frontend/DESKTOP.md).
 
 ## 4. API Laravel (backend)
 
-L’API n’est **pas nécessaire** pour consulter les interfaces de démonstration actuelles. Elle fournit déjà la connexion réelle de l’admin plateforme, la gestion des établissements et des administrateurs locaux, les invitations, l’audit et les indicateurs agrégés. Pour tester ce parcours, suivre [le guide de recette plateforme](docs/sprint-3/03-administration/TEST_ADMIN_PLATEFORME.md).
+L’API est nécessaire aux parcours réels, notamment l'espace étudiant web, les commandes et les vues professionnelles connectées. Le mode démonstration reste consultable sans API. Pour tester l'administration de plateforme, suivre [le guide de recette plateforme](docs/sprint-3/03-administration/TEST_ADMIN_PLATEFORME.md).
 
 Prérequis : PHP 8.2+, Composer 2 et MySQL 8+ avec une base locale `mon_miam_miam`. À la première installation, depuis la racine du dépôt :
 
@@ -126,6 +147,6 @@ Redémarrer Vite après une modification de `.env.local`. Voir [backend/INSTALLA
 | 2 | `frontend/` | `npm run dev` |
 | 3 | `mobile/` | `npx expo start` |
 
-La version bureau Tauri se lance **à la place du terminal Vite** pour sa propre session : `npx @tauri-apps/cli@2 dev` depuis `frontend/`. Le site web et la version bureau peuvent coexister seulement si leurs serveurs Vite utilisent des ports distincts configurés explicitement.
+Pour lancer les trois interfaces avec MySQL, Laravel et la file de notifications, utiliser la commande unique de la première section. Tauri réutilise le serveur Vite du web ; aucun deuxième port web n'est nécessaire.
 
 > Ce fichier documente les commandes. Aucun serveur ni aucune compilation n’a été lancé lors de sa rédaction.

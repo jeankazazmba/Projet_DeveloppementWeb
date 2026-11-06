@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- Shared API hook, mappings and small UI components. */
 import { useState } from 'react'
 import { platformApiBase, platformRequest } from '../platform/platformApi.js'
 

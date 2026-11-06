@@ -2,7 +2,7 @@
 
 L’entrée Tauri est `desktop.html`. Elle affiche le splash screen, le choix Admin restaurant / Gérant / Employé / Admin plateforme, puis un écran de connexion et un accès explicite à chaque démo. Le gérant et l’employé choisissent ensuite un restaurant parmi les établissements autorisés dans le profil de démonstration. Les espaces web existants sont réutilisés. Le site public continue d’utiliser `index.html`.
 
-La connexion réelle n’est pas active : le backend actuel n’expose pas de service d’authentification. Le bouton « Explorer la démo » ouvre les données locales de démonstration sans vérifier d’identifiants. Avant une mise en production, connecter l’écran aux comptes, aux rôles et aux sessions du backend, puis protéger les API côté serveur.
+Le backend expose maintenant l'authentification et les droits des espaces connectés. L'écran d'entrée propre à Tauri conserve un parcours de démonstration : le bouton « Explorer la démo » n'authentifie personne. Les applications intégrées demandent une session réelle pour leurs fonctions connectées. L'écran d'entrée doit encore être relié aux comptes et aux rôles avant une mise en production.
 
 ## Lancement par le propriétaire du projet
 
@@ -11,6 +11,8 @@ Depuis `frontend/`, installer les dépendances habituelles, puis les prérequis 
 ```powershell
 npx @tauri-apps/cli@2 dev
 ```
+
+Si le web du projet est déjà servi sur le port 5173, Tauri le réutilise. Pour démarrer web, API, MySQL, Expo et Tauri ensemble, voir [LANCEMENT.md](../LANCEMENT.md).
 
 Pour produire l’installateur NSIS Windows :
 

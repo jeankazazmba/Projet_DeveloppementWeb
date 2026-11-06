@@ -25,9 +25,8 @@ from reportlab.platypus import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[3]
 SOURCE = Path(__file__).with_name("RAPPORT_TECHNIQUE_2026-11-06.md")
-OUTPUT = ROOT / "output" / "pdf" / "RAPPORT_TECHNIQUE_MON_MIAM_MIAM_2026-11-06.pdf"
+OUTPUT = Path(__file__).with_name("RAPPORT_TECHNIQUE_MON_MIAM_MIAM_2026-11-06.pdf")
 
 pdfmetrics.registerFont(TTFont("ArialReport", "C:/Windows/Fonts/arial.ttf"))
 pdfmetrics.registerFont(TTFont("ArialReportBold", "C:/Windows/Fonts/arialbd.ttf"))
@@ -40,9 +39,9 @@ MUTED = colors.HexColor("#667187")
 styles = {
     "cover": ParagraphStyle("cover", fontName="ArialReportBold", fontSize=27, leading=34, textColor=NAVY, alignment=TA_CENTER, spaceAfter=20),
     "cover_sub": ParagraphStyle("cover_sub", fontName="ArialReport", fontSize=14, leading=21, textColor=GOLD, alignment=TA_CENTER),
-    "h2": ParagraphStyle("h2", fontName="ArialReportBold", fontSize=15, leading=19, textColor=NAVY, spaceBefore=17, spaceAfter=9, keepWithNext=True),
-    "body": ParagraphStyle("body", fontName="ArialReport", fontSize=9.3, leading=14.2, textColor=NAVY, spaceAfter=8, allowWidows=0, allowOrphans=0),
-    "bullet": ParagraphStyle("bullet", fontName="ArialReport", fontSize=9.1, leading=13.7, textColor=NAVY, leftIndent=16, firstLineIndent=-10, spaceAfter=5, allowWidows=0, allowOrphans=0),
+    "h2": ParagraphStyle("h2", fontName="ArialReportBold", fontSize=14.6, leading=18, textColor=NAVY, spaceBefore=14, spaceAfter=7, keepWithNext=True),
+    "body": ParagraphStyle("body", fontName="ArialReport", fontSize=9.2, leading=13.6, textColor=NAVY, spaceAfter=7, allowWidows=0, allowOrphans=0),
+    "bullet": ParagraphStyle("bullet", fontName="ArialReport", fontSize=9.1, leading=13.3, textColor=NAVY, leftIndent=16, firstLineIndent=-10, spaceAfter=4, allowWidows=0, allowOrphans=0),
     "meta": ParagraphStyle("meta", fontName="ArialReport", fontSize=10, leading=16, textColor=MUTED, alignment=TA_CENTER, spaceAfter=4),
     "table": ParagraphStyle("table", fontName="ArialReport", fontSize=9, leading=13.3, textColor=NAVY, leftIndent=12, firstLineIndent=-9, spaceAfter=5),
 }
