@@ -109,9 +109,19 @@ export default function StudentApp() {
   useEffect(() => {
     if (!studentApiConfigured) return
     let active = true
-    loadPublicCatalog().then(value => { if (active) setCatalog(value) }).catch(reason => { if (active) setError(firstMessage(reason)) })
-    return () => { active = false }
-  }, [])
+    let pending = false
+    const reload = async () => {
+      if (pending) return
+      pending = true
+      try { const value = await loadPublicCatalog(); if (active) setCatalog(value) }
+      catch (reason) { if (active) setError(firstMessage(reason)) }
+      finally { pending = false }
+    }
+    void reload()
+    const timer = window.setInterval(() => { if (document.visibilityState === 'visible') void reload() }, 15000)
+    window.addEventListener('focus', reload)
+    return () => { active = false; window.clearInterval(timer); window.removeEventListener('focus', reload) }
+  }, [token])
   useEffect(() => {
     if (!token) return
     const initial = window.setTimeout(() => void refreshPrivate(), 0)

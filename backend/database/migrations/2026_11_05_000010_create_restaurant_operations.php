@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        if (!Schema::hasTable('dining_tables')) {
         Schema::create('dining_tables', function (Blueprint $table) {
             $table->id();
             $table->string('restaurant_id');
@@ -19,6 +20,8 @@ return new class extends Migration {
             $table->timestamps();
             $table->unique(['restaurant_id', 'code']);
         });
+        }
+        if (!Schema::hasTable('delivery_zones')) {
         Schema::create('delivery_zones', function (Blueprint $table) {
             $table->id();
             $table->string('restaurant_id');
@@ -30,14 +33,16 @@ return new class extends Migration {
             $table->timestamps();
             $table->unique(['restaurant_id', 'district']);
         });
+        }
         Schema::table('orders', function (Blueprint $table) {
-            $table->foreignId('dining_table_id')->nullable()->constrained('dining_tables')->nullOnDelete();
-            $table->unsignedTinyInteger('party_size')->nullable();
-            $table->foreignId('delivery_zone_id')->nullable()->constrained('delivery_zones')->nullOnDelete();
-            $table->json('delivery_zone_snapshot')->nullable();
-            $table->foreignId('delivery_assignee_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('delivery_assigned_at')->nullable();
+            if (!Schema::hasColumn('orders', 'dining_table_id')) { $table->foreignId('dining_table_id')->nullable()->constrained('dining_tables')->nullOnDelete(); }
+            if (!Schema::hasColumn('orders', 'party_size')) { $table->unsignedTinyInteger('party_size')->nullable(); }
+            if (!Schema::hasColumn('orders', 'delivery_zone_id')) { $table->foreignId('delivery_zone_id')->nullable()->constrained('delivery_zones')->nullOnDelete(); }
+            if (!Schema::hasColumn('orders', 'delivery_zone_snapshot')) { $table->json('delivery_zone_snapshot')->nullable(); }
+            if (!Schema::hasColumn('orders', 'delivery_assignee_id')) { $table->foreignId('delivery_assignee_id')->nullable()->constrained('users')->nullOnDelete(); }
+            if (!Schema::hasColumn('orders', 'delivery_assigned_at')) { $table->timestamp('delivery_assigned_at')->nullable(); }
         });
+        if (!Schema::hasTable('table_reservations')) {
         Schema::create('table_reservations', function (Blueprint $table) {
             $table->id();
             $table->string('order_id', 80)->unique();
@@ -47,8 +52,13 @@ return new class extends Migration {
             $table->timestamp('ends_at');
             $table->string('status', 20)->default('active');
             $table->timestamps();
-            $table->index(['dining_table_id', 'status', 'starts_at', 'ends_at']);
+            $table->index(['dining_table_id', 'status', 'starts_at', 'ends_at'], 'table_reservations_availability_idx');
         });
+        }
+        if (!Schema::hasIndex('table_reservations', 'table_reservations_availability_idx')) {
+            Schema::table('table_reservations', fn (Blueprint $table) => $table->index(['dining_table_id', 'status', 'starts_at', 'ends_at'], 'table_reservations_availability_idx'));
+        }
+        if (!Schema::hasTable('delivery_positions')) {
         Schema::create('delivery_positions', function (Blueprint $table) {
             $table->id();
             $table->string('order_id', 80);
@@ -59,10 +69,11 @@ return new class extends Migration {
             $table->timestamp('recorded_at');
             $table->index(['order_id', 'recorded_at']);
         });
+        }
         Schema::table('order_events', function (Blueprint $table) {
-            $table->string('action', 40)->default('status_changed');
-            $table->text('reason')->nullable();
-            $table->unsignedInteger('order_version')->default(1);
+            if (!Schema::hasColumn('order_events', 'action')) { $table->string('action', 40)->default('status_changed'); }
+            if (!Schema::hasColumn('order_events', 'reason')) { $table->text('reason')->nullable(); }
+            if (!Schema::hasColumn('order_events', 'order_version')) { $table->unsignedInteger('order_version')->default(1); }
         });
 
         // Les commandes de l'étape précédente gardent leur sens dans le nouveau cycle.
