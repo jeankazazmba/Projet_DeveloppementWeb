@@ -8,7 +8,9 @@ class OrderView
 {
     public static function forStaff(Order $order, string $role, int $actorId): array
     {
-        $canSeeAddress = in_array($role, ['admin', 'manager'], true) || $order->delivery_assignee_id === $actorId;
+        $canSeeAddress = in_array($role, ['admin', 'manager'], true)
+            || ($role === 'employee' && $order->delivery_assignee_id === $actorId
+                && !in_array($order->status, ['delivered', 'cancelled'], true));
         $order->loadMissing(['lines', 'events', 'table']);
         return [
             'id' => $order->id, 'restaurant_id' => $order->restaurant_id,

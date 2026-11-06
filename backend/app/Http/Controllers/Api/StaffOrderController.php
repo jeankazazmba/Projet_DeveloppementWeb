@@ -133,11 +133,16 @@ class StaffOrderController extends Controller
     {
         $restaurant = Restaurant::findOrFail($order->restaurant_id);
         RestaurantAccess::require($request, $restaurant, ['employee']);
-        abort_unless($order->user_id !== null && $order->service === 'delivery' && $order->delivery_assignee_id === $request->user()->id, 404);
-        abort_unless($order->status === 'delivering', 409, 'La livraison n’est pas en cours.');
         $data = $request->validate(['latitude' => ['required', 'numeric', 'between:-90,90'], 'longitude' => ['required', 'numeric', 'between:-180,180']]);
-        return response()->json(DeliveryPosition::create(['order_id' => $order->id, 'actor_id' => $request->user()->id,
-            'latitude' => $data['latitude'], 'longitude' => $data['longitude'], 'recorded_at' => now()]), 201);
+        $position = DB::transaction(function () use ($request, $order, $data) {
+            $locked = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            abort_unless($locked->user_id !== null && $locked->service === 'delivery'
+                && $locked->delivery_assignee_id === $request->user()->id, 404);
+            abort_unless($locked->status === 'delivering', 409, 'La livraison n’est pas en cours.');
+            return DeliveryPosition::create(['order_id' => $locked->id, 'actor_id' => $request->user()->id,
+                'latitude' => $data['latitude'], 'longitude' => $data['longitude'], 'recorded_at' => now()]);
+        });
+        return response()->json($position, 201);
     }
 
     public function tracking(Request $request, Restaurant $restaurant, Order $order)

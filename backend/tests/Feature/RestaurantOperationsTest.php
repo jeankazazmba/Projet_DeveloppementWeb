@@ -70,6 +70,15 @@ class RestaurantOperationsTest extends TestCase
         $this->postJson("/api/staff/orders/{$id}/delivery-position", ['latitude' => -4.325, 'longitude' => 15.31])->assertCreated()->assertJsonStructure(['recorded_at']);
         $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'delivered', 'expected_version' => 6, 'reason' => 'Remis au client'])->assertOk()->assertJsonPath('version', 7);
         $this->assertDatabaseHas('order_events', ['order_id' => $id, 'to_status' => 'delivered', 'order_version' => 7, 'reason' => 'Remis au client']);
+        $event = \App\Models\OrderEvent::where('order_id', $id)->where('to_status', 'delivered')->firstOrFail();
+        $this->assertSame($assigned->id, $event->actor_id);
+        $this->assertNotNull($event->created_at);
+        $this->getJson("/api/staff/restaurants/a/orders/{$id}")->assertOk()
+            ->assertJsonPath('delivery_address', null)->assertDontSee('Avenue privée 42');
+        $this->postJson("/api/staff/orders/{$id}/delivery-position", ['latitude' => -4.325, 'longitude' => 15.31])->assertStatus(409);
+        Sanctum::actingAs($manager);
+        $this->getJson("/api/staff/restaurants/a/orders/{$id}")->assertOk()
+            ->assertJsonPath('delivery_address.address_line', 'Avenue privée 42');
         Sanctum::actingAs($student);
         $this->getJson("/api/me/orders/{$id}/tracking")->assertOk()->assertJsonPath('position.latitude', -4.325);
         $platform = User::create(['name' => 'Plateforme', 'email' => 'platform@example.test', 'password' => 'LongPassword!123', 'is_platform_admin' => true]);

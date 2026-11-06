@@ -19,7 +19,7 @@ Flux autorisés : `received → accepted → preparing → ready`, puis `ready �
 | `GET /staff/restaurants/{restaurant}/orders/{order}/tracking` | Gérant, admin local, employé affecté | Dernière position datée |
 | `GET /me/orders/{order}/tracking` | Étudiant propriétaire | Statut et dernière position datée |
 
-L'employé non affecté à une livraison voit le statut, la zone et les lignes utiles au service, **pas l'adresse complète ni le téléphone**. Le gérant et l'admin local voient l'adresse de leur restaurant ; l'employé affecté la voit pendant sa mission. Un autre restaurant reçoit 404 ; l'admin plateforme ne reçoit que les agrégats existants dans `/platform/insights`. Aucun rôle livreur séparé n'est créé : la livraison est une affectation ponctuelle d'un employé existant.
+L'employé non affecté à une livraison voit le statut, la zone et les lignes utiles au service, **pas l'adresse complète ni le téléphone**. Le gérant et l'admin local voient l'adresse de leur restaurant ; l'employé affecté la voit pendant sa mission, puis perd cet accès après livraison ou annulation. Un autre restaurant reçoit 404 ; l'admin plateforme ne reçoit que les agrégats existants dans `/platform/insights`. Aucun rôle livreur séparé n'est créé : la livraison est une affectation ponctuelle d'un employé existant.
 
 ## Tables et zones de livraison
 
