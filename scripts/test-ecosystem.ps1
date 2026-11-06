@@ -1,4 +1,4 @@
-param([switch]$SkipMobile)
+param([switch]$SkipMobile, [switch]$ExternalWeb)
 
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -6,7 +6,8 @@ Set-Location $root
 
 $running = @(& docker compose -f compose.yaml -f compose.dev.yaml ps --status running --services)
 if ($LASTEXITCODE -ne 0) { throw 'Impossible de lire les services Docker.' }
-foreach ($service in @('db', 'backend', 'queue', 'frontend')) {
+$requiredServices = if ($ExternalWeb) { @('db', 'backend', 'queue') } else { @('db', 'backend', 'queue', 'frontend') }
+foreach ($service in $requiredServices) {
   if ($service -notin $running) { throw "Service arrêté ou absent : $service" }
 }
 

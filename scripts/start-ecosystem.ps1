@@ -51,11 +51,30 @@ if ($CheckOnly) {
   exit 0
 }
 
+$existingWeb = $false
+$webListener = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue
+if ($webListener) {
+  try {
+    $webPage = Invoke-WebRequest 'http://127.0.0.1:5173/desktop.html' -TimeoutSec 5 -UseBasicParsing
+    $existingWeb = $webPage.StatusCode -eq 200 -and $webPage.Content.Contains('Mon Miam Miam')
+  } catch { }
+  if (-not $existingWeb) { throw 'Le port 5173 est occupé par un autre serveur. Libérez ce port puis relancez.' }
+  Write-Host 'Site Mon Miam Miam déjà actif sur le port 5173 ; réutilisation.' -ForegroundColor Green
+}
 if (-not $NoBuild) {
-  & docker @compose build backend frontend
+  $buildServices = if ($existingWeb) { @('backend') } else { @('backend', 'frontend') }
+  # Compose peut sélectionner Buildx Bake automatiquement ; sur certaines
+  # versions de Docker Desktop cela échoue à l'export avec "read |0: file
+  # already closed" malgré des images correctement construites. Désactiver
+  # Bake pour cet appel utilise le chemin Compose classique.
+  $previousComposeBake = $env:COMPOSE_BAKE
+  $env:COMPOSE_BAKE = 'false'
+  try { & docker @compose build @buildServices }
+  finally { $env:COMPOSE_BAKE = $previousComposeBake }
   if ($LASTEXITCODE -ne 0) { throw 'La construction des images backend/frontend a échoué.' }
 }
-$up = $compose + @('up', '-d', '--no-build', 'db', 'backend', 'queue', 'frontend')
+$services = if ($existingWeb) { @('db', 'backend', 'queue') } else { @('db', 'backend', 'queue', 'frontend') }
+$up = $compose + @('up', '-d', '--no-build') + $services
 & docker @up
 if ($LASTEXITCODE -ne 0) { throw "Docker Compose n'a pas démarré tous les services." }
 
@@ -69,7 +88,15 @@ for ($attempt = 0; $attempt -lt 60; $attempt++) {
   Start-Sleep -Seconds 2
 }
 if (-not $ready) { throw 'API ou web non prêt après deux minutes. Consultez docker compose logs backend frontend.' }
-& (Join-Path $PSScriptRoot 'test-ecosystem.ps1') -SkipMobile
+
+# Le conteneur backend exécute déjà les migrations à son démarrage. Relancer
+# explicitement cette commande garantit aussi le schéma lorsque les services
+# étaient déjà actifs ou ont été démarrés avec --no-build.
+Write-Host 'Vérification et application des migrations Laravel...' -ForegroundColor Cyan
+& docker @compose exec -T backend php artisan migrate --force
+if ($LASTEXITCODE -ne 0) { throw 'Les migrations Laravel ont échoué. Consultez docker compose logs backend.' }
+
+& (Join-Path $PSScriptRoot 'test-ecosystem.ps1') -SkipMobile -ExternalWeb:$existingWeb
 
 $shell = (Get-Process -Id $PID).Path
 if (-not $SkipMobile) {
