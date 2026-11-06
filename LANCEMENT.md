@@ -82,6 +82,14 @@ npx expo start
 
 Scanner le code QR affiché avec Expo Go. Pour demander directement Android, utiliser `npm run android` ; pour la prévisualisation dans un navigateur, `npm run web`. La prévisualisation web ne reproduit pas nécessairement les composants natifs, notamment la carte.
 
+Si Expo Go est ouvert sur un iPhone partageant sa connexion avec le PC, lancer Expo avec l’IPv4 du PC détectée par `ipconfig` :
+
+```powershell
+.\scripts\run-mobile.ps1 -LanIp 172.20.10.2
+```
+
+Le terminal Expo affiche un QR code à scanner : la découverte automatique dans Expo Go n’est pas fiable sur un partage de connexion iPhone. Si le QR code ne s’ouvre pas, exécuter une fois sur le Bureau `Autoriser Expo sur reseau.cmd` **en tant qu’administrateur** afin d’autoriser le port TCP 8081 dans le pare-feu Windows, puis relancer Expo.
+
 L’application mobile contient les espaces **étudiant** et **employé** dans le même projet ; il n’y a pas de deuxième serveur Expo à lancer. Avec `EXPO_PUBLIC_API_URL=http://IP_DU_PC:8000`, les parcours connectés utilisent l’API. Le téléphone doit pouvoir joindre l’IPv4 du PC sur le même réseau local.
 
 Pour arrêter Expo : `Ctrl + C`.
