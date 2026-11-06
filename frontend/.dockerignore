@@ -4,3 +4,7 @@ dist
 .env.*
 .vercel
 .git
+src-tauri/target
+src-tauri/gen
+src-tauri/.tauri
+coverage

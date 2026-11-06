@@ -51,9 +51,11 @@ if ($CheckOnly) {
   exit 0
 }
 
-$up = $compose + @('up', '-d')
-if (-not $NoBuild) { $up += '--build' }
-$up += @('db', 'backend', 'queue', 'frontend')
+if (-not $NoBuild) {
+  & docker @compose build backend frontend
+  if ($LASTEXITCODE -ne 0) { throw 'La construction des images backend/frontend a échoué.' }
+}
+$up = $compose + @('up', '-d', '--no-build', 'db', 'backend', 'queue', 'frontend')
 & docker @up
 if ($LASTEXITCODE -ne 0) { throw "Docker Compose n'a pas démarré tous les services." }
 
