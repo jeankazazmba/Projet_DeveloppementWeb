@@ -99,7 +99,9 @@ export default function PlatformAdminApp() {
   }, [mode, refreshDemo, refreshConnected])
   useEffect(() => {
     if (mode !== 'connected') return
-    const timer = window.setInterval(() => void refreshConnected(), 30000)
+    let running = false
+    const tick = async () => { if (running || document.visibilityState !== 'visible') return; running = true; try { await refreshConnected() } finally { running = false } }
+    const timer = window.setInterval(tick, 10000)
     return () => window.clearInterval(timer)
   }, [mode, refreshConnected])
 

@@ -49,18 +49,22 @@ class PlatformInsightsController extends Controller
 
         $orderTotals = $scope('orders')->whereIn('status', RestaurantStatistics::CONFIRMED)
             ->selectRaw('restaurant_id, COUNT(*) as orders, SUM(amount_cdf) as order_volume_cdf')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
+        $completedTotals = $scope('orders')->whereIn('status', RestaurantStatistics::COMPLETED)
+            ->selectRaw('restaurant_id, COUNT(*) as orders, SUM(amount_cdf) as order_volume_cdf')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
         $complaintTotals = $scope('complaints')->where('escalated', true)->selectRaw('restaurant_id, COUNT(*) as escalated_complaints')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
         $contentTotals = $contentScope()->where('is_published', true)->selectRaw("restaurant_id, COUNT(*) as published_contents, SUM(CASE WHEN kind = 'dish' THEN 1 ELSE 0 END) as dishes, SUM(CASE WHEN kind = 'promotion' THEN 1 ELSE 0 END) as promotions, SUM(CASE WHEN kind = 'event' THEN 1 ELSE 0 END) as events, SUM(CASE WHEN kind = 'game' THEN 1 ELSE 0 END) as games")->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
         $loyaltyTotals = $scope('loyalty_movements')->selectRaw('restaurant_id, SUM(CASE WHEN points > 0 THEN points ELSE 0 END) as points_issued, SUM(CASE WHEN points < 0 THEN -points ELSE 0 END) as points_used')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
         $referralTotals = $scope('referrals')->selectRaw('restaurant_id, COUNT(*) as referrals')->groupBy('restaurant_id')->get()->keyBy('restaurant_id');
         $byRestaurant = DB::table('restaurants')->select('id')
             ->when($restaurantId, fn ($query) => $query->where('id', $restaurantId))
-            ->orderBy('name')->get()->map(function ($restaurant) use ($orderTotals, $complaintTotals, $contentTotals, $loyaltyTotals, $referralTotals) {
+            ->orderBy('name')->get()->map(function ($restaurant) use ($orderTotals, $completedTotals, $complaintTotals, $contentTotals, $loyaltyTotals, $referralTotals) {
                 $id = $restaurant->id;
                 return [
                     'restaurant_id' => $id,
                     'orders' => (int) ($orderTotals->get($id)?->orders ?? 0),
                     'order_volume_cdf' => (int) ($orderTotals->get($id)?->order_volume_cdf ?? 0),
+                    'completed_orders' => (int) ($completedTotals->get($id)?->orders ?? 0),
+                    'completed_volume_cdf' => (int) ($completedTotals->get($id)?->order_volume_cdf ?? 0),
                     'escalated_complaints' => (int) ($complaintTotals->get($id)?->escalated_complaints ?? 0),
                     'published_contents' => (int) ($contentTotals->get($id)?->published_contents ?? 0),
                     'dishes' => (int) ($contentTotals->get($id)?->dishes ?? 0),
@@ -92,6 +96,8 @@ class PlatformInsightsController extends Controller
             'summary' => [
                 'orders' => $byRestaurant->sum('orders'),
                 'order_volume_cdf' => $byRestaurant->sum('order_volume_cdf'),
+                'completed_orders' => $byRestaurant->sum('completed_orders'),
+                'completed_volume_cdf' => $byRestaurant->sum('completed_volume_cdf'),
                 'escalated_complaints' => $byRestaurant->sum('escalated_complaints'),
                 'points_issued' => $byRestaurant->sum('points_issued'),
                 'points_used' => $byRestaurant->sum('points_used'),

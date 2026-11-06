@@ -50,6 +50,7 @@ class StatisticsNotificationsTest extends TestCase
         Sanctum::actingAs($f['manager']);
         $this->getJson('/api/staff/restaurants/stats-a/statistics')->assertOk()
             ->assertJsonPath('orders.confirmed', 1)->assertJsonPath('orders.volume_cdf', 4000)
+            ->assertJsonPath('orders.completed', 0)->assertJsonPath('orders.completed_volume_cdf', 0)
             ->assertJsonPath('loyalty.points_issued', 12)->assertJsonPath('referrals.rewarded', 1)
             ->assertDontSee('Autre secret');
         $this->getJson('/api/staff/restaurants/stats-b/statistics')->assertNotFound();
@@ -58,6 +59,7 @@ class StatisticsNotificationsTest extends TestCase
         $this->getJson('/api/staff/restaurants/stats-a/statistics')->assertForbidden();
         $this->getJson('/api/platform/insights')->assertOk()
             ->assertJsonPath('summary.orders', 2)->assertJsonPath('summary.order_volume_cdf', 11000)
+            ->assertJsonPath('summary.completed_orders', 1)->assertJsonPath('summary.completed_volume_cdf', 7000)
             ->assertJsonPath('summary.points_issued', 12)
             ->assertDontSee('Nom secret')->assertDontSee('Motif secret')
             ->assertDontSee('Détail secret')->assertDontSee('STATS-1')

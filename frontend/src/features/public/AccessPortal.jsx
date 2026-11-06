@@ -5,8 +5,8 @@ const profiles = [
   {
     id: 'student', number: '01', icon: 'student', title: 'Étudiant',
     subtitle: 'Commander et profiter des avantages MIAM',
-    description: 'Parcourez le menu, préparez vos commandes, suivez vos points de fidélité et vos parrainages depuis l’application mobile.',
-    platform: 'Application mobile', state: 'Accès depuis le téléphone',
+    description: 'Choisissez un restaurant, commandez et suivez vos avantages depuis le web ou l’application mobile.',
+    platform: 'Web et application mobile', state: 'Connexion à l’API requise', to: '/etudiant',
   },
   {
     id: 'employee', number: '02', icon: 'employee', title: 'Employé',
@@ -65,9 +65,9 @@ export default function AccessPortal() {
     </section>
 
     <div className="public-container public-access-detail-wrap"><section id="public-profile-detail" className="public-access-detail" aria-live="polite">
-      {selected ? <><div className="public-access-detail-copy"><span className="public-kicker">ESPACE {selected.title.toLocaleUpperCase('fr')}</span><h2>{selected.subtitle}</h2><p>{selected.description}</p><span className={`public-access-state ${selected.to ? 'is-ready' : ''}`}><i />{selected.state}</span></div><div className="public-access-detail-action">{selected.to ? <><Link className="public-pill" to={selected.to}>Entrer dans l’espace {selected.title.toLocaleLowerCase('fr')} <span aria-hidden="true">↗</span></Link><small>{selected.id === 'platform' ? 'Connexion réelle si l’API est configurée ; sinon, aperçu de démonstration.' : 'Accès de démonstration : la connexion par compte reste à relier au backend.'}</small></> : <><p>L’application étudiante se consulte sur téléphone. Son accès depuis le site sera proposé après sa publication.</p><Link to="/menu">Voir le menu du restaurant →</Link></>}</div></> : <><div><span className="public-kicker">VOTRE PARCOURS</span><h2>Sélectionnez un espace ci-dessus</h2><p>Les informations d’accès correspondant à votre profil apparaîtront ici.</p></div><span className="public-access-detail-mark" aria-hidden="true">✦</span></>}
+      {selected ? <><div className="public-access-detail-copy"><span className="public-kicker">ESPACE {selected.title.toLocaleUpperCase('fr')}</span><h2>{selected.subtitle}</h2><p>{selected.description}</p><span className={`public-access-state ${selected.to ? 'is-ready' : ''}`}><i />{selected.state}</span></div><div className="public-access-detail-action"><Link className="public-pill" to={selected.to}>Entrer dans l’espace {selected.title.toLocaleLowerCase('fr')} <span aria-hidden="true">↗</span></Link><small>{selected.id === 'student' ? 'Compte étudiant Laravel requis. Les commandes et paiements suivent la réponse du serveur.' : selected.id === 'platform' ? 'Connexion réelle si l’API est configurée ; sinon, aperçu de démonstration.' : 'Connexion réelle si l’API est configurée ; démonstration distincte disponible.'}</small></div></> : <><div><span className="public-kicker">VOTRE PARCOURS</span><h2>Sélectionnez un espace ci-dessus</h2><p>Les informations d’accès correspondant à votre profil apparaîtront ici.</p></div><span className="public-access-detail-mark" aria-hidden="true">✦</span></>}
     </section></div>
 
-    <section id="inscription" className="public-container public-access-registration"><div><span className="public-kicker">NOUVEAU SUR MON MIAM MIAM ?</span><h2>Envie de nous rejoindre ?</h2><p>L’inscription étudiante et la connexion sécurisée seront disponibles après l’intégration du service d’authentification. Aucun compte n’est créé depuis cette page pour le moment.</p></div><Link to="/menu">Découvrir le menu <span aria-hidden="true">→</span></Link></section>
+    <section id="inscription" className="public-container public-access-registration"><div><span className="public-kicker">NOUVEAU SUR MON MIAM MIAM ?</span><h2>Envie de nous rejoindre ?</h2><p>L’inscription étudiante est disponible depuis l’espace web connecté à Laravel.</p></div><Link to="/etudiant">Créer un compte étudiant <span aria-hidden="true">→</span></Link></section>
   </main>
 }

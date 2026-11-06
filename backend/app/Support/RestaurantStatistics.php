@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 class RestaurantStatistics
 {
     public const CONFIRMED = ['accepted', 'preparing', 'ready', 'served', 'delivering', 'delivered', 'paid'];
+    public const COMPLETED = ['served', 'delivered', 'paid'];
 
     public static function filters(array $data): array
     {
@@ -26,6 +27,8 @@ class RestaurantStatistics
         $orders = fn () => DB::table('orders')->where('restaurant_id', $restaurant->id)
             ->whereIn('status', self::CONFIRMED)->whereBetween('created_at', [$from->copy()->utc(), $to->copy()->utc()]);
         $totals = $orders()->selectRaw('COUNT(*) as orders, COALESCE(SUM(amount_cdf), 0) as volume_cdf')->first();
+        $completed = $orders()->whereIn('status', self::COMPLETED)
+            ->selectRaw('COUNT(*) as orders, COALESCE(SUM(amount_cdf), 0) as volume_cdf')->first();
         $byStatus = $orders()->selectRaw('status, COUNT(*) as orders')->groupBy('status')->pluck('orders', 'status');
         $byService = $orders()->selectRaw('service, COUNT(*) as orders, COALESCE(SUM(amount_cdf), 0) as volume_cdf')
             ->groupBy('service')->get();
@@ -37,6 +40,9 @@ class RestaurantStatistics
         $localDay = DB::getDriverName() === 'sqlite' ? "DATE(datetime(created_at, '+1 hour'))" : 'DATE(DATE_ADD(created_at, INTERVAL 1 HOUR))';
         $daily = $orders()->selectRaw("{$localDay} as day, COUNT(*) as orders, SUM(amount_cdf) as volume_cdf")
             ->groupBy(DB::raw($localDay))->orderBy('day')->get();
+        $completedDaily = $orders()->whereIn('status', self::COMPLETED)
+            ->selectRaw("{$localDay} as day, COUNT(*) as orders, SUM(amount_cdf) as volume_cdf")
+            ->groupBy(DB::raw($localDay))->orderBy('day')->get();
         $loyalty = DB::table('loyalty_movements')->where('restaurant_id', $restaurant->id)
             ->whereBetween('created_at', [$from->copy()->utc(), $to->copy()->utc()])
             ->selectRaw('COALESCE(SUM(CASE WHEN points > 0 THEN points ELSE 0 END), 0) as issued, COALESCE(SUM(CASE WHEN points < 0 THEN -points ELSE 0 END), 0) as used')->first();
@@ -47,7 +53,9 @@ class RestaurantStatistics
             'restaurant_id' => $restaurant->id, 'currency' => 'CDF',
             'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString(), 'timezone' => 'Africa/Kinshasa'],
             'orders' => ['confirmed' => (int) $totals->orders, 'volume_cdf' => (int) $totals->volume_cdf,
-                'by_status' => $byStatus, 'by_service' => $byService, 'daily' => $daily, 'top_dishes' => $topDishes],
+                'completed' => (int) $completed->orders, 'completed_volume_cdf' => (int) $completed->volume_cdf,
+                'by_status' => $byStatus, 'by_service' => $byService, 'daily' => $daily,
+                'completed_daily' => $completedDaily, 'top_dishes' => $topDishes],
             'loyalty' => ['points_issued' => (int) $loyalty->issued, 'points_used' => (int) $loyalty->used],
             'referrals' => ['total' => (int) $referrals->total, 'rewarded' => (int) $referrals->rewarded],
         ];

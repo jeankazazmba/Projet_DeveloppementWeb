@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import EmployeeIcon from './EmployeeIcon.jsx'
 import { initialClaims, initialMenu, initialOrders, orderSteps, sleepyClaims, sleepyMenu, sleepyOrders, sleepyWeeklyStats, sleepyTopDishes } from './employeeData.js'
@@ -54,6 +54,7 @@ function EmployeeWorkspace({ restaurant, restaurantId, setRestaurantId, allowedR
   const [sync, setSync] = useState({ loading: false, error: '', lastSync: null })
   const [query, setQuery] = useState('')
   const [notice, setNotice] = useState('')
+  const knownOrderIds = useRef(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem('mon-miam-miam-theme') === 'light' ? 'light' : 'dark' } catch { return 'dark' }
@@ -74,7 +75,13 @@ function EmployeeWorkspace({ restaurant, restaurantId, setRestaurantId, allowedR
         staffApi(`${base}/orders?per_page=100`, connection.token), staffApi(`${base}/content`, connection.token),
         staffApi(`${base}/complaints?per_page=100`, connection.token),
       ])
-      setOrders((remoteOrders.data || []).map(mapStaffOrder))
+      const incomingOrders = (remoteOrders.data || []).map(mapStaffOrder)
+      if (knownOrderIds.current) {
+        const fresh = incomingOrders.find(order => !knownOrderIds.current.has(order.id) && order.rawStatus === 'received')
+        if (fresh) setNotice(`Nouvelle commande ${fresh.id} reçue dans ${restaurant.name}.`)
+      }
+      knownOrderIds.current = new Set(incomingOrders.map(order => order.id))
+      setOrders(incomingOrders)
       setMenu(remoteContent.filter(item => item.kind === 'dish').map(item => ({ id: item.id, name: item.title,
         description: item.description || '', category: 'Plats', price: item.price_cdf || 0,
         available: Boolean(item.is_available), featured: Boolean(item.is_featured), image: item.image_url || '/assets/figma/dashboard-imgMonMiamMiamZeDucSpCe.png', version: item.version })))
@@ -84,8 +91,10 @@ function EmployeeWorkspace({ restaurant, restaurantId, setRestaurantId, allowedR
   }
   useEffect(() => {
     if (!connected) return
-    refresh()
-    const timer = window.setInterval(refresh, 30000)
+    let running = false
+    const tick = async () => { if (running || document.visibilityState !== 'visible') return; running = true; try { await refresh() } finally { running = false } }
+    void tick()
+    const timer = window.setInterval(tick, 4000)
     return () => window.clearInterval(timer)
   }, [connection.token, restaurantId, connected])
 

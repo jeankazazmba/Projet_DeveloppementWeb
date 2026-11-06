@@ -25,6 +25,7 @@ Le serveur Vite affiche son adresse dans le terminal, normalement `http://localh
 | Menu public | http://localhost:5173/menu |
 | Promotions, événements et jeux publics | http://localhost:5173/promotions |
 | Choix d’espace / accès | http://localhost:5173/acces |
+| Espace étudiant web (API requise) | http://localhost:5173/etudiant |
 | Administration | http://localhost:5173/admin |
 | Administration de la plateforme | http://localhost:5173/plateforme |
 | Gérant | http://localhost:5173/gerant |

@@ -648,8 +648,10 @@ export default function EmployeeApp({
         setSync({ loading: false, error: '', lastSync: new Date().toISOString() });
       } catch (error) { if (active) setSync(current => ({ ...current, loading: false, error: error.message })); }
     };
-    refresh();
-    const timer = setInterval(refresh, 30000);
+    let running = false;
+    const tick = async () => { if (running) return; running = true; try { await refresh(); } finally { running = false; } };
+    tick();
+    const timer = setInterval(tick, 5000);
     return () => { active = false; clearInterval(timer); };
   }, [auth, restaurantId]);
   if (!ready) return <View style={{

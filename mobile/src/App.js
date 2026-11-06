@@ -175,13 +175,22 @@ function AppProvider({ children, skipOnboarding = false }) {
   useEffect(() => {
     if (!sessionToken || !['orders', 'order'].includes(screen.name)) return;
     let active = true;
-    setSync(current => ({ ...current, loading: true }));
-    studentRequest('/me/orders?per_page=100', sessionToken).then(result => {
-      if (!active) return;
-      setData(current => ({ ...current, orders: (result.data || []).map(mapOrder) }));
-      setSync({ loading: false, error: '', lastSync: new Date().toISOString() });
-    }).catch(error => { if (active) setSync(current => ({ ...current, loading: false, error: error.message })); });
-    return () => { active = false; };
+    let running = false;
+    const refreshOrders = async () => {
+      if (!active || running) return;
+      running = true;
+      try {
+        const result = await studentRequest('/me/orders?per_page=100', sessionToken);
+        if (active) {
+          setData(current => ({ ...current, orders: (result.data || []).map(mapOrder) }));
+          setSync(current => ({ ...current, error: '', lastSync: new Date().toISOString() }));
+        }
+      } catch (error) { if (active) setSync(current => ({ ...current, error: error.message })); }
+      finally { running = false; }
+    };
+    void refreshOrders();
+    const timer = setInterval(refreshOrders, 4000);
+    return () => { active = false; clearInterval(timer); };
   }, [sessionToken, screen.name]);
   const go = (name, params = {}) =>
     setStack((current) => [...current, { name, params }]);

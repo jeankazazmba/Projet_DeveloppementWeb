@@ -57,6 +57,7 @@ class RestaurantOperationsTest extends TestCase
         Sanctum::actingAs($manager);
         $this->putJson("/api/staff/orders/{$id}/delivery-assignment", ['employee_id' => $foreign->id, 'expected_version' => 1])->assertUnprocessable();
         $this->putJson("/api/staff/orders/{$id}/delivery-assignment", ['employee_id' => $assigned->id, 'expected_version' => 1])->assertOk()->assertJsonPath('version', 2)->assertJsonPath('delivery_address.address_line', 'Avenue privée 42');
+        $this->getJson('/api/staff/restaurants/a/statistics')->assertOk()->assertJsonPath('orders.completed', 0);
         Sanctum::actingAs($assigned);
         $this->getJson("/api/staff/restaurants/a/orders/{$id}")->assertOk()->assertJsonPath('delivery_address.address_line', 'Avenue privée 42');
         $this->patchJson("/api/staff/orders/{$id}/status", ['status' => 'delivering', 'expected_version' => 2])->assertStatus(409);
@@ -79,6 +80,8 @@ class RestaurantOperationsTest extends TestCase
         Sanctum::actingAs($manager);
         $this->getJson("/api/staff/restaurants/a/orders/{$id}")->assertOk()
             ->assertJsonPath('delivery_address.address_line', 'Avenue privée 42');
+        $this->getJson('/api/staff/restaurants/a/statistics')->assertOk()
+            ->assertJsonPath('orders.completed', 1)->assertJsonPath('orders.completed_volume_cdf', 1900);
         Sanctum::actingAs($student);
         $this->getJson("/api/me/orders/{$id}/tracking")->assertOk()->assertJsonPath('position.latitude', -4.325);
         $platform = User::create(['name' => 'Plateforme', 'email' => 'platform@example.test', 'password' => 'LongPassword!123', 'is_platform_admin' => true]);
