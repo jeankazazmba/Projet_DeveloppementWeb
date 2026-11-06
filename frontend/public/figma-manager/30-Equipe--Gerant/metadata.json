@@ -1,0 +1,19 @@
+{
+  "id": "146:9211",
+  "page": "Page 1",
+  "pageId": "0:1",
+  "name": "Équipe -Gérant",
+  "width": 1280,
+  "height": 1193,
+  "type": "FRAME",
+  "path": "screens/30-Equipe--Gerant",
+  "layerCount": 247,
+  "assetCount": 89,
+  "visualMode": "svg",
+  "notes": [
+    "Calque icon/logout (146:9582): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9583): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9584): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:9585): Failed to export node. This node may not have any visible layers."
+  ]
+}

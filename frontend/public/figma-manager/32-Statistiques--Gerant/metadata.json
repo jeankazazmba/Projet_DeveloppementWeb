@@ -1,0 +1,21 @@
+{
+  "id": "146:9963",
+  "page": "Page 1",
+  "pageId": "0:1",
+  "name": "Statistiques -Gérant",
+  "width": 1280,
+  "height": 1411,
+  "type": "FRAME",
+  "path": "screens/32-Statistiques--Gerant",
+  "layerCount": 407,
+  "assetCount": 127,
+  "visualMode": "svg",
+  "notes": [
+    "Calque Vector (146:10130): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10131): Failed to export node. This node may not have any visible layers.",
+    "Calque icon/logout (146:10355): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10356): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10357): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10358): Failed to export node. This node may not have any visible layers."
+  ]
+}

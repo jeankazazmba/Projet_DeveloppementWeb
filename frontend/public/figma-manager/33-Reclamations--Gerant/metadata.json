@@ -1,0 +1,19 @@
+{
+  "id": "146:10395",
+  "page": "Page 1",
+  "pageId": "0:1",
+  "name": "Réclamations -Gérant",
+  "width": 1280,
+  "height": 1398,
+  "type": "FRAME",
+  "path": "screens/33-Reclamations--Gerant",
+  "layerCount": 287,
+  "assetCount": 100,
+  "visualMode": "svg",
+  "notes": [
+    "Calque icon/logout (146:10679): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10680): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10681): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10682): Failed to export node. This node may not have any visible layers."
+  ]
+}

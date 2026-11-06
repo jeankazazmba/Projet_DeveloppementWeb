@@ -1,0 +1,13 @@
+.restaurant-scope-control{display:flex;flex-direction:column;gap:4px;min-width:190px;max-width:260px;color:inherit;font:inherit}
+.restaurant-scope-control span{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.restaurant-scope-control select{max-width:100%;border:1px solid #cfbd9766;border-radius:10px;padding:7px 9px;background:#222;color:#f5f1e8;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer}
+.manager-app[data-theme='light'] .restaurant-scope-control select{background:#fff;color:#222;border-color:#b7a780}
+.employee-app[data-theme='light'] .restaurant-scope-control select{background:#fff;color:#222;border-color:#b7a780}
+.restaurant-empty{margin:24px;padding:30px;border:1px solid #cfbd9766;border-radius:18px;background:#cfbd9710;color:#eee}
+.restaurant-empty strong{display:block;font-size:18px;margin-bottom:8px}
+.restaurant-empty p{color:#bcb8ae;line-height:1.5}
+.manager-topbar{height:auto;min-height:72px;flex-wrap:wrap;padding-block:10px}
+.manager-topbar>.restaurant-scope-control{flex:0 1 210px}
+.employee-topbar>.restaurant-scope-control{grid-column:1/-1;grid-row:3;max-width:none}
+@media(min-width:900px){.employee-topbar>.restaurant-scope-control{grid-column:auto;grid-row:auto;max-width:210px}}
+@media(max-width:1050px){.manager-topbar .manager-global-search{display:none}.manager-topbar>.restaurant-scope-control{flex:1 1 190px}}

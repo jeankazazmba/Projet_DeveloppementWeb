@@ -4,7 +4,7 @@
 
 - **Couleur primaire :** `#CFBD97` (beige doré).
 - **Couleur secondaire :** `#000000` (noir).
-- **Marque/restaurant :** **ZeDuc@Space**.
+- **Marque du cahier historique :** **ZeDuc@Space**. Dans les interfaces actuelles, **ZeDuc-Sp@ce** est la plateforme et **Khalifa_food** et **sleepy hollow** sont les restaurants de démonstration.
 - **Nom de l'application :** **Mon Miam Miam**.
 
 Le cahier des charges comporte une **illustration du logo ZeDuc@Space en page 1**. Le fichier source vectoriel/translucide et les droits de réutilisation ne sont pas fournis dans ce dépôt. Utiliser les assets officiels une fois obtenus ; ne pas inventer ou altérer le logo.

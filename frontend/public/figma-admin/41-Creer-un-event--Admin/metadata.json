@@ -1,0 +1,14 @@
+{
+  "id": "146:13465",
+  "page": "Page 1",
+  "pageId": "0:1",
+  "name": "Créer un event -Admin",
+  "width": 1280,
+  "height": 1590,
+  "type": "FRAME",
+  "path": "screens/41-Creer-un-event--Admin",
+  "layerCount": 478,
+  "assetCount": 169,
+  "visualMode": "svg",
+  "notes": []
+}

@@ -60,6 +60,8 @@ Le cahier cite également le paiement en ligne, mais le classe **bonus non oblig
 | ADM-05 | Superviser les réclamations. |
 | ADM-06 | Paramétrer horaires, politiques et règles de fidélité. |
 
+Pour détailler les écrans, les règles d'accès et l'ordre d'intégration de cet espace, consulter la [spécification fonctionnelle de l'administration](sprint-3/03-administration/SPEC_FONCTIONNELLE_ADMIN.md). L'[administration de toute la plateforme](sprint-3/03-administration/SPEC_ADMIN_PLATEFORME.md) est une extension multi-restaurants distincte, non un rôle explicitement défini par le cahier.
+
 ## 3. Fidélité et parrainage
 
 Données citées : `users`, `orders`, `referrals`. Les champs proposés dans le cahier incluent identifiants, contacts, points, parrain, statut, montants, dates, nombre de points gagnés et attribution de récompense.

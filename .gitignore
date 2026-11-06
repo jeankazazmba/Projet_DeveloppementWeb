@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 *.pem
 *.key
 *.p12
@@ -22,7 +23,10 @@ coverage/
 .vite/
 .phpunit.cache/
 .phpunit.result.cache
+__pycache__/
+*.pyc
 *.log
+backups/
 
 # IDE et système
 .idea/

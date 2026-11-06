@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Complaint;
+use App\Policies\ComplaintPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,6 +16,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Pas de configuration globale supplémentaire pour le socle.
+        Gate::policy(Complaint::class, ComplaintPolicy::class);
     }
 }

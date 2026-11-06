@@ -1,8 +1,8 @@
 # Mon Miam Miam 🍽️
 
-**Application web de commande et de gestion du restaurant ZeDuc@Space — UCAC-ICAM, Yansoki.**
+**Plateforme multi-restaurants ZeDuc-Sp@ce — démonstration située à Kinshasa, RDC, avec montants en CDF.**
 
-> Projet d'équipe de développement web • Dépôt privé • Phase actuelle : **conception et préparation jusqu'à la revue du dimanche 25 octobre 2026** (aucune fonctionnalité applicative encore livrée).
+Le dépôt contient le site React, les espaces web, l'application Expo et une API Laravel en cours de raccordement. Pour l'administration plateforme et les commandes de démarrage Docker Compose, voir [le guide plateforme](docs/sprint-3/03-administration/PLATEFORME_ET_DEMARRAGE.md). Le cahier V1.0.2 décrit l'origine du projet ; la localisation Kinshasa et le rôle administrateur de plateforme sont des décisions ultérieures.
 
 ## 🎯 Pourquoi Mon Miam Miam ?
 

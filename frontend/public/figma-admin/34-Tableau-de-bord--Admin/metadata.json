@@ -1,0 +1,31 @@
+{
+  "id": "146:10704",
+  "page": "Page 1",
+  "pageId": "0:1",
+  "name": "Tableau de bord -Admin",
+  "width": 1280,
+  "height": 2029,
+  "type": "FRAME",
+  "path": "screens/34-Tableau-de-bord--Admin",
+  "layerCount": 536,
+  "assetCount": 185,
+  "visualMode": "svg",
+  "notes": [
+    "Calque Sparkline SVG (146:10833): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10834): Failed to export node. This node may not have any visible layers.",
+    "Calque SVG (146:10849): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10850): Failed to export node. This node may not have any visible layers.",
+    "Calque SVG (146:10865): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10866): Failed to export node. This node may not have any visible layers.",
+    "Calque SVG (146:10897): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10898): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10957): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10958): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10959): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10960): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10962): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10990): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10991): Failed to export node. This node may not have any visible layers.",
+    "Calque Vector (146:10992): Failed to export node. This node may not have any visible layers."
+  ]
+}

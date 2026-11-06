@@ -5,3 +5,5 @@ Dossier des livrables et preuves de recette du Sprint 3.
 Déposer ici les documents, captures, décisions, scénarios et résultats de tests du module. Le code applicatif reste dans les dossiers frontend/, backend/ ou mobile/.
 
 Pour la répartition et les références Jira/GitHub, consulter [l'index du Sprint 3](../README.md).
+
+Recherche fournisseur : [e-COM EasyPay — informations confirmées et prérequis d'intégration](RECHERCHE_ECOM_EASYPAY.md). Ce document ne constitue pas une API implémentée.

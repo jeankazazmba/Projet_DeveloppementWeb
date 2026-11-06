@@ -1,0 +1,22 @@
+.staff-catalog { min-height: 100vh; padding: 3rem 1rem; color: #f4efe6; background: radial-gradient(circle at 85% 0, #59412b, transparent 35%), #161a19; font-family: Inter, system-ui, sans-serif; }
+.staff-catalog-shell { max-width: 1050px; margin: auto; }
+.staff-catalog header { display: flex; justify-content: space-between; gap: 2rem; margin-bottom: 2rem; }
+.staff-catalog header span { color: #d9a95d; font-size: .75rem; letter-spacing: .15em; font-weight: 800; }
+.staff-catalog h1 { margin: .5rem 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+.staff-catalog p { color: #c1c0b8; }
+.staff-catalog a { color: #f3c885; }
+.staff-catalog button { cursor: pointer; padding: .7rem 1rem; border: 1px solid #77664b; border-radius: .8rem; color: #f7e2bc; background: #31291f; }
+.staff-catalog button:disabled { opacity: .5; cursor: wait; }
+.staff-catalog-card { padding: 1.4rem; margin-bottom: 1rem; background: rgba(255,255,255,.065); border: 1px solid rgba(255,255,255,.16); border-radius: 1.25rem; backdrop-filter: blur(15px); }
+.staff-catalog-form { display: grid; gap: 1rem; }
+.staff-catalog-form label, .staff-catalog-card > label { display: grid; gap: .4rem; font-weight: 700; }
+.staff-catalog input:not([type=checkbox]), .staff-catalog textarea, .staff-catalog select { width: 100%; box-sizing: border-box; padding: .8rem; color: #f4efe6; background: #232724; border: 1px solid #66645b; border-radius: .7rem; font: inherit; }
+.staff-catalog textarea { min-height: 5rem; }
+.staff-catalog-check { display: flex !important; align-items: center; }
+.staff-catalog-tabs, .staff-catalog-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1rem; }
+.staff-catalog-tabs .active { color: #181815; background: #e8bb76; }
+.staff-catalog-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.staff-catalog-list .staff-catalog-card { display: flex; flex-direction: column; justify-content: space-between; }
+.staff-catalog-error { color: #ffb3a8 !important; }
+.staff-catalog-notice { color: #b8eab6 !important; }
+@media (max-width: 640px) { .staff-catalog header { flex-direction: column; } }
