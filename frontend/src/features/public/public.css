@@ -210,6 +210,7 @@
 .public-event-date small { color:var(--gold);font-size:.67rem; }
 .public-event-date strong { font-size:1.5rem;line-height:1.1; }
 .public-event-list article > div:nth-child(2) { flex:1; }
+.public-event-visual { width:112px;height:76px;object-fit:cover;border-radius:12px;float:right;margin:0 0 6px 14px; }
 .public-event-list article > div:nth-child(2) small { color:var(--gold);font-size:.75rem; }
 .public-event-list h3 { margin:4px 0; }
 .public-event-list p { font-size:.81rem; }

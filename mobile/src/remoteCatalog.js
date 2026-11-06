@@ -1,4 +1,4 @@
-import { setDishes } from './catalog';
+import { dishes, setDishes } from './catalog';
 import { setRestaurants } from './restaurants';
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '').replace(/\/api$/, '');
@@ -22,6 +22,17 @@ export async function staffRequest(path, token, options = {}) {
 }
 export const studentRequest = staffRequest;
 let remoteContent = null;
+const normalize = value => (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim();
+const dishImages = [
+  require('../assets/images/public-menu-00075.jpg'),
+  require('../assets/images/public-menu-00101.jpg'),
+  require('../assets/images/public-menu-00129.jpg'),
+  require('../assets/images/public-menu-00176.jpg'),
+  require('../assets/images/public-menu-00202.jpg'),
+  require('../assets/images/public-menu-00228.jpg'),
+];
+const localDishImage = item => dishes.find(dish => dish.restaurantId === item.restaurant_id && normalize(dish.name) === normalize(item.title))?.image
+  || dishImages[(Number(item.id) || 0) % dishImages.length];
 
 export function getRemoteContent(restaurantId, kind) {
   return remoteContent?.filter(item => item.restaurant_id === restaurantId && item.kind === kind) ?? null;
@@ -32,7 +43,13 @@ export async function loadRemoteCatalog() {
   const response = await fetch(`${apiUrl}/api/restaurants`);
   if (!response.ok) throw new Error('Répertoire indisponible');
   const restaurants = await response.json();
-  if (!Array.isArray(restaurants) || !restaurants.length) return false;
+  if (!Array.isArray(restaurants)) throw new Error('Répertoire invalide');
+  if (!restaurants.length) {
+    setRestaurants([]);
+    setDishes([]);
+    remoteContent = [];
+    return true;
+  }
   const content = await Promise.all(restaurants.map(async restaurant => {
     const result = await fetch(`${apiUrl}/api/restaurants/${encodeURIComponent(restaurant.id)}/content`);
     if (!result.ok) throw new Error(`Catalogue indisponible : ${restaurant.name}`);
@@ -42,9 +59,9 @@ export async function loadRemoteCatalog() {
   setRestaurants(restaurants.map(item => ({ ...item, example: item.is_demo })));
   setDishes(all.filter(item => item.kind === 'dish').map(item => ({
     id: `api-${item.id}`, restaurantId: item.restaurant_id, name: item.title,
-    description: item.description || '', category: item.details?.category || 'Plats',
+    description: item.description || '', category: item.category?.name || item.details?.category || 'Plats',
     price: item.price_cdf || 0, available: item.is_available !== false, featured: item.is_featured === true,
-    image: item.image_url ? { uri: item.image_url } : require('../assets/images/admin-menu-0.jpg'),
+    image: item.image_url ? { uri: item.image_url } : localDishImage(item),
   })));
   remoteContent = all;
   return true;

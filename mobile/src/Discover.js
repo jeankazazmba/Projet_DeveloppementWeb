@@ -5,8 +5,7 @@ import { getRestaurant, PRIMARY_RESTAURANT_ID, SECONDARY_RESTAURANT_ID } from '.
 import { getRemoteContent } from './remoteCatalog';
 import { getGamesForRestaurant, playable } from './games';
 
-// Informational content adapted from the public website's Figma export.
-// Publishing dates and availability will come from the backend later.
+// Local catalogue shown when the API is not configured or cannot be reached.
 const promotions = [
   { id: "weekend", title: "Double plaisir du week-end", badge: "−20 %", description: "Plats à partager, planches dégustation et cocktails du rooftop.", terms: "Offre mise en avant sur le site public. Dates, billard et double points à confirmer auprès du restaurant.", image: require("../assets/images/20-Promotions-layer-00024.jpg") },
   { id: "duo", title: "Offre Duo Grillades", badge: "−15 %", description: "Un assortiment de grillades à partager, accompagné de bobolo et de deux bissaps.", terms: "Offre présentée sur le site. Disponibilité et conditions à confirmer auprès du restaurant.", image: require("../assets/images/20-Promotions-layer-00074.jpg") },
@@ -31,14 +30,25 @@ const tabs = [
   { id: "events", label: "Événements" },
   { id: "games", label: "Jeux MIAM" },
 ];
+const normalize = value => (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim();
+const promotionImages = [
+  require('../assets/images/20-Promotions-layer-00074.jpg'),
+  require('../assets/images/20-Promotions-layer-00103.jpg'),
+  require('../assets/images/20-Promotions-layer-00132.jpg'),
+  require('../assets/images/20-Promotions-layer-00161.jpg'),
+  require('../assets/images/20-Promotions-layer-00190.jpg'),
+  require('../assets/images/20-Promotions-layer-00219.jpg'),
+];
+const localImage = item => promotions.find(offer => offer.restaurantId === item.restaurant_id && normalize(offer.title) === normalize(item.title))?.image
+  || promotionImages[(Number(item.id) || 0) % promotionImages.length];
 
 export default function Discover({ back, go, initialTab = "promotions", restaurantFilter }) {
   const [tab, setTab] = useState(tabs.some(item => item.id === initialTab) ? initialTab : "promotions");
   const remotePromotions = getRemoteContent(restaurantFilter, 'promotion');
   const remoteEvents = getRemoteContent(restaurantFilter, 'event');
   const restaurantGames = getGamesForRestaurant(restaurantFilter);
-  const visiblePromotions = remotePromotions === null ? promotions.filter(item => item.restaurantId === restaurantFilter) : remotePromotions.map(item => ({ id: item.id, title: item.title, badge: item.details?.badge || 'Offre', description: item.description, terms: item.details?.terms || 'Conditions à confirmer auprès du restaurant.', image: item.image_url ? { uri: item.image_url } : require('../assets/images/20-Promotions-layer-00024.jpg'), restaurantId: item.restaurant_id }));
-  const visibleEvents = remoteEvents === null ? events.filter(item => item.restaurantId === restaurantFilter) : remoteEvents.map(item => ({ id: item.id, title: item.title, place: item.details?.place || getRestaurant(restaurantFilter).location, description: item.description, price: item.details?.price || '', icon: 'calendar-outline', restaurantId: item.restaurant_id }));
+  const visiblePromotions = remotePromotions === null ? promotions.filter(item => item.restaurantId === restaurantFilter) : remotePromotions.map(item => ({ id: item.id, title: item.title, badge: item.details?.badge || 'Offre', description: item.description, terms: item.details?.terms || 'Conditions à confirmer auprès du restaurant.', image: item.image_url ? { uri: item.image_url } : localImage(item), restaurantId: item.restaurant_id }));
+  const visibleEvents = remoteEvents === null ? events.filter(item => item.restaurantId === restaurantFilter) : remoteEvents.map(item => ({ id: item.id, title: item.title, place: item.details?.place || getRestaurant(restaurantFilter).location, description: item.description, price: item.details?.price || '', icon: 'calendar-outline', image: item.image_url ? { uri: item.image_url } : promotionImages[(Number(item.id) || 0) % promotionImages.length], restaurantId: item.restaurant_id }));
   return (
     <Page title="À découvrir" subtitle={`Offres et rendez-vous de ${getRestaurant(restaurantFilter).name}.`} onBack={back}>
       <Text style={{ color: colors.gold, fontWeight: '800', marginBottom: 9 }}>Restaurant : {getRestaurant(restaurantFilter).name}</Text>
@@ -46,7 +56,7 @@ export default function Discover({ back, go, initialTab = "promotions", restaura
         <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
           <Icon name="information-circle-outline" color={colors.gold} />
           <Text style={{ color: colors.muted, flex: 1, lineHeight: 19 }}>
-            Contenu informatif issu du site. Offres, dates et réservations à confirmer auprès du restaurant.
+            {remotePromotions !== null || remoteEvents !== null ? 'Contenus publiés par le restaurant. Les réservations et inscriptions aux événements restent à confirmer auprès de lui.' : 'Aperçu de démonstration. Offres et dates à confirmer auprès du restaurant.'}
           </Text>
         </View>
       </Glass>
@@ -54,7 +64,7 @@ export default function Discover({ back, go, initialTab = "promotions", restaura
         {tabs.map(item => <Pill key={item.id} title={item.label} active={tab === item.id} onPress={() => setTab(item.id)} />)}
       </View>
       {tab === "promotions" && <>
-        <SectionTitle title="Les offres du site" />
+        <SectionTitle title={remotePromotions === null ? 'Offres de démonstration' : 'Promotions publiées'} />
         {visiblePromotions.map(offer => <Glass key={offer.id} style={{ marginBottom: 13, overflow: "hidden" }}>
           <Image source={offer.image} style={{ width: "100%", height: 150 }} resizeMode="cover" />
           <View style={{ padding: 16 }}>
@@ -72,13 +82,14 @@ export default function Discover({ back, go, initialTab = "promotions", restaura
       {tab === "events" && <>
         <SectionTitle title={`Agenda de ${getRestaurant(restaurantFilter).name}`} />
         {visibleEvents.map(event => <Glass key={event.id} style={{ padding: 17, marginBottom: 12 }}>
+          {event.image && <Image source={event.image} style={{ width: '100%', height: 136, borderRadius: 12, marginBottom: 14 }} resizeMode="cover" />}
           <View style={{ flexDirection: "row", gap: 12 }}>
             <View style={{ width: 44, height: 44, borderRadius: 13, backgroundColor: "#332B1F", alignItems: "center", justifyContent: "center" }}><Icon name={event.icon} /></View>
             <View style={{ flex: 1 }}><Text style={{ color: colors.gold, fontSize: 12, fontWeight: '800' }}>{getRestaurant(event.restaurantId).name}</Text><Text style={{ color: colors.text, fontSize: 16, fontWeight: "800" }}>{event.title}</Text><Text style={{ color: colors.gold, marginTop: 3 }}>{event.place}</Text></View>
           </View>
           <Text style={{ color: colors.muted, lineHeight: 20, marginTop: 13 }}>{event.description}</Text>
           <Text style={{ color: colors.text, fontWeight: "700", marginTop: 11 }}>{event.price}</Text>
-          <Text style={{ color: colors.muted, marginTop: 5, fontSize: 12 }}>Date et disponibilité à confirmer</Text>
+          {remoteEvents === null && <Text style={{ color: colors.muted, marginTop: 5, fontSize: 12 }}>Date et disponibilité à confirmer</Text>}
         </Glass>)}
         {!visibleEvents.length && <Text style={{ color: colors.muted }}>Aucun événement publié pour ce restaurant.</Text>}
       </>}

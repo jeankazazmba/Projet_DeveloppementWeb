@@ -34,10 +34,10 @@ export const offers = [
 ].map(offer => ({ restaurantId: PRIMARY_RESTAURANT_ID, ...offer }))
 
 export const events = [
-  { day: '29', month: 'OCT', title: 'Soirée Ligue des Champions Canal+', time: '20h30', place: 'Terrasse Rooftop Kinshasa', description: 'Diffusion grand écran et planches tapas en continu.', price: 'Entrée gratuite · Conso requise' },
-  { day: '01', month: 'NOV', title: 'Tournoi de billard Khalifa Cup', time: '16h00', place: 'Espace Billard & Lounge', description: 'Compétition amicale à 8-ball, trophée et crédits repas.', price: '1 500 CDF / inscription' },
-  { day: '07', month: 'NOV', title: 'Quiz musique & Afro-Beats Night', time: '19h00', place: 'Rooftop Panoramique', description: 'Blind test musical, DJ invité et cocktails signature.', price: 'Accès libre' },
-  { day: '14', month: 'NOV', title: 'Soirée jeux sleepy hollow', time: '19h30', place: 'Espace sleepy hollow', description: 'Quiz et plats à partager dans le restaurant.', price: 'Accès libre · consommation à confirmer', restaurantId: SECONDARY_RESTAURANT_ID },
+  { day: '29', month: 'OCT', title: 'Soirée Ligue des Champions Canal+', time: '20h30', place: 'Terrasse Rooftop Kinshasa', description: 'Diffusion grand écran et planches tapas en continu.', price: 'Entrée gratuite · Conso requise', image: promoImage(190) },
+  { day: '01', month: 'NOV', title: 'Tournoi de billard Khalifa Cup', time: '16h00', place: 'Espace Billard & Lounge', description: 'Compétition amicale à 8-ball, trophée et crédits repas.', price: '1 500 CDF / inscription', image: promoImage(219) },
+  { day: '07', month: 'NOV', title: 'Quiz musique & Afro-Beats Night', time: '19h00', place: 'Rooftop Panoramique', description: 'Blind test musical, DJ invité et cocktails signature.', price: 'Accès libre', image: promoImage(103) },
+  { day: '14', month: 'NOV', title: 'Soirée jeux sleepy hollow', time: '19h30', place: 'Espace sleepy hollow', description: 'Quiz et plats à partager dans le restaurant.', price: 'Accès libre · consommation à confirmer', restaurantId: SECONDARY_RESTAURANT_ID, image: promoImage(132) },
 ].map(event => ({ restaurantId: PRIMARY_RESTAURANT_ID, ...event }))
 
 export const formatPrice = price => `${new Intl.NumberFormat('fr-CD').format(price)} CDF`

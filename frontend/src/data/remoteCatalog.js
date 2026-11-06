@@ -18,6 +18,9 @@ export const demoCatalog = () => ({
 })
 
 const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '').replace(/\/api$/, '')
+const normalize = value => (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('fr').trim()
+const knownImage = (items, title) => items.find(item => normalize(item.name || item.title) === normalize(title))?.image
+const fallbackImage = (items, title, id, imageAt) => knownImage(items, title) || imageAt((Number(id) || 0) % 6)
 
 export async function loadPublicCatalog() {
   if (!apiUrl) return null
@@ -33,9 +36,9 @@ export async function loadPublicCatalog() {
   return {
     connected: true,
     restaurants: restaurants.map(item => ({ ...item, example: item.is_demo })),
-    dishes: content.filter(item => item.kind === 'dish').map(item => ({ id: `api-${item.id}`, restaurantId: item.restaurant_id, name: item.title, description: item.description || '', price: item.price_cdf || 0, category: item.details?.category || 'Plats', image: item.image_url || menuImage(75), unavailable: item.is_available === false, featured: item.is_featured === true })),
-    offers: content.filter(item => item.kind === 'promotion').map(item => ({ id: item.id, restaurantId: item.restaurant_id, title: item.title, description: item.description || '', terms: item.details?.terms || 'Conditions à confirmer auprès du restaurant.', badge: item.details?.badge || 'Offre', tag: item.details?.tag || '', image: item.image_url || promoImage(74) })),
-    events: content.filter(item => item.kind === 'event').map(item => ({ id: item.id, restaurantId: item.restaurant_id, title: item.title, description: item.description || '', day: item.details?.day || '—', month: item.details?.month || '', time: item.details?.time || '', place: item.details?.place || '', price: item.details?.price || '' })),
+    dishes: content.filter(item => item.kind === 'dish').map(item => ({ id: `api-${item.id}`, restaurantId: item.restaurant_id, name: item.title, description: item.description || '', price: item.price_cdf || 0, category: item.category?.name || item.details?.category || 'Plats', image: item.image_url || fallbackImage(demoDishes, item.title, item.id, index => menuImage([75, 101, 129, 176, 202, 228][index])), unavailable: item.is_available === false, featured: item.is_featured === true })),
+    offers: content.filter(item => item.kind === 'promotion').map(item => ({ id: item.id, restaurantId: item.restaurant_id, title: item.title, description: item.description || '', terms: item.details?.terms || 'Conditions à confirmer auprès du restaurant.', badge: item.details?.badge || 'Offre', tag: item.details?.tag || '', image: item.image_url || fallbackImage(demoOffers, item.title, item.id, index => promoImage([74, 103, 132, 161, 190, 219][index])) })),
+    events: content.filter(item => item.kind === 'event').map(item => ({ id: item.id, restaurantId: item.restaurant_id, title: item.title, description: item.description || '', day: item.details?.day || '—', month: item.details?.month || '', time: item.details?.time || '', place: item.details?.place || '', price: item.details?.price || '', image: item.image_url || fallbackImage(demoEvents, item.title, item.id, index => promoImage([74, 103, 132, 161, 190, 219][index])) })),
     games: content.filter(item => item.kind === 'game').map(item => ({ id: item.id, restaurantId: item.restaurant_id, title: item.title, description: item.description || '' })),
   }
 }
