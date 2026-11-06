@@ -40,6 +40,20 @@ return Application::configure(basePath: dirname(__DIR__))
                 401 => 'unauthenticated', 403 => 'forbidden', 404 => 'not_found',
                 409 => 'conflict', 422 => 'validation_failed', 426 => 'https_required', default => 'server_error',
             };
+            $validationDetails = $exception instanceof ValidationException
+                ? collect($exception->errors())->map(static fn (array $messages) => array_map(static function (string $message): string {
+                    // Sans les fichiers de traduction Laravel publiés, certaines règles
+                    // renvoyaient leur clé technique (ex. `validation.confirmed`) au client.
+                    return match ($message) {
+                        'validation.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+                        'validation.required' => 'Ce champ est obligatoire.',
+                        'validation.email' => 'Indiquez une adresse e-mail valide.',
+                        'validation.unique' => 'Cette valeur est déjà utilisée.',
+                        'validation.min.string' => 'La valeur saisie est trop courte.',
+                        default => $message,
+                    };
+                }, $messages))->all()
+                : null;
             $message = $exception instanceof ValidationException
                 ? 'Les données transmises sont invalides.'
                 : ($status >= 500 && !config('app.debug') ? 'Une erreur est survenue.' : ($exception->getMessage() ?: 'Une erreur est survenue.'));
@@ -50,7 +64,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'error' => array_filter([
                     'code' => $code,
                     'message' => $message,
-                    'details' => $exception instanceof ValidationException ? $exception->errors() : null,
+                    'details' => $validationDetails,
                 ]),
             ], $status);
         });
