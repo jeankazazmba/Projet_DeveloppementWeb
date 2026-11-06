@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use App\Http\Middleware\RequestTelemetry;
+use App\Http\Middleware\RequireHttps;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,7 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Les permissions métier seront ajoutées après validation des rôles.
+        $middleware->trustProxies(at: env('TRUSTED_PROXIES', ''));
+        $middleware->prepend(RequestTelemetry::class);
+        $middleware->prepend(RequireHttps::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Throwable $exception, Request $request) {
@@ -34,11 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
             };
             $code = match ($status) {
                 401 => 'unauthenticated', 403 => 'forbidden', 404 => 'not_found',
-                409 => 'conflict', 422 => 'validation_failed', default => 'server_error',
+                409 => 'conflict', 422 => 'validation_failed', 426 => 'https_required', default => 'server_error',
             };
             $message = $exception instanceof ValidationException
                 ? 'Les données transmises sont invalides.'
-                : ($exception->getMessage() ?: 'Une erreur est survenue.');
+                : ($status >= 500 && !config('app.debug') ? 'Une erreur est survenue.' : ($exception->getMessage() ?: 'Une erreur est survenue.'));
 
             return response()->json([
                 // message est conservé pour les clients existants.

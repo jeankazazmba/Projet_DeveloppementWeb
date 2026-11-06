@@ -9,6 +9,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (!app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Les restaurants de démonstration sont réservés aux environnements local et testing.');
+        }
         $samples = [
             [
                 'id' => 'khalifa-food', 'name' => 'Khalifa_food',

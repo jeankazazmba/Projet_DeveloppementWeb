@@ -10,6 +10,9 @@ class PlatformRecetteSeeder extends Seeder
 {
     public function run(): void
     {
+        if (!app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Les agrégats de recette sont réservés aux environnements local et testing.');
+        }
         $restaurants = ['khalifa-food', 'sleepy-hollow'];
         foreach ($restaurants as $restaurantId) {
             if (!DB::table('restaurants')->where('id', $restaurantId)->exists()) {

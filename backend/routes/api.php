@@ -25,14 +25,10 @@ use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RestaurantStatisticsController;
+use App\Http\Controllers\Api\HealthController;
 
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'application' => 'Mon Miam Miam',
-        'service' => 'backend',
-    ]);
-});
+Route::get('/health', [HealthController::class, 'live']);
+Route::get('/ready', [HealthController::class, 'ready']);
 
 Route::get('/restaurants', [RestaurantCatalogController::class, 'index']);
 Route::get('/restaurants/{restaurant}', [RestaurantCatalogController::class, 'show']);

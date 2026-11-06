@@ -33,7 +33,7 @@ Pour Expo Go sur téléphone, remplacer `ADRESSE_IP_DU_PC` par l’adresse IPv4 
 
 ## Images de livraison
 
-`compose.yaml` reste la composition de livraison : frontend statique Nginx, API Laravel et MySQL. Le frontend est construit avec `VITE_API_URL` ; une API publique HTTPS est donc requise avant publication Vercel. Les environnements locaux ne doivent jamais être utilisés comme URL d’API de production.
+`compose.yaml` est la composition locale historique (`APP_ENV=local`, `APP_DEBUG=true`). Pour une future mise en production, utiliser uniquement `compose.production.yaml`, avec les secrets, le domaine et le certificat décrits dans [RECETTE_PRODUCTION.md](RECETTE_PRODUCTION.md). Le frontend est construit avec `VITE_API_URL` ; une API publique HTTPS est requise avant publication. Les environnements locaux ne doivent jamais être utilisés comme URL d’API de production.
 
 Les volumes nommés conservent les dépendances et les données MySQL. Pour arrêter sans les supprimer :
 
