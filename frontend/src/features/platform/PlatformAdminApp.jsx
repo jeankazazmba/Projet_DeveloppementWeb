@@ -23,7 +23,7 @@ const nav = [
   { id: 'audit', label: 'Journal d’audit', icon: 'audit', group: 'Traçabilité', description: 'Retrouvez les actions sensibles effectuées sur la plateforme.' },
   { id: 'profile', label: 'Mon compte', icon: 'team', group: 'Compte', description: 'Consultez votre identité et sécurisez votre accès.' },
 ]
-const emptyInsights = { summary: { orders: 0, order_volume_cdf: 0, escalated_complaints: 0, points_issued: 0, points_used: 0, referrals: 0, published_contents: 0 }, by_restaurant: [], complaints: [], trends: [], has_demo_rows: false }
+const emptyInsights = { summary: { orders: 0, order_volume_cdf: 0, completed_orders: 0, completed_volume_cdf: 0, escalated_complaints: 0, points_issued: 0, points_used: 0, referrals: 0, published_contents: 0 }, by_restaurant: [], complaints: [], trends: [], has_demo_rows: false }
 const statusKey = restaurant => restaurant.status === 'Actif' || restaurant.status === 'Exemple' || restaurant.status === 'active' ? 'active' : restaurant.status === 'Suspendu' || restaurant.status === 'suspended' ? 'suspended' : 'draft'
 const demoStatus = value => value === 'active' ? 'Actif' : value === 'suspended' ? 'Suspendu' : 'Brouillon'
 const slug = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')

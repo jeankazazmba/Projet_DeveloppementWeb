@@ -25,9 +25,9 @@ export function CatalogPanel({ insights, restaurants }) {
 export function OrdersPanel({ insights, restaurants }) {
   return <Card title="Activité des commandes par restaurant">
     <p className="platform-help">La plateforme voit les volumes de la période. Les commandes individuelles et les données des clients sont réservées aux équipes du restaurant.</p>
-    <div className="platform-metrics platform-metrics-small platform-metrics-two"><div><small>COMMANDES</small><strong>{number(insights.summary.orders)}</strong></div><div><small>VOLUME HORS ANNULATIONS</small><strong>{money(insights.summary.order_volume_cdf)}</strong><span>Ce volume ne prouve pas un encaissement.</span></div></div>
-    <div className="platform-table-wrap"><table><thead><tr><th>RESTAURANT</th><th>COMMANDES</th><th>VOLUME HORS ANNULATIONS</th></tr></thead><tbody>
-      {insights.by_restaurant.map(row => <tr key={row.restaurant_id}><td><strong>{restaurantName(restaurants, row.restaurant_id)}</strong></td><td>{number(row.orders)}</td><td>{money(row.order_volume_cdf)}</td></tr>)}
+    <div className="platform-metrics platform-metrics-small platform-metrics-two"><div><small>COMMANDES</small><strong>{number(insights.summary.orders)}</strong></div><div><small>SERVIES / LIVRÉES</small><strong>{number(insights.summary.completed_orders)}</strong><span>{money(insights.summary.completed_volume_cdf)} de volume terminé, sans preuve d'encaissement.</span></div></div>
+    <div className="platform-table-wrap"><table><thead><tr><th>RESTAURANT</th><th>COMMANDES</th><th>SERVIES / LIVRÉES</th><th>VOLUME TERMINÉ</th></tr></thead><tbody>
+      {insights.by_restaurant.map(row => <tr key={row.restaurant_id}><td><strong>{restaurantName(restaurants, row.restaurant_id)}</strong></td><td>{number(row.orders)}</td><td>{number(row.completed_orders)}</td><td>{money(row.completed_volume_cdf)}</td></tr>)}
     </tbody></table>{!insights.by_restaurant.length && <Empty>Aucun restaurant dans ce périmètre.</Empty>}</div>
   </Card>
 }
