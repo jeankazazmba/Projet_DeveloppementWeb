@@ -568,7 +568,7 @@ function Router({ onOpenEmployee }) {
       )}
       {remoteApiUrl && <View style={{ paddingHorizontal: 22, paddingVertical: 5 }}>
         <Text style={{ color: sync.error ? colors.red : colors.muted, fontSize: 11 }}>
-          {sync.loading ? 'Synchronisation en cours…' : sync.error ? `API : ${sync.error}` : sessionToken ? `Dernière synchronisation : ${sync.lastSync ? new Date(sync.lastSync).toLocaleTimeString('fr-CD') : 'en attente'}` : 'Mode démonstration · connexion disponible'}
+          {sync.loading ? 'Synchronisation en cours…' : sync.error ? `API : ${sync.error}` : sessionToken ? `Dernière synchronisation : ${sync.lastSync ? new Date(sync.lastSync).toLocaleTimeString('fr-CD') : 'en attente'}` : apiConnected ? 'Serveur disponible · connectez-vous pour synchroniser votre espace.' : 'Connexion au serveur en attente.'}
         </Text>
       </View>}
       <BlurTargetView ref={blurTarget} collapsable={false} style={{ flex: 1 }}>
@@ -749,7 +749,7 @@ function AuthShell({ title, subtitle, children }) {
         {children}
       </Glass>
       <Text style={{ color: colors.muted, textAlign: "center", fontSize: 12 }}>
-        Application étudiante · Mode démonstration local
+        {remoteApiUrl ? 'Application étudiante · Serveur connecté' : 'Application étudiante'}
       </Text>
     </Page>
   );

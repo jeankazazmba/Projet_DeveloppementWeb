@@ -7,6 +7,8 @@ import PlatformAdminApp from '../features/platform/PlatformAdminApp.jsx'
 import PublicSite from '../features/public/PublicSite.jsx'
 import StaffCatalog from '../features/shared/StaffCatalog.jsx'
 import { getRestaurants, restaurantScopeKey, PRIMARY_RESTAURANT_ID, SECONDARY_RESTAURANT_ID } from '../data/restaurants.js'
+import { platformApiBase, platformRequest } from '../features/platform/platformApi.js'
+import { saveAuthSession } from '../features/shared/authSession.js'
 
 const logo = '/assets/figma/dashboard-imgMonMiamMiamZeDucSpCe.png'
 const roles = [
@@ -48,6 +50,8 @@ export default function DesktopApp() {
   const [role, setRole] = useState(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (stage !== 'splash') return undefined
@@ -65,12 +69,14 @@ export default function DesktopApp() {
     setRole(selected)
     setEmail('')
     setPassword('')
+    setError('')
     setStage('login')
   }
   const leave = () => {
     setRole(null)
     setEmail('')
     setPassword('')
+    setError('')
     setStage('roles')
   }
   const enterDemo = () => {
@@ -84,6 +90,29 @@ export default function DesktopApp() {
     if (!role.restaurantIds.includes(id)) return
     localStorage.setItem(restaurantScopeKey(role.id), id)
     setStage('workspace')
+  }
+  const login = async event => {
+    event.preventDefault()
+    if (!platformApiBase) { setError('Le serveur n’est pas configuré pour l’application bureau.'); return }
+    setBusy(true); setError('')
+    try {
+      const session = await platformRequest('/auth/login', null, { method: 'POST', body: JSON.stringify({ email, password }) })
+      const profile = await platformRequest('/me', session.token)
+      if (role.id === 'platform') {
+        if (!profile.is_platform_admin) throw new Error('Ce compte ne possède pas les droits administrateur de plateforme.')
+        saveAuthSession({ token: session.token, role: 'platform', profile })
+        setStage('workspace')
+        return
+      }
+      const restaurants = (profile.restaurants || []).filter(item => item.role === role.id)
+      if (profile.account_type !== 'professional' || !restaurants.length) throw new Error(`Ce compte n’a pas d’affectation ${role.name.toLowerCase()} active.`)
+      saveAuthSession({ token: session.token, role: role.id, profile, restaurants, restaurantId: restaurants[0].id })
+      if (restaurants.length > 1) { setStage('restaurants'); return }
+      localStorage.setItem(restaurantScopeKey(role.id), restaurants[0].id)
+      setStage('workspace')
+    } catch (reason) {
+      setError(reason.message || 'Connexion impossible.')
+    } finally { setBusy(false) }
   }
 
   if (stage === 'workspace' && role) return <Workspace role={role} onLeave={leave} />
@@ -112,9 +141,9 @@ export default function DesktopApp() {
         <p className="desktop-note">L’espace étudiant est disponible dans l’application mobile.</p>
       </section> : stage === 'restaurants' ? <section className="desktop-panel" aria-labelledby="desktop-title">
         <button className="desktop-back" type="button" onClick={() => setStage('login')}>← Revenir à la connexion</button>
-        <span className="desktop-kicker">ESPACE {role.name.toUpperCase()} · DÉMO</span>
+        <span className="desktop-kicker">ESPACE {role.name.toUpperCase()}</span>
         <h1 id="desktop-title">Choisissez un restaurant</h1>
-        <p>Ce profil de démonstration a accès aux établissements ci-dessous. Les comptes réels détermineront cette liste via l’API.</p>
+        <p>Choisissez l’établissement auquel votre compte est affecté.</p>
         <div className="desktop-roles">{getRestaurants().filter(item => role.restaurantIds.includes(item.id)).map(item => <button key={item.id} className="desktop-role" type="button" onClick={() => selectRestaurant(item.id)}><span className="desktop-role-icon" aria-hidden="true">⌂</span><span className="desktop-role-copy"><strong>{item.name}</strong><small>{item.location}{item.example ? ' · fiche exemple' : ''}</small></span><span className="desktop-role-arrow" aria-hidden="true">→</span></button>)}</div>
       </section> : <section className="desktop-panel desktop-login" aria-labelledby="desktop-title">
         <button className="desktop-back" type="button" onClick={leave}>← Choisir un autre rôle</button>
@@ -122,17 +151,17 @@ export default function DesktopApp() {
         <span className="desktop-kicker">ESPACE {role.name.toUpperCase()}</span>
         <h1 id="desktop-title">Connexion</h1>
         <p>Accédez à l’espace {role.name.toLowerCase()} Mon Miam Miam.</p>
-        <form className="desktop-login-form" onSubmit={event => event.preventDefault()}>
+        <form className="desktop-login-form" onSubmit={login}>
           <label htmlFor="desktop-email">Adresse e-mail</label>
           <input id="desktop-email" type="email" autoComplete="username" value={email} onChange={event => setEmail(event.target.value)} placeholder="nom@exemple.cd" />
           <label htmlFor="desktop-password">Mot de passe</label>
           <input id="desktop-password" type="password" autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} placeholder="Votre mot de passe" />
-          <button className="desktop-primary" type="submit" disabled title="Connexion réelle en attente de l’API d’authentification">Se connecter</button>
+          <button className="desktop-primary" type="submit" disabled={busy}>{busy ? 'Connexion…' : 'Se connecter'}</button>
         </form>
-        <p className="desktop-auth-note" role="status">La connexion réelle sera activée avec l’API d’authentification. Aucun identifiant n’est encore vérifié.</p>
-        <button className="desktop-demo" type="button" onClick={enterDemo}>Explorer la démo {role.name.toLowerCase()} <span aria-hidden="true">→</span></button>
+        {error && <p className="desktop-auth-note desktop-auth-error" role="alert">{error}</p>}
+        {!platformApiBase && <><p className="desktop-auth-note" role="status">Le serveur est indisponible. Vous pouvez explorer l’interface locale.</p><button className="desktop-demo" type="button" onClick={enterDemo}>Ouvrir l’interface {role.name.toLowerCase()} <span aria-hidden="true">→</span></button></>}
       </section>}
-      <footer className="desktop-gateway-footer">© Mon Miam Miam · Kinshasa, RDC <span>Version bureau · Mode démo</span></footer>
+      <footer className="desktop-gateway-footer">© Mon Miam Miam · Kinshasa, RDC <span>Version bureau</span></footer>
     </main>}
   </div>
 }
