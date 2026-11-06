@@ -3,6 +3,7 @@ import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import AccessPortal from './AccessPortal.jsx'
 import { formatPrice, homeImage, menuImage } from './publicData.js'
 import { demoCatalog, loadPublicCatalog } from '../../data/remoteCatalog.js'
+import { logoutAuthSession, readAuthSession, rolePath } from '../shared/authSession.js'
 import './public.css'
 
 const logo = homeImage(444)
@@ -56,6 +57,7 @@ function useVisibleSection(sections, fallback, lastSection) {
 
 function Header({ page, activeSection, theme, onThemeChange }) {
   const [open, setOpen] = useState(false)
+  const [session, setSession] = useState(() => readAuthSession())
   const links = [
     { to: '/', label: 'Accueil', key: 'home' },
     { to: '/#restaurants', label: 'Restaurants', key: 'restaurants' },
@@ -71,7 +73,7 @@ function Header({ page, activeSection, theme, onThemeChange }) {
     <button type="button" className="public-menu-toggle" aria-expanded={open} aria-controls="public-nav" onClick={() => setOpen(!open)}>☰ <span className="public-sr-only">Menu</span></button>
     <nav id="public-nav" className={open ? 'public-nav is-open' : 'public-nav'} aria-label="Navigation publique">
       {links.map(link => <Link key={link.key} to={link.to} aria-current={activeSection === link.key ? (page === link.key ? 'page' : 'location') : undefined} onClick={() => setOpen(false)}>{link.label}</Link>)}
-      <div className="public-nav-access"><Link to="/acces" aria-current={activeSection === 'access' ? 'page' : undefined}>Connexion</Link><Link className="public-pill" to="/acces#inscription" aria-current={activeSection === 'signup' ? 'location' : undefined}>Inscription</Link></div>
+      <div className="public-nav-access">{session ? <><Link to={rolePath(session.role)}>Mon espace</Link><button type="button" onClick={() => { void logoutAuthSession(); setSession(null); setOpen(false) }}>Déconnexion</button></> : <><Link to="/acces" aria-current={activeSection === 'access' ? 'page' : undefined}>Connexion</Link><Link className="public-pill" to="/acces#inscription" aria-current={activeSection === 'signup' ? 'location' : undefined}>Inscription</Link></>}</div>
     </nav>
     <button type="button" className="public-theme-toggle" onClick={onThemeChange} aria-label={theme === 'dark' ? 'Activer le mode clair' : 'Activer le mode sombre'} aria-pressed={theme === 'light'} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span></button>
   </header>

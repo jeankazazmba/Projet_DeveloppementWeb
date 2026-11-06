@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { getRestaurants, saveRestaurants } from '../../data/restaurants.js'
 import { getDemoAudit, getDemoInsights, getDemoUsers, recordDemoAudit, saveDemoUsers } from './platformDemo.js'
 import { platformApiBase, platformRequest } from './platformApi.js'
+import { clearAuthSession, readAuthSession, saveAuthSession } from '../shared/authSession.js'
 import PlatformIcon from './PlatformIcon.jsx'
 import { AccountsPanel, AuditPanel, OverviewPanel, RestaurantsPanel } from './PlatformPanels.jsx'
 import { CatalogPanel, ComplaintsPanel, LoyaltyPanel, OrdersPanel } from './PlatformNetworkPanels.jsx'
@@ -29,8 +30,9 @@ const demoStatus = value => value === 'active' ? 'Actif' : value === 'suspended'
 const slug = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 export default function PlatformAdminApp() {
-  const [mode, setMode] = useState(null)
-  const [session, setSession] = useState(null)
+  const storedSession = readAuthSession()
+  const [mode, setMode] = useState(() => storedSession?.role === 'platform' ? 'connected' : null)
+  const [session, setSession] = useState(() => storedSession?.role === 'platform' ? { token: storedSession.token, user: storedSession.profile } : null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [invitationToken, setInvitationToken] = useState(() => window.location.hash.startsWith('#invitation=') ? window.location.hash.slice(12) : '')
@@ -88,7 +90,7 @@ export default function PlatformAdminApp() {
       setRestaurants(list); setUsers(accounts); setInsights(report); setAudit(log); setInvitations(pendingInvitations); setLastSync(new Date().toISOString())
     } catch (reason) {
       setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([]); setInvitations([])
-      if (reason.status === 401 || reason.status === 403) { setSession(null); setMode(null) }
+      if (reason.status === 401 || reason.status === 403) { clearAuthSession(); setSession(null); setMode(null) }
       setError(reason.message)
     }
     finally { setLoading(false) }
@@ -108,11 +110,12 @@ export default function PlatformAdminApp() {
   const login = async event => {
     event.preventDefault(); setBusy(true); setError('')
     try {
-      const result = await platformRequest('/login', null, { method: 'POST', body: JSON.stringify({ email, password }) })
+      const result = await platformRequest('/auth/login', null, { method: 'POST', body: JSON.stringify({ email, password }) })
       if (!result.user?.is_platform_admin) {
-        await platformRequest('/logout', result.token, { method: 'POST' }).catch(() => {})
+        await platformRequest('/auth/logout', result.token, { method: 'POST' }).catch(() => {})
         throw new Error('Ce compte n’a pas le rôle administrateur de plateforme.')
       }
+      saveAuthSession({ token: result.token, role: 'platform', profile: result.user })
       setSession(result); setMode('connected'); setPassword('')
     } catch (reason) { setError(reason.message) }
     finally { setBusy(false) }
@@ -122,13 +125,14 @@ export default function PlatformAdminApp() {
     event.preventDefault(); setBusy(true); setError('')
     try {
       const result = await platformRequest('/platform/register', null, { method: 'POST', body: JSON.stringify({ ...registration, token: invitationToken }) })
+      saveAuthSession({ token: result.token, role: 'platform', profile: result.user })
       setSession(result); setMode('connected'); setInvitationToken(''); setRegistration({ name: '', email: '', password: '', password_confirmation: '' }); window.history.replaceState(null, '', '/plateforme')
     } catch (reason) { setError(reason.message) }
     finally { setBusy(false) }
   }
   const logout = async () => {
-    if (session) await platformRequest('/logout', session.token, { method: 'POST' }).catch(() => {})
-    setMode(null); setSession(null); setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([]); setInvitations([]); setInvitationLink(''); setRestaurantFilter(''); setTab('overview'); setSidebarOpen(false)
+    if (session) await platformRequest('/auth/logout', session.token, { method: 'POST' }).catch(() => {})
+    clearAuthSession(); setMode(null); setSession(null); setRestaurants([]); setUsers([]); setInsights(emptyInsights); setAudit([]); setInvitations([]); setInvitationLink(''); setRestaurantFilter(''); setTab('overview'); setSidebarOpen(false)
   }
   const mutate = async (connectedAction, demoAction, success) => {
     setBusy(true); setError(''); setNotice('')

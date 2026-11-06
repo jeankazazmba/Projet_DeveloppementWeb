@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { loadPublicCatalog } from '../../data/remoteCatalog.js'
 import { studentApi, studentApiConfigured, studentDownload, asList, formatCdf } from './studentApi.js'
+import { clearAuthSession, readAuthSession, saveAuthSession } from '../shared/authSession.js'
 import './student.css'
 
 const statusText = { received: 'Reçue', accepted: 'Acceptée', preparing: 'En préparation', ready: 'Prête', served: 'Servie', delivering: 'En livraison', delivered: 'Livrée', cancelled: 'Annulée', cash_due: 'Espèces à régler' }
@@ -12,8 +13,9 @@ const lineItems = cart => (cart?.items || []).map(item => ({ content_id: item.co
 const cartKey = item => `${item.content_id}:${item.variant_id || ''}:${(item.supplement_ids || []).join(',')}`
 
 export default function StudentApp() {
-  const [token, setToken] = useState(null)
-  const [profile, setProfile] = useState(null)
+  const storedSession = readAuthSession()
+  const [token, setToken] = useState(() => storedSession?.role === 'student' ? storedSession.token : null)
+  const [profile, setProfile] = useState(() => storedSession?.role === 'student' ? storedSession.profile : null)
   const [authMode, setAuthMode] = useState('login')
   const [auth, setAuth] = useState({ name: '', email: '', password: '', password_confirmation: '', phone: '', reset_token: '' })
   const [catalog, setCatalog] = useState(null)
@@ -100,7 +102,7 @@ export default function StudentApp() {
       setLastSync(new Date()); setError('')
     } catch (reason) {
       setError(firstMessage(reason))
-      if (reason.status === 401 || reason.status === 403) { setToken(null); setProfile(null) }
+      if (reason.status === 401 || reason.status === 403) { clearAuthSession(); setToken(null); setProfile(null) }
     } finally { pollBusy.current = false; setLoading(false) }
   }, [token])
 
@@ -157,12 +159,13 @@ export default function StudentApp() {
       })
       const me = await studentApi('/me', response.token)
       if (me.account_type !== 'student') { await studentApi('/auth/logout', response.token, { method: 'POST' }); throw new Error('Ce compte ne possède pas le rôle étudiant.') }
+      saveAuthSession({ token: response.token, role: 'student', profile: me })
       setProfile(me); setToken(response.token); setView('restaurants'); setAuth(current => ({ ...current, password: '', password_confirmation: '' }))
     })
   }
   const logout = () => {
     if (token) void studentApi('/auth/logout', token, { method: 'POST' }).catch(() => {})
-    setToken(null); setProfile(null); setCart(null); setOrders([]); setNotifications([]); setView('restaurants')
+    clearAuthSession(); setToken(null); setProfile(null); setCart(null); setOrders([]); setNotifications([]); setView('restaurants')
   }
   const selectRestaurant = id => { setRestaurantId(id); setView('menu'); setQuote(null); setSelectedDish(null) }
   const saveCart = async (items, targetId, replace = false) => {
@@ -256,7 +259,7 @@ export default function StudentApp() {
   if (!studentApiConfigured) return <main className="student-app student-gate"><h1>Espace étudiant</h1><p>Cette application demande l’API Laravel. Renseignez <code>VITE_API_URL</code> dans le frontend, puis ouvrez cet espace.</p><Link to="/">Retour au site</Link></main>
   if (!token) return <main className="student-app student-gate"><div className="student-auth"><Link to="/">← Site public</Link><span className="student-eyebrow">MON MIAM MIAM · KINSHASA</span><h1>{authMode === 'register' ? 'Créer mon compte' : authMode === 'forgot' ? 'Mot de passe oublié' : authMode === 'reset' ? 'Réinitialiser le mot de passe' : 'Bienvenue étudiant'}</h1><p>Vos restaurants, commandes et avantages sont synchronisés avec le serveur.</p><form onSubmit={submitAuth}>{authMode === 'register' && <label>Nom complet<input required value={auth.name} onChange={event => setAuth({ ...auth, name: event.target.value })} /></label>}<label>Adresse e-mail<input type="email" required value={auth.email} onChange={event => setAuth({ ...auth, email: event.target.value })} /></label>{authMode === 'reset' && <label>Jeton du journal local<input required value={auth.reset_token} onChange={event => setAuth({ ...auth, reset_token: event.target.value })} /></label>}{!['forgot'].includes(authMode) && <label>Mot de passe<input type="password" minLength={authMode === 'login' ? undefined : 12} required value={auth.password} onChange={event => setAuth({ ...auth, password: event.target.value })} /></label>}{['register', 'reset'].includes(authMode) && <label>Confirmer le mot de passe<input type="password" minLength={12} required value={auth.password_confirmation} onChange={event => setAuth({ ...auth, password_confirmation: event.target.value })} /></label>}{authMode === 'register' && <label>Téléphone (facultatif)<input type="tel" value={auth.phone} onChange={event => setAuth({ ...auth, phone: event.target.value })} /></label>}<button disabled={busy}>{busy ? 'Patientez…' : authMode === 'register' ? 'Créer le compte' : authMode === 'forgot' ? 'Demander un jeton' : authMode === 'reset' ? 'Modifier le mot de passe' : 'Se connecter'}</button></form>{error && <p className="student-error" role="alert">{error}</p>}{notice && <p className="student-notice" role="status">{notice}</p>}<div className="student-auth-links">{[['login', 'Connexion'], ['register', 'Inscription'], ['forgot', 'Mot de passe oublié'], ['reset', 'J’ai un jeton']].map(([mode, label]) => <button key={mode} type="button" onClick={() => { setAuthMode(mode); setError(''); setNotice('') }}>{label}</button>)}</div></div></main>
 
-  return <div className="student-app"><header className="student-top"><Link to="/" className="student-brand"><span>✦</span> Mon Miam Miam <small>Étudiant</small></Link><div><span>{profile?.name}</span><button type="button" onClick={logout}>Déconnexion</button></div></header><div className="student-layout"><nav className="student-nav" aria-label="Navigation étudiant">{tabs.map(([id, label]) => <button key={id} className={view === id ? 'active' : ''} onClick={() => setView(id)}>{label}{id === 'cart' && cart?.items?.length ? ` · ${cart.items.reduce((sum, item) => sum + item.quantity, 0)}` : ''}{id === 'orders' && orders.some(item => ['received', 'accepted', 'preparing', 'ready', 'delivering'].includes(item.status)) ? ' ●' : ''}</button>)}<Link to="/">Site public ↗</Link></nav><main className="student-main"><div className="student-heading"><div><span className="student-eyebrow">{restaurant?.name || 'KINSHASA · RDC'}</span><h1>{tabs.find(([id]) => id === view)?.[1]}</h1></div><small>{loading ? 'Synchronisation…' : lastSync ? `Synchronisé ${lastSync.toLocaleTimeString('fr-CD')}` : 'Connexion en cours'}</small></div>{error && <p className="student-error" role="alert">{error} <button onClick={() => void refreshPrivate()}>Réessayer</button></p>}{notice && <p className="student-notice" role="status">{notice}</p>}
+  return <div className="student-app"><header className="student-top"><Link to="/" className="student-brand"><span>✦</span> Mon Miam Miam <small>Étudiant</small></Link><div><span>{profile?.name}</span><Link to="/">Site public</Link><button type="button" onClick={logout}>Déconnexion</button></div></header><div className="student-layout"><nav className="student-nav" aria-label="Navigation étudiant">{tabs.map(([id, label]) => <button key={id} className={view === id ? 'active' : ''} onClick={() => setView(id)}>{label}{id === 'cart' && cart?.items?.length ? ` · ${cart.items.reduce((sum, item) => sum + item.quantity, 0)}` : ''}{id === 'orders' && orders.some(item => ['received', 'accepted', 'preparing', 'ready', 'delivering'].includes(item.status)) ? ' ●' : ''}</button>)}<Link to="/">Site public ↗</Link></nav><main className="student-main"><div className="student-heading"><div><span className="student-eyebrow">{restaurant?.name || 'KINSHASA · RDC'}</span><h1>{tabs.find(([id]) => id === view)?.[1]}</h1></div><small>{loading ? 'Synchronisation…' : lastSync ? `Synchronisé ${lastSync.toLocaleTimeString('fr-CD')}` : 'Connexion en cours'}</small></div>{error && <p className="student-error" role="alert">{error} <button onClick={() => void refreshPrivate()}>Réessayer</button></p>}{notice && <p className="student-notice" role="status">{notice}</p>}
 
     {view === 'restaurants' && <section className="student-grid">{catalog?.restaurants.map(item => <article className="student-card" key={item.id}><span className="student-eyebrow">{item.is_demo ? 'RESTAURANT DE RECETTE' : 'RESTAURANT'}</span><h2>{item.name}</h2><p>{item.description}</p><p>{item.location}</p><small>{item.hours}</small><button onClick={() => selectRestaurant(item.id)}>Explorer ce restaurant →</button></article>)}{!catalog && <p>Chargement du répertoire…</p>}{catalog && !catalog.restaurants.length && <p>Aucun restaurant publié pour le moment.</p>}</section>}
 

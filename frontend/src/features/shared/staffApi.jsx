@@ -1,18 +1,37 @@
 /* eslint-disable react-refresh/only-export-components -- Shared API hook, mappings and small UI components. */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { platformApiBase, platformRequest } from '../platform/platformApi.js'
+import { clearAuthSession, readAuthSession, saveAuthSession } from './authSession.js'
 
 export const staffApi = platformRequest
 export const hasStaffApi = Boolean(platformApiBase)
 
 export function useStaffConnection(role) {
-  const [mode, setMode] = useState(hasStaffApi ? 'login' : 'demo')
-  const [token, setToken] = useState(null)
-  const [profile, setProfile] = useState(null)
-  const [restaurants, setRestaurants] = useState([])
-  const [restaurantId, setRestaurantId] = useState(null)
+  const stored = readAuthSession()
+  const resume = stored?.role === role
+  const [mode, setMode] = useState(resume ? 'connected' : hasStaffApi ? 'login' : 'demo')
+  const [token, setToken] = useState(resume ? stored.token : null)
+  const [profile, setProfile] = useState(resume ? stored.profile : null)
+  const [restaurants, setRestaurants] = useState(resume ? stored.restaurants || [] : [])
+  const [restaurantId, setRestaurantId] = useState(resume ? stored.restaurantId || stored.restaurants?.[0]?.id || null : null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  useEffect(() => {
+    if (!resume || !token) return
+    let active = true
+    staffApi('/me', token).then(me => {
+      const allowed = (me.restaurants || []).filter(item => item.role === role)
+      if (me.account_type !== 'professional' || !allowed.length) throw new Error('Session non autorisée pour cet espace.')
+      if (!active) return
+      setProfile(me); setRestaurants(allowed)
+      const selected = allowed.some(item => item.id === restaurantId) ? restaurantId : allowed[0].id
+      setRestaurantId(selected); saveAuthSession({ token, role, profile: me, restaurants: allowed, restaurantId: selected })
+    }).catch(() => {
+      if (!active) return
+      clearAuthSession(); setToken(null); setProfile(null); setRestaurants([]); setRestaurantId(null); setMode(hasStaffApi ? 'login' : 'demo'); setError('Votre session a expiré. Connectez-vous de nouveau.')
+    })
+    return () => { active = false }
+  }, [resume, token, role, restaurantId])
   const login = async (email, password) => {
     setBusy(true); setError('')
     try {
@@ -23,6 +42,7 @@ export function useStaffConnection(role) {
         await staffApi('/auth/logout', session.token, { method: 'POST' }).catch(() => {})
         throw new Error(`Ce compte n’a pas d’affectation ${role} active.`)
       }
+      saveAuthSession({ token: session.token, role, profile: me, restaurants: allowed, restaurantId: allowed[0].id })
       setToken(session.token); setProfile(me); setRestaurants(allowed)
       setRestaurantId(allowed[0].id); setMode('connected')
     } catch (reason) { setError(reason.message) }
@@ -30,9 +50,10 @@ export function useStaffConnection(role) {
   }
   const logout = () => {
     if (token) staffApi('/auth/logout', token, { method: 'POST' }).catch(() => {})
-    setToken(null); setProfile(null); setRestaurants([]); setRestaurantId(null); setMode('login')
+    clearAuthSession(); setToken(null); setProfile(null); setRestaurants([]); setRestaurantId(null); setMode('login')
   }
-  return { mode, token, profile, restaurants, restaurantId, setRestaurantId, busy, error, login, logout, enterDemo: () => setMode('demo'), returnToLogin: () => setMode('login') }
+  const selectRestaurant = id => { setRestaurantId(id); if (token) saveAuthSession({ token, role, profile, restaurants, restaurantId: id }) }
+  return { mode, token, profile, restaurants, restaurantId, setRestaurantId: selectRestaurant, busy, error, login, logout, enterDemo: () => setMode('demo'), returnToLogin: () => setMode('login') }
 }
 
 export function StaffLogin({ role, connection }) {

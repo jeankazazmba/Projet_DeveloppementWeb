@@ -21,11 +21,12 @@
 .public-brand { flex:none; display:block; width:66px; }
 .public-brand img { display:block; width:100%; height:58px; object-fit:contain; }
 .public-nav { flex:1; display:flex; align-items:center; justify-content:center; gap:clamp(14px,2.5vw,38px); }
-.public-nav > a,.public-nav-access > a { color:#aea89d; white-space:nowrap; transition:color .2s; }
+.public-nav > a,.public-nav-access > a,.public-nav-access > button { color:#aea89d; white-space:nowrap; transition:color .2s; }
 .public-nav > a { position:relative; padding-block:8px; }
-.public-nav a:hover,.public-nav a[aria-current] { color:var(--gold); }
+.public-nav a:hover,.public-nav a[aria-current],.public-nav-access > button:hover { color:var(--gold); }
 .public-nav > a[aria-current]::after { content:'';position:absolute;left:0;right:0;bottom:2px;height:2px;border-radius:2px;background:var(--gold); }
 .public-nav-access { display:flex; align-items:center; gap:26px; margin-left:auto; }
+.public-nav-access > button { padding:0; border:0; background:transparent; }
 .public-pill { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-height:43px; padding:10px 27px; border:0; border-radius:999px; background:var(--gold); color:#0d0d0d!important; font-size:.92rem; font-weight:700; text-align:center; white-space:nowrap; transition:background .2s,transform .2s; }
 .public-pill:hover { background:#e3d2ac; transform:translateY(-2px); }
 .public-nav-access .public-pill { min-width:148px; }
@@ -355,7 +356,7 @@ html:has(.public-site) { scroll-behavior:smooth; }
 
 .public-site[data-theme='light'] { --gold:#755d2e;--surface:#f5efe3;--muted:#625d55;background:#faf8f3;color:#1d211e; }
 .public-site[data-theme='light'] .public-header { background:#fffdf8;border-bottom:1px solid #e4dac8; }
-.public-site[data-theme='light'] .public-nav > a,.public-site[data-theme='light'] .public-nav-access > a:not(.public-pill) { color:#4c4b44; }
+.public-site[data-theme='light'] .public-nav > a,.public-site[data-theme='light'] .public-nav-access > a:not(.public-pill),.public-site[data-theme='light'] .public-nav-access > button { color:#4c4b44; }
 .public-site[data-theme='light'] .public-nav a:hover,.public-site[data-theme='light'] .public-nav a[aria-current] { color:var(--gold); }
 .public-site[data-theme='light'] .public-pill { color:#fff!important;background:var(--gold); }
 .public-site[data-theme='light'] .public-pill:hover { background:#604a23; }
