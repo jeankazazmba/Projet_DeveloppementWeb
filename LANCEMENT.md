@@ -4,6 +4,15 @@ Ce guide utilise **PowerShell sous Windows**. Ouvrir un terminal distinct pour c
 
 ## Démarrage de tout l'écosystème
 
+### Lanceur sur le Bureau
+
+Deux fichiers sont disponibles directement sur le Bureau Windows :
+
+- `Lancer Mon Miam Miam.cmd` détecte l'IPv4 du PC, puis démarre Docker, MySQL, Laravel, le worker, le site web, Expo et Tauri.
+- `Arreter Mon Miam Miam.cmd` arrête les conteneurs ; fermer également les fenêtres Expo et Tauri avec `Ctrl+C`.
+
+Double-cliquer sur le premier fichier et garder la fenêtre ouverte jusqu'au message de réussite. Si la détection réseau échoue, le lanceur demande l'adresse IPv4 du PC ; elle doit être accessible depuis le téléphone utilisant Expo Go.
+
 Préparer `.env` à la racine avec `DB_PASSWORD` et `MYSQL_ROOT_PASSWORD`, puis installer les dépendances avec `npm ci` dans `frontend/` et `mobile/`. Docker Desktop, Rust, WebView2 et les outils C++ Windows sont requis pour cette configuration complète. Relever l'adresse IPv4 du PC sur le réseau Wi-Fi avec `ipconfig`. Le téléphone Expo Go doit être sur ce même réseau.
 
 ```powershell
