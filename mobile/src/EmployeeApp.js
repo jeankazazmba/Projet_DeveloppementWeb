@@ -617,6 +617,7 @@ export default function EmployeeApp({
   const [selectedId, setSelectedId] = useState(null);
   const [searchRequested, setSearchRequested] = useState(false);
   const blurTarget = useRef(null);
+  const employeeSessionKey = 'mon-miam-miam-employee-session-v1';
   const storeKey = `${STORAGE_KEY}-${restaurantId}`;
   const baseData = remoteApiUrl ? { orders: [], claims: [], menu: [] } : restaurantId === 'sleepy-hollow' ? sleepyEmployeeData : initialEmployeeData;
   useEffect(() => {
@@ -627,6 +628,23 @@ export default function EmployeeApp({
     }).catch(() => { if (active) setData(baseData); }).finally(() => { if (active) setReady(true); });
     return () => { active = false; };
   }, [storeKey]);
+  useEffect(() => {
+    if (!remoteApiUrl) return;
+    let active = true;
+    AsyncStorage.getItem(employeeSessionKey).then(async raw => {
+      if (!active || !raw) return;
+      const saved = JSON.parse(raw);
+      if (!saved?.token) return;
+      const me = await staffRequest('/me', saved.token);
+      const items = (me.restaurants || []).filter(item => item.role === 'employee');
+      if (!items.length) throw new Error('Aucune affectation employé active.');
+      const restaurantId = items.some(item => item.id === saved.restaurantId) ? saved.restaurantId : items[0].id;
+      const session = { token: saved.token, user: me, restaurants: items, restaurantId };
+      await AsyncStorage.setItem(employeeSessionKey, JSON.stringify(session));
+      if (active) { setAuth(session); setAssigned(items); setRestaurantId(restaurantId); setScreen(items.length === 1 ? 'orders' : 'restaurant'); }
+    }).catch(() => { AsyncStorage.removeItem(employeeSessionKey).catch(() => {}); });
+    return () => { active = false; };
+  }, []);
   useEffect(() => {
     if (ready && !remoteApiUrl) AsyncStorage.setItem(storeKey, JSON.stringify(data)).catch(() => {});
   }, [data, ready, storeKey]);
@@ -671,13 +689,16 @@ export default function EmployeeApp({
       const result = await staffRequest('/login', null, { method: 'POST', body: JSON.stringify({ email, password }) });
       const items = (await staffRequest('/staff/restaurants', result.token)).filter(item => item.pivot?.role === 'employee');
       if (!items.length) { await staffRequest('/logout', result.token, { method: 'POST' }); throw new Error('Ce compte n’a aucune affectation employé.'); }
-      setAuth(result); setAssigned(items); setPassword('');
+      const session = { ...result, restaurants: items, restaurantId: items[0]?.id || null };
+      await AsyncStorage.setItem(employeeSessionKey, JSON.stringify(session));
+      setAuth(session); setAssigned(items); setPassword('');
       if (items.length === 1) { setRestaurantId(items[0].id); setScreen('orders'); }
       else { setRestaurantId(null); setScreen('restaurant'); }
     } catch (error) { setAuthError(error.message); }
   };
   const exitEmployee = async () => {
     if (auth) { try { await staffRequest('/logout', auth.token, { method: 'POST' }); } catch { /* Le jeton n’est plus conservé localement. */ } }
+    AsyncStorage.removeItem(employeeSessionKey).catch(() => {});
     setAuth(null); onExit();
   };
   if (remoteApiUrl && !auth) return <Page eyebrow={EMPLOYEE} title="Connexion employé" subtitle="Connectez-vous pour voir uniquement vos restaurants."><Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" /><Field label="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry /><Button title="Se connecter" onPress={loginEmployee} />{authError ? <Text style={{ color: '#ffb3a8', marginTop: 12 }}>{authError}</Text> : null}<Button title="Retour à l’espace étudiant" variant="secondary" onPress={onExit} style={{ marginTop: 20 }} /></Page>;

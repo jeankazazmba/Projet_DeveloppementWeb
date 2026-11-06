@@ -60,6 +60,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 SplashScreen.setOptions({ duration: 450, fade: true });
 
 const KEY = "mon-miam-miam-student-v1";
+const SESSION_KEY = "mon-miam-miam-student-session-v1";
 const ACTIVE_SPACE_KEY = "mon-miam-miam-active-space-v1";
 const Context = createContext(null);
 const useApp = () => useContext(Context);
@@ -154,8 +155,8 @@ function AppProvider({ children, skipOnboarding = false }) {
     return () => { active = false; };
   }, []);
   useEffect(() => {
-    AsyncStorage.getItem(KEY)
-      .then((raw) => {
+    Promise.all([AsyncStorage.getItem(KEY), AsyncStorage.getItem(SESSION_KEY)])
+      .then(([raw, rawSession]) => {
         if (raw) {
           const saved = JSON.parse(raw);
           const migrated = migrateStudentDemo(saved);
@@ -164,6 +165,10 @@ function AppProvider({ children, skipOnboarding = false }) {
           if (skipOnboarding)
             setStack([{ name: migrated.user ? "home" : "login", params: {} }]);
         }
+        if (rawSession) {
+          const savedSession = JSON.parse(rawSession);
+          if (savedSession?.token) { setSessionToken(savedSession.token); if (skipOnboarding) setStack([{ name: "home", params: {} }]); }
+        }
       })
       .catch(() => {})
       .finally(() => setReady(true));
@@ -171,6 +176,11 @@ function AppProvider({ children, skipOnboarding = false }) {
   useEffect(() => {
     if (ready) AsyncStorage.setItem(KEY, JSON.stringify(data.source === 'server' ? { ...data, user: null, orders: [], cart: {} } : data)).catch(() => {});
   }, [data, ready]);
+  useEffect(() => {
+    if (!ready) return;
+    if (sessionToken) AsyncStorage.setItem(SESSION_KEY, JSON.stringify({ token: sessionToken })).catch(() => {});
+    else AsyncStorage.removeItem(SESSION_KEY).catch(() => {});
+  }, [sessionToken, ready]);
   const screen = stack[stack.length - 1];
   useEffect(() => {
     if (!sessionToken || !['orders', 'order'].includes(screen.name)) return;
@@ -210,6 +220,7 @@ function AppProvider({ children, skipOnboarding = false }) {
   const logout = () => {
     if (sessionToken) studentRequest('/auth/logout', sessionToken, { method: 'POST' }).catch(() => {});
     setSessionToken(null);
+    AsyncStorage.removeItem(SESSION_KEY).catch(() => {});
     setCartHydrated(false);
     setData((current) => ({ ...current, user: null, orders: [], cart: {}, source: null }));
     setStack([{ name: "login", params: {} }]);
@@ -229,7 +240,7 @@ function AppProvider({ children, skipOnboarding = false }) {
       })
       .catch(error => {
         if (!active) return;
-        if (error.status === 401 || error.status === 403) { setSessionToken(null); setData(current => ({ ...current, user: null, cart: {}, orders: [] })); tab('login'); }
+        if (error.status === 401 || error.status === 403) { AsyncStorage.removeItem(SESSION_KEY).catch(() => {}); setSessionToken(null); setData(current => ({ ...current, user: null, cart: {}, orders: [] })); tab('login'); }
         setSync(current => ({ ...current, loading: false, error: error.message }));
       });
     return () => { active = false; };
@@ -263,7 +274,7 @@ function AppProvider({ children, skipOnboarding = false }) {
       const top = current[current.length - 1];
       return top.params?.replay && current.length > 1
         ? current.slice(0, -1)
-        : [{ name: data.user ? "home" : "login", params: {} }];
+        : [{ name: sessionToken || data.user ? "home" : "login", params: {} }];
     });
   };
   const selectRestaurant = (id, onSelected) => {
@@ -891,10 +902,13 @@ function Register() {
 function Forgot() {
   const { back } = useApp();
   const [email, setEmail] = useState("");
+  const [notice, setNotice] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
   return (
     <AuthShell
       title="Mot de passe oublié ?"
-      subtitle="La récupération du compte sera disponible après le raccordement au serveur d'authentification."
+      subtitle="Demandez un jeton de réinitialisation. En développement, le serveur l’inscrit dans son journal local."
     >
       <Field
         label="Adresse e-mail"
@@ -904,7 +918,17 @@ function Forgot() {
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      <Button title="Revenir à la connexion" onPress={back} />
+      <Button title={busy ? 'Envoi…' : 'Demander un jeton'} disabled={busy} onPress={async () => {
+        if (!email.includes('@')) return setError('Indiquez une adresse e-mail valide.');
+        if (!remoteApiUrl) return setError('API non configurée.');
+        setBusy(true); setError('');
+        try { await studentRequest('/auth/password/forgot', null, { method: 'POST', body: JSON.stringify({ email }) }); setNotice('Si le compte existe, le jeton a été inscrit dans le journal local du serveur.'); }
+        catch (reason) { setError(reason.message); }
+        finally { setBusy(false); }
+      }} />
+      {notice ? <Text style={{ color: colors.green, marginTop: 9 }}>{notice}</Text> : null}
+      {error ? <Text style={{ color: colors.red, marginTop: 9 }}>{error}</Text> : null}
+      <Button title="Revenir à la connexion" variant="secondary" onPress={back} style={{ marginTop: 11 }} />
     </AuthShell>
   );
 }
